@@ -1,0 +1,6 @@
+{
+  "name": "Luz Barinas",
+  "description": "Monitoreo, predicción y telemetría ciudadana de cortes eléctricos en Barinas con arquitectura offline-first.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

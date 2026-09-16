@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:angle="315"
+                android:startColor="#0D1B2A"
+                android:centerColor="#1B263B"
+                android:endColor="#0F3460"
+                android:type="linear" />
+        </aapt:attr>
+    </path>
+    <!-- Subtle technical grid representing power distribution network -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,36L108,36 M0,72L108,72 M36,0L36,108 M72,0L72,108"
+        android:strokeWidth="0.75"
+        android:strokeColor="#1FFFFFFF" />
+</vector>

@@ -1,0 +1,21 @@
+# Standalone Web Admin Repo (separate repository)
+admin-web/
+
+# Build and IDE artifacts
+*.iml
+.gradle
+.kotlin
+/local.properties
+local.properties
+.idea/
+.DS_Store
+/build
+build/
+app/build/
+*.apk
+*.aab
+/captures
+.externalNativeBuild
+.cxx
+.env
+debug.keystore
