@@ -131,8 +131,8 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         onDismiss = {
             viewModel.setOnboardingOpen(false)
         },
-        onRegisterNewCommunity = { name, parroquia, block, circuit ->
-            viewModel.registerCommunityLocation(name, parroquia, block, circuit)
+        onRegisterNewCommunity = { name, municipio, parroquia, block, circuit ->
+            viewModel.registerCommunityLocation(name, municipio, parroquia, block, circuit)
         }
     )
 

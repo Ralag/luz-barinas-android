@@ -342,13 +342,14 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
 
     fun registerCommunityLocation(
         name: String,
+        municipio: String = "Barinas",
         parroquia: String,
         block: String,
         circuit: String
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            val result = repository.registerCommunityLocation(name, parroquia, block, circuit)
+            val result = repository.registerCommunityLocation(name, municipio, parroquia, block, circuit)
             if (result.isSuccess) {
                 val newSector = result.getOrNull()
                 val loc = BarinasLocation(
@@ -360,7 +361,8 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
                     circuitCode = circuit.trim().ifEmpty { "Circuito $parroquia" },
                     sectorEntityId = newSector?.id ?: "sec_a_alto_barinas_1",
                     description = "Comunidad en $parroquia • $block",
-                    keywords = listOf(name.lowercase(), parroquia.lowercase(), block.lowercase())
+                    keywords = listOf(name.lowercase(), municipio.lowercase(), parroquia.lowercase(), block.lowercase()),
+                    municipio = municipio.trim()
                 )
                 BarinasLocationsCatalog.addCustomLocation(loc)
                 setUserLocation(loc)

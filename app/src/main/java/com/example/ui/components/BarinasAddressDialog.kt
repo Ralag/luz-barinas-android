@@ -75,14 +75,15 @@ fun BarinasAddressDialog(
     currentAddress: String?,
     onLocationSelected: (BarinasLocation) -> Unit,
     onDismiss: () -> Unit,
-    onRegisterNewCommunity: ((name: String, parroquia: String, block: String, circuit: String) -> Unit)? = null,
+    onRegisterNewCommunity: ((name: String, municipio: String, parroquia: String, block: String, circuit: String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     if (!isOpen) return
 
     var dialogTab by remember { mutableIntStateOf(0) } // 0 = Buscar, 1 = Denominar / Registrar
     var customName by remember { mutableStateOf("") }
-    var customParroquia by remember { mutableStateOf(BarinasLocationsCatalog.BARINAS_PARROQUIAS[0]) }
+    var customMunicipio by remember { mutableStateOf(BarinasLocationsCatalog.BARINAS_MUNICIPALITIES[0].name) }
+    var customParroquia by remember { mutableStateOf(BarinasLocationsCatalog.BARINAS_MUNICIPALITIES[0].parroquias[0]) }
     var customBlock by remember { mutableStateOf("C") }
     var customCircuit by remember { mutableStateOf("") }
 
@@ -395,80 +396,118 @@ fun BarinasAddressDialog(
                     }
                 }
 
-                // Search Results List
-                Text(
-                    text = "Resultados encontrados (${results.size}):",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 6.dp)
-                )
-
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 240.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    items(results, key = { it.id }) { loc ->
-                        val locBlockColor = when {
-                            loc.block.contains("A") -> BlockAColor
-                            loc.block.contains("B") -> BlockBColor
-                            loc.block.contains("C") -> BlockCColor
-                            loc.block.contains("D") -> BlockDColor
-                            else -> MaterialTheme.colorScheme.primary
-                        }
-
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (selectedPreviewLocation?.id == loc.id) {
-                                locBlockColor.copy(alpha = 0.15f)
-                            } else {
-                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                // Search Results or Not-Found Card
+                if (query.length >= 2 && results.isEmpty()) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp)
+                            .clickable {
+                                customName = query.trim()
+                                dialogTab = 1
                             },
-                            border = androidx.compose.foundation.BorderStroke(
-                                width = if (selectedPreviewLocation?.id == loc.id) 1.5.dp else 0.5.dp,
-                                color = if (selectedPreviewLocation?.id == loc.id) locBlockColor else MaterialTheme.colorScheme.outline
-                            ),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                    ) {
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
-                                    selectedPreviewLocation = loc
-                                }
+                                .padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
+                            Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "¿No encuentras '$query'?",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "Toca aquí para registrar este sector indicando su Municipio y Parroquia.",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "Resultados encontrados (${results.size}):",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 6.dp)
+                    )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 240.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        items(results, key = { it.id }) { loc ->
+                            val locBlockColor = when {
+                                loc.block.contains("A") -> BlockAColor
+                                loc.block.contains("B") -> BlockBColor
+                                loc.block.contains("C") -> BlockCColor
+                                loc.block.contains("D") -> BlockDColor
+                                else -> MaterialTheme.colorScheme.primary
+                            }
+
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (selectedPreviewLocation?.id == loc.id) {
+                                    locBlockColor.copy(alpha = 0.15f)
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                },
+                                border = androidx.compose.foundation.BorderStroke(
+                                    width = if (selectedPreviewLocation?.id == loc.id) 1.5.dp else 0.5.dp,
+                                    color = if (selectedPreviewLocation?.id == loc.id) locBlockColor else MaterialTheme.colorScheme.outline
+                                ),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                    .clickable {
+                                        selectedPreviewLocation = loc
+                                    }
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = loc.name,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "${loc.parroquia} • ${loc.circuitCode}",
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = locBlockColor.copy(alpha = 0.2f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, locBlockColor)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = loc.block,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = locBlockColor,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = loc.name,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "${loc.parroquia} • ${loc.circuitCode}",
+                                            fontSize = 11.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = locBlockColor.copy(alpha = 0.2f),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, locBlockColor)
+                                    ) {
+                                        Text(
+                                            text = loc.block,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = locBlockColor,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -484,13 +523,13 @@ fun BarinasAddressDialog(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = "📍 Denominar Nueva Sección / Comunidad",
+                            text = "📍 Registrar Sector / Comunidad en la Nube",
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Ayuda a construir el mapa exacto de Barinas. Indica tu comunidad, parroquia y bloque asignado.",
+                            text = "Ayuda a mapear Barinas. Selecciona tu municipio, parroquia y el bloque asignado.",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -500,27 +539,30 @@ fun BarinasAddressDialog(
                             value = customName,
                             onValueChange = { customName = it },
                             label = { Text("Nombre de la Comunidad / Sector *") },
-                            placeholder = { Text("Ej: Urb. La Cincuentena III, Barrio...") },
+                            placeholder = { Text("Ej: Urb. Los Profesionales, Barrio...") },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        // 2. Parroquia Selector
+                        // 2. Municipio Selector (12 Municipios Oficiales de Barinas)
                         Column {
-                            Text("Parroquia de Barinas: *", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("1. Municipio del Estado Barinas: *", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(modifier = Modifier.height(6.dp))
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                items(BarinasLocationsCatalog.BARINAS_PARROQUIAS) { p ->
-                                    val isSelected = customParroquia == p
+                                items(BarinasLocationsCatalog.BARINAS_MUNICIPALITIES) { mun ->
+                                    val isSelected = customMunicipio == mun.name
                                     Surface(
                                         shape = RoundedCornerShape(8.dp),
                                         color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                                         border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-                                        modifier = Modifier.clickable { customParroquia = p }
+                                        modifier = Modifier.clickable {
+                                            customMunicipio = mun.name
+                                            customParroquia = mun.parroquias.firstOrNull() ?: ""
+                                        }
                                     ) {
                                         Text(
-                                            text = p,
+                                            text = mun.name,
                                             fontSize = 11.sp,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                             color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
@@ -531,9 +573,37 @@ fun BarinasAddressDialog(
                             }
                         }
 
-                        // 3. Bloque PAC Asignado
+                        // 3. Parroquia Selector (Filtradas según el Municipio seleccionado)
                         Column {
-                            Text("Bloque PAC asignado por Corpoelec: *", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            val availableParroquias = remember(customMunicipio) {
+                                BarinasLocationsCatalog.getParroquiasForMunicipality(customMunicipio)
+                            }
+                            Text("2. Parroquia (Municipio $customMunicipio): *", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(modifier = Modifier.height(6.dp))
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                items(availableParroquias) { p ->
+                                    val isSelected = customParroquia == p
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceVariant,
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                                        modifier = Modifier.clickable { customParroquia = p }
+                                    ) {
+                                        Text(
+                                            text = p,
+                                            fontSize = 11.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // 4. Bloque PAC Asignado
+                        Column {
+                            Text("3. Bloque PAC asignado por Corpoelec: *", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -568,12 +638,12 @@ fun BarinasAddressDialog(
                             }
                         }
 
-                        // 4. Circuito o Referencia
+                        // 5. Circuito o Referencia
                         OutlinedTextField(
                             value = customCircuit,
                             onValueChange = { customCircuit = it },
-                            label = { Text("Circuito o Referencia (Opcional)") },
-                            placeholder = { Text("Ej: Circuito Corocito / Cerca de...") },
+                            label = { Text("Circuito o Punto de Referencia (Opcional)") },
+                            placeholder = { Text("Ej: Circuito Don Samuel / Cerca de la plaza...") },
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth()
@@ -587,7 +657,8 @@ fun BarinasAddressDialog(
                                 if (customName.isNotBlank()) {
                                     onRegisterNewCommunity?.invoke(
                                         customName.trim(),
-                                        customParroquia,
+                                        customMunicipio.trim(),
+                                        customParroquia.trim(),
                                         "Bloque $customBlock",
                                         customCircuit.trim()
                                     )

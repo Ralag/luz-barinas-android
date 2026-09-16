@@ -317,6 +317,7 @@ class CloudSyncRepository(
      */
     suspend fun uploadCommunityLocation(
         name: String,
+        municipio: String = "Barinas",
         parroquia: String,
         block: String,
         circuit: String
@@ -327,6 +328,7 @@ class CloudSyncRepository(
             val data = hashMapOf(
                 "id" to cleanId,
                 "name" to name.trim(),
+                "municipio" to municipio.trim(),
                 "parroquia" to parroquia.trim(),
                 "block" to block.trim(),
                 "circuitCode" to circuit.trim().ifEmpty { "Circuito Urbano" },
@@ -344,7 +346,7 @@ class CloudSyncRepository(
             // 2. Also register directly as active sector in sectors collection
             db.collection("sectors").document(cleanId).set(data, SetOptions.merge()).await()
 
-            Log.i(TAG, "Community location '$name' ($parroquia, $block) successfully published to Firebase!")
+            Log.i(TAG, "Community location '$name' ($municipio, $parroquia, $block) successfully published to Firebase!")
             true
         } catch (e: Exception) {
             Log.w(TAG, "Failed to upload community location: ${e.message}")

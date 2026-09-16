@@ -357,6 +357,7 @@ class EnergyRepository(
 
     suspend fun registerCommunityLocation(
         name: String,
+        municipio: String = "Barinas",
         parroquia: String,
         block: String,
         circuit: String
@@ -378,7 +379,7 @@ class EnergyRepository(
             sectorDao.insertOrUpdateSector(newSector)
 
             // Upload to Firestore in background
-            cloudSync.uploadCommunityLocation(name, parroquia, block, circuit)
+            cloudSync.uploadCommunityLocation(name, municipio, parroquia, block, circuit)
 
             Result.success(newSector.toDomain())
         } catch (e: Exception) {

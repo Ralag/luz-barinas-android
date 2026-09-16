@@ -1,5 +1,11 @@
 package com.example.data.model
 
+data class BarinasMunicipality(
+    val name: String,
+    val capital: String,
+    val parroquias: List<String>
+)
+
 data class BarinasLocation(
     val id: String,
     val name: String,
@@ -9,7 +15,8 @@ data class BarinasLocation(
     val circuitCode: String,
     val sectorEntityId: String,
     val description: String,
-    val keywords: List<String>
+    val keywords: List<String>,
+    val municipio: String = "Barinas"
 )
 
 object BarinasLocationsCatalog {
@@ -1005,22 +1012,141 @@ object BarinasLocationsCatalog {
         )
     )
 
-    val BARINAS_PARROQUIAS = listOf(
-        "El Carmen",
-        "Alto Barinas",
-        "Barinas (Centro)",
-        "Rómulo Betancourt",
-        "Corazón de Jesús",
-        "Manuel Palacio Fajardo",
-        "Juan Antonio Rodríguez Domínguez",
-        "Dominga Ortiz de Páez",
-        "Torunos",
-        "San Silvestre",
-        "Santa Inés",
-        "Santa Lucía",
-        "Alfredo Arvelo Larriva",
-        "Quebrada Seca (Barinitas)"
+    val BARINAS_MUNICIPALITIES = listOf(
+        BarinasMunicipality(
+            name = "Barinas",
+            capital = "Barinas",
+            parroquias = listOf(
+                "Alto Barinas",
+                "Barinas (Centro)",
+                "Corazón de Jesús",
+                "El Carmen",
+                "Rómulo Betancourt",
+                "Ramón Ignacio Méndez",
+                "Manuel Palacio Fajardo (La Caramuca)",
+                "Juan Antonio Rodríguez Domínguez (El Corozo)",
+                "Dominga Ortiz de Páez (La Mula)",
+                "Torunos",
+                "San Silvestre",
+                "Santa Inés",
+                "Santa Lucía",
+                "Alfredo Arvelo Larriva (Quebrada Seca)"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Bolívar",
+            capital = "Barinitas",
+            parroquias = listOf(
+                "Barinitas",
+                "Altamira de Cáceres",
+                "Calderas"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Antonio José de Sucre",
+            capital = "Socopó",
+            parroquias = listOf(
+                "Ticoporo (Socopó)",
+                "Nicolás Pulido (Chameta)",
+                "Andrés Bello (Bum Bum)"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Pedraza",
+            capital = "Ciudad Bolivia",
+            parroquias = listOf(
+                "Ciudad Bolivia",
+                "José Félix Ribas (Curbatí)",
+                "Ignacio Briceño",
+                "José Antonio Páez (Canaguá)"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Alberto Arvelo Torrealba",
+            capital = "Sabaneta",
+            parroquias = listOf(
+                "Sabaneta",
+                "Rodríguez Domínguez"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Obispos",
+            capital = "Obispos",
+            parroquias = listOf(
+                "Obispos",
+                "El Real",
+                "Los Guasimitos",
+                "La Luz"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Ezequiel Zamora",
+            capital = "Santa Bárbara",
+            parroquias = listOf(
+                "Santa Bárbara",
+                "José Ignacio del Pumar",
+                "Pedro Briceño Méndez",
+                "Ramón Ignacio Méndez (Punta de Piedra)"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Rojas",
+            capital = "Libertad",
+            parroquias = listOf(
+                "Libertad",
+                "Dolores",
+                "Santa Rosa",
+                "Simón Rodríguez",
+                "Palacio Fajardo (Mijagual)"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Cruz Paredes",
+            capital = "Barrancas",
+            parroquias = listOf(
+                "Barrancas",
+                "El Socorro",
+                "Masparrito"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Sosa",
+            capital = "Ciudad de Nutrias",
+            parroquias = listOf(
+                "Ciudad de Nutrias",
+                "El Regalo",
+                "Puerto Nutrias",
+                "Santa Catalina",
+                "Simón Bolívar"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Andrés Eloy Blanco",
+            capital = "El Cantón",
+            parroquias = listOf(
+                "El Cantón",
+                "Santa Cruz de Guacas",
+                "Puerto Vivas"
+            )
+        ),
+        BarinasMunicipality(
+            name = "Arismendi",
+            capital = "Arismendi",
+            parroquias = listOf(
+                "Arismendi",
+                "Guadarrama",
+                "La Unión",
+                "San Antonio"
+            )
+        )
     )
+
+    fun getParroquiasForMunicipality(municipalityName: String): List<String> {
+        return BARINAS_MUNICIPALITIES.find { it.name.equals(municipalityName, ignoreCase = true) }?.parroquias
+            ?: BARINAS_MUNICIPALITIES[0].parroquias
+    }
+
+    val BARINAS_PARROQUIAS: List<String> = BARINAS_MUNICIPALITIES.flatMap { it.parroquias }
 
     private val customLocations = mutableListOf<BarinasLocation>()
 
