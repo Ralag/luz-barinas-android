@@ -52,6 +52,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.IconButton
+import com.example.data.model.BroadcastNotice
 import com.example.data.model.OutagePrediction
 import com.example.data.model.PacScheduleData
 import com.example.data.model.Sector
@@ -77,6 +81,8 @@ fun DashboardScreen(
     userAddress: String? = null,
     prediction: OutagePrediction?,
     unsyncedCount: Int,
+    activeNotice: BroadcastNotice? = null,
+    onDismissNotice: () -> Unit = {},
     onSectorSelected: (Sector) -> Unit,
     onReportStatus: (Boolean, String, Float?) -> Unit,
     onChangeAddressClicked: () -> Unit = {},
@@ -153,8 +159,19 @@ fun DashboardScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // 0. Official Broadcast Notice Banner (if active)
+            if (activeNotice != null) {
+                item(key = "broadcast_notice_banner") {
+                    BroadcastNoticeBanner(
+                        notice = activeNotice,
+                        onDismiss = onDismissNotice,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
             // 1. Search Bar inside LazyColumn (scrolls away naturally when scrolling down)
-            item {
+            item(key = "google_search_bar") {
                 GoogleSearchBar(
                     sectors = sectors,
                     onSectorSelected = onSectorSelected,
@@ -545,3 +562,100 @@ fun DashboardScreen(
     }
 }
 }
+
+@Composable
+fun BroadcastNoticeBanner(
+    notice: BroadcastNotice,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isEmergency = notice.level.equals("EMERGENCY", ignoreCase = true)
+    val isWarning = notice.level.equals("WARNING", ignoreCase = true)
+
+    val containerColor = when {
+        isEmergency -> Color(0xFF381212)
+        isWarning -> Color(0xFF332008)
+        else -> Color(0xFF0C2436)
+    }
+
+    val borderColor = when {
+        isEmergency -> Color(0xFFFF5252).copy(alpha = 0.5f)
+        isWarning -> Color(0xFFFFB300).copy(alpha = 0.5f)
+        else -> Color(0xFF40C4FF).copy(alpha = 0.5f)
+    }
+
+    val iconTint = when {
+        isEmergency -> Color(0xFFFF5252)
+        isWarning -> Color(0xFFFFB300)
+        else -> Color(0xFF40C4FF)
+    }
+
+    val tagText = when {
+        isEmergency -> "🚨 AVISO DE EMERGENCIA"
+        isWarning -> "⚠️ ALERTA PAC OFICIAL"
+        else -> "📢 COMUNICADO OFICIAL"
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        border = androidx.compose.foundation.BorderStroke(1.dp, borderColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = tagText,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = iconTint
+                    )
+                }
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Cerrar aviso",
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = notice.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            if (notice.message.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = notice.message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.85f),
+                    lineHeight = 18.sp
+                )
+            }
+        }
+    }
+}
+

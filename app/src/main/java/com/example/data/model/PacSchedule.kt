@@ -4,6 +4,15 @@ import java.util.Calendar
 import java.util.TimeZone
 import androidx.compose.runtime.Immutable
 
+@Immutable
+data class BroadcastNotice(
+    val title: String = "",
+    val message: String = "",
+    val level: String = "INFO", // "INFO", "WARNING", "EMERGENCY"
+    val timestamp: Long = System.currentTimeMillis(),
+    val active: Boolean = true
+)
+
 data class DayApproximation(
     val dayOfMonth: Int,
     val dayOfWeekName: String,
@@ -128,7 +137,7 @@ object PacScheduleData {
         Array(7) { c -> DEFAULT_MATRIX[r][c] }
     }
 
-    var scheduleVersion: Long = System.currentTimeMillis()
+    var scheduleVersion: Long = 0L
 
     val MATRIX: Array<Array<String>>
         get() = activeMatrix
@@ -474,15 +483,23 @@ object PacScheduleData {
             }
 
             val matchingSlots = mutableListOf<PacSlot>()
-            for (slotIdx in 0..5) {
-                val rotatedSlot = (slotIdx + weekOffset) % 6
-                val slotBlock = activeMatrix[rotatedSlot][dayIdx]
+            val totalMatrixSlots = activeMatrix.size
+            for (slotIdx in activeSlots.indices) {
+                val rotatedSlot = if (totalMatrixSlots > 0) (slotIdx + weekOffset) % totalMatrixSlots else 0
+                val slotBlock = activeMatrix.getOrNull(rotatedSlot)?.getOrNull(dayIdx) ?: "-"
                 if (slotBlock.equals(cleanBlock, ignoreCase = true)) {
-                    matchingSlots.add(SLOTS[slotIdx])
+                    matchingSlots.add(activeSlots[slotIdx])
                 }
             }
 
-            val dayHours = matchingSlots.size * 4 // each standard slot is 4 hours
+            val dayHours = matchingSlots.sumOf { slot ->
+                val duration = if (slot.endHour >= slot.startHour) {
+                    slot.endHour - slot.startHour
+                } else {
+                    24 - slot.startHour + slot.endHour
+                }
+                duration.coerceAtLeast(1)
+            }
             totalCuts += matchingSlots.size
             totalHours += dayHours
 
@@ -516,25 +533,26 @@ object PacScheduleData {
      * Generates 4 weeks of the month for the #SOYBARINAS monthly PAC graphic format.
      */
     fun getMonthlyWeeks(monthName: String, totalDays: Int): List<PacWeekPlan> {
+        val rows = activeMatrix.size.coerceAtLeast(1)
         val week1 = PacWeekPlan(
             weekNumber = 1,
             dateRangeLabel = "DEL 01 AL 07 DE ${monthName.uppercase()}",
             matrix = activeMatrix
         )
         // Shift rotation for subsequent weeks (classic Corpoelec cycle)
-        val week2Matrix = Array(6) { r ->
+        val week2Matrix = Array(rows) { r ->
             Array(7) { c ->
-                activeMatrix[(r + 1) % 6][c]
+                activeMatrix[(r + 1) % rows][c]
             }
         }
-        val week3Matrix = Array(6) { r ->
+        val week3Matrix = Array(rows) { r ->
             Array(7) { c ->
-                activeMatrix[(r + 2) % 6][c]
+                activeMatrix[(r + 2) % rows][c]
             }
         }
-        val week4Matrix = Array(6) { r ->
+        val week4Matrix = Array(rows) { r ->
             Array(7) { c ->
-                activeMatrix[(r + 3) % 6][c]
+                activeMatrix[(r + 3) % rows][c]
             }
         }
 

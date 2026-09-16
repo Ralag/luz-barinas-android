@@ -17,6 +17,7 @@ object NotificationHelper {
     const val NOTIFICATION_ID_ALERT = 1001
     const val NOTIFICATION_ID_CONFIRMATION = 1002
     const val NOTIFICATION_ID_PREDICTIVE = 1003
+    const val NOTIFICATION_ID_BROADCAST = 1004
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -168,6 +169,54 @@ object NotificationHelper {
 
         try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_PREDICTIVE, builder.build())
+        } catch (e: SecurityException) {
+            // Ignore if permissions missing
+        }
+    }
+
+    /**
+     * Broadcast official notice notification: alerts citizens of emergency notices, PAC updates, or announcements.
+     */
+    fun showBroadcastNoticeNotification(
+        context: Context,
+        title: String,
+        message: String,
+        level: String = "INFO"
+    ) {
+        createNotificationChannel(context)
+
+        val openIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val prefix = when (level.uppercase()) {
+            "EMERGENCY" -> "🚨 AVISO URGENTE"
+            "WARNING" -> "⚠️ ALERTA PAC"
+            else -> "📢 COMUNICADO OFICIAL"
+        }
+
+        val fullTitle = "$prefix: $title"
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification_bolt)
+            .setContentTitle(fullTitle)
+            .setContentText(message)
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle(fullTitle)
+                    .bigText(message)
+            )
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setVibrate(longArrayOf(0, 350, 200, 350))
+
+        try {
+            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_BROADCAST, builder.build())
         } catch (e: SecurityException) {
             // Ignore if permissions missing
         }

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import android.content.Context
 import com.example.data.model.BarinasLocation
 import com.example.data.model.BarinasLocationsCatalog
+import com.example.data.model.BroadcastNotice
 import com.example.data.model.CitizenReport
 import com.example.data.model.DayTurnAudit
 import com.example.data.model.OutagePrediction
@@ -46,7 +47,8 @@ data class LuzBarinasUiState(
     val sectorsA: List<String> = PacScheduleData.SECTORS_BLOQUE_A.toList(),
     val sectorsB: List<String> = PacScheduleData.SECTORS_BLOQUE_B.toList(),
     val sectorsC: List<String> = PacScheduleData.SECTORS_BLOQUE_C.toList(),
-    val sectorsD: List<String> = PacScheduleData.SECTORS_BLOQUE_D.toList()
+    val sectorsD: List<String> = PacScheduleData.SECTORS_BLOQUE_D.toList(),
+    val activeBroadcastNotice: BroadcastNotice? = null
 )
 
 class LuzBarinasViewModel(application: Application) : AndroidViewModel(application) {
@@ -116,6 +118,21 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             repository.allReportsFlow.collectLatest { reports ->
                 _uiState.update { it.copy(recentReports = reports) }
+            }
+        }
+
+        // Collect real-time PAC schedule updates from cloud (instantly updates UI without restart)
+        viewModelScope.launch {
+            repository.pacScheduleUpdatedFlow.collectLatest { _ ->
+                _uiState.update { buildPacStateCopy() }
+                _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
+            }
+        }
+
+        // Collect official broadcast notice updates from cloud (in-app banner & alert)
+        viewModelScope.launch {
+            repository.broadcastNoticeFlow.collectLatest { notice ->
+                _uiState.update { it.copy(activeBroadcastNotice = notice) }
             }
         }
     }
@@ -415,6 +432,10 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
                 userMessage = "📢 Horarios PAC publicados y sincronizados en la nube."
             )
         }
+    }
+
+    fun dismissBroadcastNotice() {
+        _uiState.update { it.copy(activeBroadcastNotice = null) }
     }
 
     fun clearUserMessage() {

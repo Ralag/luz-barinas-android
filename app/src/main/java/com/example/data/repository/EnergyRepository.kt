@@ -11,6 +11,7 @@ import com.example.data.local.AppDatabase
 import com.example.data.local.entity.OutageRecordEntity
 import com.example.data.local.entity.PendingReportEntity
 import com.example.data.local.entity.SectorEntity
+import com.example.data.model.BroadcastNotice
 import com.example.data.model.CitizenReport
 import com.example.data.model.OutagePrediction
 import com.example.data.model.OutageRecord
@@ -22,6 +23,8 @@ import com.example.engine.OutagePredictionEngine
 import com.example.worker.ReportPowerWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -34,6 +37,12 @@ class EnergyRepository(
     private val pendingDao = database.pendingReportDao()
 
     val cloudSync: CloudSyncRepository by lazy { CloudSyncRepository(context, database) }
+
+    val broadcastNoticeFlow: StateFlow<BroadcastNotice?>
+        get() = cloudSync.broadcastNoticeFlow
+
+    val pacScheduleUpdatedFlow: SharedFlow<Long>
+        get() = cloudSync.pacScheduleUpdatedFlow
 
     val allSectorsFlow: Flow<List<Sector>> = sectorDao.getAllSectors().map { list ->
         list.map { it.toDomain() }

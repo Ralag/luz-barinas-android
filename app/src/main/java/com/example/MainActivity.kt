@@ -301,6 +301,8 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         userAddress = uiState.userAddress,
                         prediction = uiState.prediction,
                         unsyncedCount = uiState.unsyncedReportsCount,
+                        activeNotice = uiState.activeBroadcastNotice,
+                        onDismissNotice = { viewModel.dismissBroadcastNotice() },
                         onSectorSelected = { viewModel.selectSector(it) },
                         onReportStatus = { hasPower, reportType, voltage ->
                             viewModel.reportPowerStatus(hasPower, reportType, voltage)

@@ -4,7 +4,10 @@ import android.content.Context
 import android.util.Log
 import com.example.data.PacSchedulePrefs
 import com.example.data.local.AppDatabase
+import com.example.data.model.BroadcastNotice
 import com.example.data.model.PacScheduleData
+import com.example.data.model.PacSlot
+import com.example.notification.NotificationHelper
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -12,6 +15,12 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -23,9 +32,6 @@ import kotlinx.coroutines.withContext
  * 1. Real-time sector status updates from citizen reports across Barinas.
  * 2. Instant propagation of PAC schedule changes made by the admin to all users.
  * 3. Citizen report syncing with offline-first support.
- * 
- * Safe design: If Firebase is not configured yet (no google-services.json),
- * all operations fail gracefully and the app runs in pure offline Room mode.
  */
 class CloudSyncRepository(
     private val context: Context,
@@ -34,6 +40,15 @@ class CloudSyncRepository(
     private val scope = CoroutineScope(Dispatchers.IO)
     private var sectorsListener: ListenerRegistration? = null
     private var pacScheduleListener: ListenerRegistration? = null
+    private var broadcastListener: ListenerRegistration? = null
+
+    private val _broadcastNoticeFlow = MutableStateFlow<BroadcastNotice?>(null)
+    val broadcastNoticeFlow: StateFlow<BroadcastNotice?> = _broadcastNoticeFlow.asStateFlow()
+
+    private val _pacScheduleUpdatedFlow = MutableSharedFlow<Long>(extraBufferCapacity = 1)
+    val pacScheduleUpdatedFlow: SharedFlow<Long> = _pacScheduleUpdatedFlow.asSharedFlow()
+
+    private val syncPrefs = context.getSharedPreferences("cloud_sync_prefs", Context.MODE_PRIVATE)
 
     private val firestore: FirebaseFirestore? by lazy {
         try {
@@ -110,6 +125,44 @@ class CloudSyncRepository(
                 }
         } catch (e: Exception) {
             Log.w(TAG, "Failed to attach sectors listener", e)
+        }
+
+        // 3. Real-time listener for official broadcast notices published by admin
+        try {
+            broadcastListener = db.collection("app_config")
+                .document("broadcast_notice")
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Log.w(TAG, "Error listening to broadcast notice", error)
+                        return@addSnapshotListener
+                    }
+                    if (snapshot != null && snapshot.exists()) {
+                        val data = snapshot.data ?: return@addSnapshotListener
+                        val active = data["active"] as? Boolean ?: false
+                        if (active) {
+                            val title = data["title"] as? String ?: "Aviso Oficial"
+                            val message = data["message"] as? String ?: ""
+                            val level = data["level"] as? String ?: "INFO"
+                            val timestamp = (data["timestamp"] as? Number)?.toLong() ?: System.currentTimeMillis()
+
+                            val notice = BroadcastNotice(title, message, level, timestamp, true)
+                            _broadcastNoticeFlow.value = notice
+
+                            // Alert citizen with high priority system notification if notice is new
+                            val lastSeen = syncPrefs.getLong("last_seen_broadcast_timestamp", 0L)
+                            if (timestamp > lastSeen) {
+                                syncPrefs.edit().putLong("last_seen_broadcast_timestamp", timestamp).apply()
+                                NotificationHelper.showBroadcastNoticeNotification(context, title, message, level)
+                            }
+                        } else {
+                            _broadcastNoticeFlow.value = null
+                        }
+                    } else {
+                        _broadcastNoticeFlow.value = null
+                    }
+                }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to attach broadcast notice listener", e)
         }
     }
 
@@ -302,12 +355,28 @@ class CloudSyncRepository(
     private fun applyRemotePacSchedule(data: Map<String, Any>) {
         try {
             val remoteVersion = (data["version"] as? Number)?.toLong() ?: 0L
-            if (remoteVersion > PacScheduleData.scheduleVersion) {
-                // Apply remote matrix
+            val remoteUpdatedAt = (data["updatedAt"] as? Number)?.toLong() ?: remoteVersion
+            val lastApplied = syncPrefs.getLong("last_applied_pac_updated_at", 0L)
+
+            if (remoteUpdatedAt > lastApplied || remoteVersion > PacScheduleData.scheduleVersion || (remoteUpdatedAt > 0L && PacScheduleData.scheduleVersion == 0L)) {
+                // 1. Apply remote slots if present
+                @Suppress("UNCHECKED_CAST")
+                val slotsRaw = data["slots"] as? List<Map<String, Any>>
+                if (!slotsRaw.isNullOrEmpty()) {
+                    PacScheduleData.activeSlots.clear()
+                    slotsRaw.forEachIndexed { idx, sMap ->
+                        val label = sMap["timeLabel"] as? String ?: "Turno ${idx + 1}"
+                        val startH = (sMap["startHour"] as? Number)?.toInt() ?: 0
+                        val endH = (sMap["endHour"] as? Number)?.toInt() ?: 4
+                        PacScheduleData.activeSlots.add(PacSlot(idx, label, startH, endH))
+                    }
+                }
+
+                // 2. Apply remote matrix
                 @Suppress("UNCHECKED_CAST")
                 val matrixRows = data["matrixRows"] as? List<Map<String, Any>>
-                if (matrixRows != null && matrixRows.size == 6) {
-                    PacScheduleData.activeMatrix = Array(6) { i ->
+                if (matrixRows != null && matrixRows.isNotEmpty()) {
+                    PacScheduleData.activeMatrix = Array(matrixRows.size) { i ->
                         @Suppress("UNCHECKED_CAST")
                         val cells = matrixRows[i]["cells"] as? List<String>
                         cells?.toTypedArray() ?: Array(7) { "-" }
@@ -315,14 +384,14 @@ class CloudSyncRepository(
                 } else {
                     @Suppress("UNCHECKED_CAST")
                     val matrixRaw = data["matrix"] as? List<List<String>>
-                    if (matrixRaw != null && matrixRaw.size == 6) {
-                        PacScheduleData.activeMatrix = Array(6) { i ->
+                    if (matrixRaw != null && matrixRaw.isNotEmpty()) {
+                        PacScheduleData.activeMatrix = Array(matrixRaw.size) { i ->
                             matrixRaw[i].toTypedArray()
                         }
                     }
                 }
 
-                // Apply remote sector assignments
+                // 3. Apply remote sector assignments
                 @Suppress("UNCHECKED_CAST")
                 (data["sectorsA"] as? List<String>)?.let {
                     PacScheduleData.SECTORS_BLOQUE_A.clear()
@@ -344,11 +413,15 @@ class CloudSyncRepository(
                     PacScheduleData.SECTORS_BLOQUE_D.addAll(it)
                 }
 
-                PacScheduleData.scheduleVersion = remoteVersion
+                PacScheduleData.scheduleVersion = remoteUpdatedAt
+                syncPrefs.edit().putLong("last_applied_pac_updated_at", remoteUpdatedAt).apply()
 
                 // Persist locally
                 PacSchedulePrefs.saveSchedule(context)
-                Log.i(TAG, "Updated local PAC schedule to remote version $remoteVersion")
+                Log.i(TAG, "Updated local PAC schedule to remote updatedAt $remoteUpdatedAt (version $remoteVersion)")
+
+                // Notify UI state flow reactively
+                _pacScheduleUpdatedFlow.tryEmit(remoteUpdatedAt)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error applying remote PAC schedule", e)
@@ -358,6 +431,7 @@ class CloudSyncRepository(
     fun stopRealtimeSync() {
         sectorsListener?.remove()
         pacScheduleListener?.remove()
+        broadcastListener?.remove()
     }
 
     companion object {
