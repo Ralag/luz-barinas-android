@@ -19,3 +19,5 @@ app/build/
 .cxx
 .env
 debug.keystore
+__pycache__/
+*.pyc
