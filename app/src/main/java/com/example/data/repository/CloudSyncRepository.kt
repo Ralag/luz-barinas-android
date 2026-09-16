@@ -179,7 +179,9 @@ class CloudSyncRepository(
         val db = firestore ?: return@withContext false
 
         try {
-            val matrixList = PacScheduleData.activeMatrix.map { row -> row.toList() }
+            val matrixRows = PacScheduleData.activeMatrix.map { row ->
+                mapOf("cells" to row.toList())
+            }
             val slotsList = PacScheduleData.activeSlots.map { slot ->
                 mapOf(
                     "timeLabel" to slot.timeLabel,
@@ -191,7 +193,7 @@ class CloudSyncRepository(
             val payload = hashMapOf(
                 "version" to PacScheduleData.scheduleVersion,
                 "updatedAt" to System.currentTimeMillis(),
-                "matrix" to matrixList,
+                "matrixRows" to matrixRows,
                 "slots" to slotsList,
                 "sectorsA" to PacScheduleData.SECTORS_BLOQUE_A.toList(),
                 "sectorsB" to PacScheduleData.SECTORS_BLOQUE_B.toList(),
@@ -303,10 +305,20 @@ class CloudSyncRepository(
             if (remoteVersion > PacScheduleData.scheduleVersion) {
                 // Apply remote matrix
                 @Suppress("UNCHECKED_CAST")
-                val matrixRaw = data["matrix"] as? List<List<String>>
-                if (matrixRaw != null && matrixRaw.size == 6) {
+                val matrixRows = data["matrixRows"] as? List<Map<String, Any>>
+                if (matrixRows != null && matrixRows.size == 6) {
                     PacScheduleData.activeMatrix = Array(6) { i ->
-                        matrixRaw[i].toTypedArray()
+                        @Suppress("UNCHECKED_CAST")
+                        val cells = matrixRows[i]["cells"] as? List<String>
+                        cells?.toTypedArray() ?: Array(7) { "-" }
+                    }
+                } else {
+                    @Suppress("UNCHECKED_CAST")
+                    val matrixRaw = data["matrix"] as? List<List<String>>
+                    if (matrixRaw != null && matrixRaw.size == 6) {
+                        PacScheduleData.activeMatrix = Array(6) { i ->
+                            matrixRaw[i].toTypedArray()
+                        }
                     }
                 }
 
