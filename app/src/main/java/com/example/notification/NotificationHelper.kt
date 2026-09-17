@@ -13,7 +13,7 @@ import com.example.R
 
 object NotificationHelper {
     const val CHANNEL_ID = "alertas_cortes_barinas"
-    const val CHANNEL_NAME = "Alertas de Cortes Eléctricos"
+    const val CHANNEL_NAME = "Alertas PAC Barinas"
     const val NOTIFICATION_ID_ALERT = 1001
     const val NOTIFICATION_ID_CONFIRMATION = 1002
     const val NOTIFICATION_ID_PREDICTIVE = 1003
@@ -27,7 +27,7 @@ object NotificationHelper {
                 CHANNEL_NAME,
                 importance
             ).apply {
-                description = "Notificaciones interactivas para telemetría ciudadana de cortes en Barinas"
+                description = "Notificaciones oficiales, alarmas y telemetría de cortes PAC Barinas"
                 enableVibration(true)
                 setShowBadge(true)
             }

@@ -39,19 +39,27 @@ class PredictiveNotificationWorker(
             val currentMinute = cal.get(Calendar.MINUTE)
             val currentDayIdx = PacScheduleData.getDayIndex(cal.get(Calendar.DAY_OF_WEEK))
 
+            val alertSettings = com.example.data.model.PacAlertPrefs.getSettings(applicationContext)
+            if (!alertSettings.isNotificationEnabled) return@withContext Result.success()
+            val targetAdvance = alertSettings.advanceMinutes
+
+            // Ensure exact AlarmManager is armed
+            com.example.notification.PacAlarmScheduler.scheduleNextAlarm(applicationContext)
+
             // Check each upcoming slot
             for (slot in PacScheduleData.SLOTS) {
                 val minutesUntilSlot = calculateMinutesUntil(currentHour, currentMinute, slot.startHour)
 
-                // Only alert if the outage is 15-30 minutes away
-                if (minutesUntilSlot in 15..30) {
+                // Match user's configured advance notice window (within +/- 10 min window of check)
+                val minThreshold = (targetAdvance - 5).coerceAtLeast(1)
+                val maxThreshold = targetAdvance + 15
+                if (minutesUntilSlot in minThreshold..maxThreshold) {
                     val slotIdx = PacScheduleData.SLOTS.indexOf(slot)
                     if (slotIdx >= 0) {
                         val dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
                         val blockForSlot = PacScheduleData.getBlockForDate(slotIdx, currentDayIdx, dayOfMonth)
 
                         if (blockForSlot.equals(userBlock, ignoreCase = true)) {
-                            // This user's block has a scheduled outage coming up!
                             NotificationHelper.showPredictiveAlert(
                                 context = applicationContext,
                                 sectorName = userSectorName,
@@ -59,7 +67,7 @@ class PredictiveNotificationWorker(
                                 minutesUntil = minutesUntilSlot,
                                 slotLabel = slot.timeLabel
                             )
-                            break // Only one notification at a time
+                            break
                         }
                     }
                 }

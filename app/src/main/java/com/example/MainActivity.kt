@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.DarkMode
@@ -24,6 +25,10 @@ import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.example.ui.components.PacSettingsDialog
+import com.example.notification.PacAlarmScheduler
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -121,6 +126,26 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         }
     }
 
+    // Alert & Alarm Settings State
+    var isSettingsOpen by remember { mutableStateOf(false) }
+
+    val currentBlock = remember(uiState.selectedSector) {
+        uiState.selectedSector?.rotationBlock?.uppercase()?.replace("BLOQUE", "")?.trim() ?: "A"
+    }
+
+    // Synchronize exact PAC Alarm whenever block or sector changes
+    LaunchedEffect(uiState.selectedSector) {
+        PacAlarmScheduler.scheduleNextAlarm(context)
+    }
+
+    // PAC Alert & Alarm Settings Dialog
+    PacSettingsDialog(
+        isOpen = isSettingsOpen,
+        userBlock = currentBlock,
+        userSectorName = uiState.userAddress ?: "Barinas",
+        onDismiss = { isSettingsOpen = false }
+    )
+
     // Onboarding / Location Selector Dialog (Barinas Locations Catalog)
     BarinasAddressDialog(
         isOpen = uiState.isOnboardingOpen,
@@ -152,13 +177,13 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         modifier = Modifier.padding(vertical = 4.dp)
                     ) {
                         Text(
-                            text = "💡 Luz Barinas",
+                            text = "⚡ PAC Barinas",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "PAC Barinas • En vivo",
+                            text = "Control Eléctrico Oficial • En vivo",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -173,6 +198,19 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         Icon(
                             imageVector = if (uiState.isDarkMode) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
                             contentDescription = if (uiState.isDarkMode) "Activar modo claro" else "Activar modo oscuro",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // Alert & Alarm Settings Dialog
+                    IconButton(
+                        onClick = { isSettingsOpen = true },
+                        modifier = Modifier.testTag("action_alarm_settings")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Alarm,
+                            contentDescription = "Configurar Alertas y Alarma PAC",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
@@ -308,7 +346,8 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                             viewModel.reportPowerStatus(hasPower, reportType, voltage)
                         },
                         onChangeAddressClicked = { viewModel.setOnboardingOpen(true) },
-                        onNavigateToSchedule = { viewModel.setTab(1) }
+                        onNavigateToSchedule = { viewModel.setTab(1) },
+                        onOpenAlarmSettings = { isSettingsOpen = true }
                     )
                     1 -> PacScheduleView(
                         selectedSector = uiState.selectedSector,

@@ -55,6 +55,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.ui.platform.LocalContext
+import com.example.data.model.PacAlertPrefs
 import com.example.data.model.BroadcastNotice
 import com.example.data.model.OutagePrediction
 import com.example.data.model.PacScheduleData
@@ -71,7 +76,7 @@ import java.util.Calendar
 import java.util.TimeZone
 
 /**
- * Clean, Fast, Minimalist Dashboard for Luz Barinas.
+ * Clean, Fast, Minimalist Dashboard for PAC Barinas.
  * Philosophy: Menos es mejor. All vital schedule and status info at a single glance.
  */
 @Composable
@@ -87,6 +92,7 @@ fun DashboardScreen(
     onReportStatus: (Boolean, String, Float?) -> Unit,
     onChangeAddressClicked: () -> Unit = {},
     onNavigateToSchedule: () -> Unit = {},
+    onOpenAlarmSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var reportFeedback by remember { mutableStateOf<String?>(null) }
@@ -447,6 +453,80 @@ fun DashboardScreen(
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // 2.5 Quick Alarms & Notification Settings Card
+        item(key = "quick_alarm_card") {
+            val context = LocalContext.current
+            val alertSettings = remember { PacAlertPrefs.getSettings(context) }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onOpenAlarmSettings() },
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (alertSettings.isAlarmEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                    else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(42.dp)
+                                .background(
+                                    if (alertSettings.isAlarmEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                                    else MaterialTheme.colorScheme.surfaceVariant,
+                                    CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (alertSettings.isAlarmEnabled) Icons.Default.Alarm else Icons.Default.NotificationsActive,
+                                contentDescription = null,
+                                tint = if (alertSettings.isAlarmEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = if (alertSettings.isAlarmEnabled) "🔔 Alarma PAC Activada" else "⏰ Alerta de Corte Programada",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Aviso ${alertSettings.advanceMinutes} min antes del corte • Toca para ajustar",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    FilledTonalButton(
+                        onClick = onOpenAlarmSettings,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text("Ajustar", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

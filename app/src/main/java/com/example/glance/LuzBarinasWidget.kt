@@ -76,7 +76,7 @@ class LuzBarinasWidget : GlanceAppWidget() {
                     ) {
                         Column(modifier = GlanceModifier.defaultWeight()) {
                             Text(
-                                text = "⚡ Luz Barinas",
+                                text = "⚡ PAC Barinas",
                                 style = TextStyle(
                                     color = ColorProvider(Color(0xFFF59E0B)),
                                     fontSize = 13.sp,
