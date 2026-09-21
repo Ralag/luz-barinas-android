@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.PacScheduleData
 import com.example.data.model.PacSlot
+import com.example.data.model.PacWeekPlan
 import com.example.data.model.Sector
 import com.example.ui.theme.BlockAColor
 import com.example.ui.theme.BlockBColor
@@ -117,8 +119,17 @@ fun PacScheduleView(
         tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
-    val monthlyWeeks = remember(selectedMonthName, selectedMonthDays, PacScheduleData.scheduleVersion) {
-        PacScheduleData.getMonthlyWeeks(selectedMonthName, selectedMonthDays)
+    val monthlyWeeks by produceState<List<PacWeekPlan>>(initialValue = emptyList(), key1 = selectedMonthName, key2 = selectedMonthDays, key3 = PacScheduleData.scheduleVersion) {
+        try {
+            val response = com.example.data.remote.ApiClient.api.getMonthlyWeeks(selectedMonthName, selectedMonthDays)
+            if (response.isSuccessful) {
+                value = response.body()?.weeks ?: emptyList()
+            } else {
+                value = emptyList()
+            }
+        } catch (e: Exception) {
+            value = emptyList()
+        }
     }
 
     LazyColumn(

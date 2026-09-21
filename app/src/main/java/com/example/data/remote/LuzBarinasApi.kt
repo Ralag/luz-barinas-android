@@ -22,4 +22,15 @@ interface LuzBarinasApi {
     suspend fun submitPowerReport(
         @Body request: TelemetryReportRequest
     ): Response<TelemetryReportResponse>
+
+    @GET("api/getOutagePrediction")
+    suspend fun getOutagePrediction(
+        @retrofit2.http.Query("sectorId") sectorId: String
+    ): Response<com.example.data.model.OutagePrediction>
+
+    @GET("api/getMonthlyWeeks")
+    suspend fun getMonthlyWeeks(
+        @retrofit2.http.Query("monthName") monthName: String,
+        @retrofit2.http.Query("totalDays") totalDays: Int
+    ): Response<com.example.data.model.MonthlyWeeksResponse>
 }
