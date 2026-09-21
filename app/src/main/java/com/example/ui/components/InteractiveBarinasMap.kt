@@ -94,17 +94,8 @@ fun InteractiveBarinasMap(
     val textColor = if (isDark) android.graphics.Color.WHITE else android.graphics.Color.DKGRAY
     val primaryColor = MaterialTheme.colorScheme.primary
 
-    // Pulsing halo for selected sector
-    val infiniteTransition = rememberInfiniteTransition(label = "halo_pulse")
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.25f,
-        targetValue = 0.85f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse_alpha"
-    )
+    // Remove pulseAlpha to prevent 60fps continuous redrawing.
+    // We will use a static highlight for the selected sector instead.
 
     // Precompute normalized positions outside the draw loop
     val precomputedSectors = remember(sectors) {
@@ -201,7 +192,6 @@ fun InteractiveBarinasMap(
     }
 
     val selectedLabelSize = remember(density) { 12f * density }
-    val normalLabelSize = remember(density) { 9f * density }
 
     Box(
         modifier = modifier
@@ -213,13 +203,24 @@ fun InteractiveBarinasMap(
                 .fillMaxSize()
                 .testTag("barinas_circuit_canvas_map")
                 .pointerInput(Unit) {
-                    detectTransformGestures { _, pan, zoom, _ ->
-                        scale = (scale * zoom).coerceIn(0.8f, 3.5f)
-                        offsetX += pan.x
-                        offsetY += pan.y
+                    detectTransformGestures { centroid, pan, zoom, _ ->
+                        val oldScale = scale
+                        val newScale = (scale * zoom).coerceIn(0.8f, 3.5f)
+                        
+                        // Smooth pinch-to-zoom mathematically centered on the fingers' centroid
+                        offsetX = (offsetX + pan.x) - (centroid.x - offsetX) * (newScale / oldScale - 1f)
+                        offsetY = (offsetY + pan.y) - (centroid.y - offsetY) * (newScale / oldScale - 1f)
+                        scale = newScale
                     }
                 }
-                .pointerInput(precomputedSectors, scale, offsetX, offsetY) {
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    translationX = offsetX
+                    translationY = offsetY
+                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0f)
+                }
+                .pointerInput(precomputedSectors) {
                     detectTapGestures { tapOffset ->
                         val canvasW = size.width.toFloat()
                         val canvasH = size.height.toFloat()
@@ -228,8 +229,9 @@ fun InteractiveBarinasMap(
                         var minDistance = Float.MAX_VALUE
 
                         for (item in precomputedSectors) {
-                            val mapX = (item.centerNormX * canvasW * 0.85f + canvasW * 0.075f) * scale + offsetX
-                            val mapY = (item.centerNormY * canvasH * 0.85f + canvasH * 0.075f) * scale + offsetY
+                            // GraphicsLayer automatically transforms pointer coordinates, so we compare directly!
+                            val mapX = item.centerNormX * canvasW * 0.85f + canvasW * 0.075f
+                            val mapY = item.centerNormY * canvasH * 0.85f + canvasH * 0.075f
 
                             val dist = hypot(tapOffset.x - mapX, tapOffset.y - mapY)
                             val threshold = 48f * density
@@ -245,59 +247,59 @@ fun InteractiveBarinasMap(
         ) {
             val width = size.width
             val height = size.height
-            val scaleX = width * 0.85f * scale
-            val scaleY = height * 0.85f * scale
-            val baseOffsetX = width * 0.075f * scale + offsetX
-            val baseOffsetY = height * 0.075f * scale + offsetY
+            val drawScaleX = width * 0.85f
+            val drawScaleY = height * 0.85f
+            val baseOffsetX = width * 0.075f
+            val baseOffsetY = height * 0.075f
 
             // =========================================================================
             // 1. DIBUJAR RÍO SANTO DOMINGO (Sello geográfico de Barinas)
             // =========================================================================
             withTransform({
                 translate(baseOffsetX, baseOffsetY)
-                scale(scaleX, scaleY)
+                scale(drawScaleX, drawScaleY)
             }) {
-                val avgScale = (scaleX + scaleY) / 2f
+                val avgScale = (drawScaleX + drawScaleY) / 2f
                 drawPath(
                     path = riverPath,
                     color = riverGlowColor,
-                    style = Stroke(width = (16f * scale) / avgScale, cap = StrokeCap.Round)
+                    style = Stroke(width = 16f / avgScale, cap = StrokeCap.Round)
                 )
                 drawPath(
                     path = riverPath,
                     color = riverBodyColor,
-                    style = Stroke(width = (8f * scale) / avgScale, cap = StrokeCap.Round)
+                    style = Stroke(width = 8f / avgScale, cap = StrokeCap.Round)
                 )
             }
 
             // Etiqueta del Río
-            riverPaint.textSize = (11f * scale).coerceIn(9f, 16f) * density
+            riverPaint.textSize = 11f.coerceIn(9f, 16f) * density
             drawContext.canvas.nativeCanvas.drawText(
                 "🌊 Río Santo Domingo",
-                0.72f * scaleX + baseOffsetX,
-                0.52f * scaleY + baseOffsetY,
+                0.72f * drawScaleX + baseOffsetX,
+                0.52f * drawScaleY + baseOffsetY,
                 riverPaint
             )
 
             // =========================================================================
             // 2. EJES VIALES PRINCIPALES DE BARINAS (Arterias eléctricas)
             // =========================================================================
-            val roadWidth = 3f * scale
+            val roadWidth = 3f
 
             // Troncal 5 (Sur -> Centro -> Noreste hacia Guanare)
             withTransform({
                 translate(baseOffsetX, baseOffsetY)
-                scale(scaleX, scaleY)
+                scale(drawScaleX, drawScaleY)
             }) {
-                val avgScale = (scaleX + scaleY) / 2f
+                val avgScale = (drawScaleX + drawScaleY) / 2f
                 drawPath(path = troncal5Path, color = roadColor, style = Stroke(width = (roadWidth * 1.4f) / avgScale, cap = StrokeCap.Round))
             }
 
             // Av. Cuatricentenaria (Oeste a Este)
             drawLine(
                 color = roadColor,
-                start = Offset(0.12f * scaleX + baseOffsetX, 0.62f * scaleY + baseOffsetY),
-                end = Offset(0.70f * scaleX + baseOffsetX, 0.58f * scaleY + baseOffsetY),
+                start = Offset(0.12f * drawScaleX + baseOffsetX, 0.62f * drawScaleY + baseOffsetY),
+                end = Offset(0.70f * drawScaleX + baseOffsetX, 0.58f * drawScaleY + baseOffsetY),
                 strokeWidth = roadWidth,
                 cap = StrokeCap.Round
             )
@@ -305,8 +307,8 @@ fun InteractiveBarinasMap(
             // Av. 23 de Enero (Centro a Cuatricentenaria)
             drawLine(
                 color = roadColor,
-                start = Offset(0.48f * scaleX + baseOffsetX, 0.38f * scaleY + baseOffsetY),
-                end = Offset(0.42f * scaleX + baseOffsetX, 0.62f * scaleY + baseOffsetY),
+                start = Offset(0.48f * drawScaleX + baseOffsetX, 0.38f * drawScaleY + baseOffsetY),
+                end = Offset(0.42f * drawScaleX + baseOffsetX, 0.62f * drawScaleY + baseOffsetY),
                 strokeWidth = roadWidth,
                 cap = StrokeCap.Round
             )
@@ -314,8 +316,8 @@ fun InteractiveBarinasMap(
             // Av. Los Próceres / Av. Alberto Arvelo Torrealba (Alto Barinas)
             drawLine(
                 color = roadColor,
-                start = Offset(0.18f * scaleX + baseOffsetX, 0.32f * scaleY + baseOffsetY),
-                end = Offset(0.45f * scaleX + baseOffsetX, 0.22f * scaleY + baseOffsetY),
+                start = Offset(0.18f * drawScaleX + baseOffsetX, 0.32f * drawScaleY + baseOffsetY),
+                end = Offset(0.45f * drawScaleX + baseOffsetX, 0.22f * drawScaleY + baseOffsetY),
                 strokeWidth = roadWidth,
                 cap = StrokeCap.Round
             )
@@ -324,19 +326,19 @@ fun InteractiveBarinasMap(
             // 3. SUBESTACIONES PRINCIPALES (Hubs)
             // =========================================================================
             for ((coord, subName) in subStations) {
-                val sx = coord.first * scaleX + baseOffsetX
-                val sy = coord.second * scaleY + baseOffsetY
+                val sx = coord.first * drawScaleX + baseOffsetX
+                val sy = coord.second * drawScaleY + baseOffsetY
 
-                drawCircle(color = subColor.copy(alpha = 0.20f), radius = 12f * scale, center = Offset(sx, sy))
-                drawCircle(color = subColor, radius = 5f * scale, center = Offset(sx, sy))
+                drawCircle(color = subColor.copy(alpha = 0.20f), radius = 12f, center = Offset(sx, sy))
+                drawCircle(color = subColor, radius = 5f, center = Offset(sx, sy))
             }
 
             // =========================================================================
             // 4. NODOS DE SECTORES (Limpio, Sin solapamientos masivos)
             // =========================================================================
             for (item in precomputedSectors) {
-                val secX = item.centerNormX * scaleX + baseOffsetX
-                val secY = item.centerNormY * scaleY + baseOffsetY
+                val secX = item.centerNormX * drawScaleX + baseOffsetX
+                val secY = item.centerNormY * drawScaleY + baseOffsetY
                 val pinOffset = Offset(secX, secY)
                 val isSelected = selectedSector?.id == item.sector.id
 
@@ -347,57 +349,55 @@ fun InteractiveBarinasMap(
                 }
 
                 if (isSelected) {
-                    // Pulsing animated ring for selected sector
+                    // Highlight ring for selected sector
                     drawCircle(
-                        color = pinColor.copy(alpha = pulseAlpha * 0.45f),
-                        radius = 24f * scale,
+                        color = pinColor.copy(alpha = 0.45f),
+                        radius = 24f,
                         center = pinOffset
                     )
                     drawCircle(
                         color = primaryColor,
-                        radius = 14f * scale,
+                        radius = 14f,
                         center = pinOffset,
-                        style = Stroke(width = 3f * scale)
+                        style = Stroke(width = 3f)
                     )
                     drawCircle(
                         color = pinColor,
-                        radius = 8f * scale,
+                        radius = 8f,
                         center = pinOffset
                     )
                 } else {
                     // Subtle, crisp electrical node
                     drawCircle(
                         color = pinColor.copy(alpha = 0.25f),
-                        radius = 8f * scale,
+                        radius = 8f,
                         center = pinOffset
                     )
                     drawCircle(
                         color = pinColor,
-                        radius = 4.5f * scale,
+                        radius = 4.5f,
                         center = pinOffset
                     )
                 }
 
-                // Render label ONLY when selected or when zoomed in (scale > 1.8) to eliminate overlap
-                if (isSelected || scale > 1.8f) {
-                    val labelText = if (isSelected) "📍 ${item.shortName}" else item.shortName
-                    textPaint.textSize = if (isSelected) selectedLabelSize else normalLabelSize
-                    textPaint.color = if (isSelected) android.graphics.Color.WHITE else textColor
+                // Render label ONLY when selected to eliminate text rendering bottlenecks
+                if (isSelected) {
+                    val labelText = "📍 ${item.shortName}"
+                    textPaint.textSize = selectedLabelSize
+                    textPaint.color = android.graphics.Color.WHITE
 
                     val textWidth = textPaint.measureText(labelText)
                     val bgMargin = 8f * density
-                    val badgeTop = pinOffset.y - (26f * scale)
+                    val badgeTop = pinOffset.y - 26f
                     val badgeLeft = pinOffset.x - (textWidth / 2f) - bgMargin
                     val badgeRight = pinOffset.x + (textWidth / 2f) + bgMargin
                     val badgeBottom = badgeTop + (16f * density)
 
-                    if (isSelected) {
-                        labelBgPaint.color = android.graphics.Color.argb(235, 15, 23, 42)
-                        drawContext.canvas.nativeCanvas.drawRoundRect(
-                            badgeLeft, badgeTop, badgeRight, badgeBottom,
-                            12f, 12f, labelBgPaint
-                        )
-                    }
+                    labelBgPaint.color = android.graphics.Color.argb(235, 15, 23, 42)
+                    drawContext.canvas.nativeCanvas.drawRoundRect(
+                        badgeLeft, badgeTop, badgeRight, badgeBottom,
+                        12f, 12f, labelBgPaint
+                    )
 
                     drawContext.canvas.nativeCanvas.drawText(
                         labelText,
