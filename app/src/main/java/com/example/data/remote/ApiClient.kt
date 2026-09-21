@@ -8,7 +8,8 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    private const val BASE_URL = "https://luzbarinas.example.com/"
+    // Asegúrate de cambiar esta URL por la URL real de tu proyecto Vercel (ej: https://tu-proyecto.vercel.app/)
+    private const val BASE_URL = "https://luz-barinas-admin-web.vercel.app/"
 
     private val moshi: Moshi by lazy {
         Moshi.Builder()
