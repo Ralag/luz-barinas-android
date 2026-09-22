@@ -336,7 +336,69 @@ class CloudSyncRepository(
     }
 
     private fun applyRemotePacScheduleJson(obj: JsonObject) {
-        // ... simplistic implementation ...
+        try {
+            val remoteVersion = obj["version"]?.jsonPrimitive?.longOrNull ?: 0L
+            val remoteUpdatedAt = obj["updatedAt"]?.jsonPrimitive?.longOrNull ?: remoteVersion
+            val lastApplied = syncPrefs.getLong("last_applied_pac_updated_at", 0L)
+
+            if (remoteUpdatedAt > lastApplied || remoteVersion > PacScheduleData.scheduleVersion || (remoteUpdatedAt > 0L && PacScheduleData.scheduleVersion == 0L)) {
+                
+                // 1. Apply remote slots
+                val slotsArray = obj["slots"]?.jsonArray
+                if (slotsArray != null && slotsArray.isNotEmpty()) {
+                    PacScheduleData.activeSlots.clear()
+                    slotsArray.forEachIndexed { idx, element ->
+                        val sMap = element.jsonObject
+                        val label = sMap["timeLabel"]?.jsonPrimitive?.content ?: "Turno ${idx + 1}"
+                        val startH = sMap["startHour"]?.jsonPrimitive?.intOrNull ?: 0
+                        val endH = sMap["endHour"]?.jsonPrimitive?.intOrNull ?: 4
+                        PacScheduleData.activeSlots.add(PacSlot(idx, label, startH, endH))
+                    }
+                }
+
+                // 2. Apply remote matrix
+                val matrixRows = obj["matrixRows"]?.jsonArray
+                if (matrixRows != null && matrixRows.isNotEmpty()) {
+                    PacScheduleData.activeMatrix = Array(matrixRows.size) { i ->
+                        val cells = matrixRows[i].jsonObject["cells"]?.jsonArray
+                        cells?.map { it.jsonPrimitive.content }?.toTypedArray() ?: Array(7) { "-" }
+                    }
+                } else {
+                    val matrixRaw = obj["matrix"]?.jsonArray
+                    if (matrixRaw != null && matrixRaw.isNotEmpty()) {
+                        PacScheduleData.activeMatrix = Array(matrixRaw.size) { i ->
+                            matrixRaw[i].jsonArray.map { it.jsonPrimitive.content }.toTypedArray()
+                        }
+                    }
+                }
+
+                // 3. Apply remote sector assignments
+                obj["sectorsA"]?.jsonArray?.let { arr ->
+                    PacScheduleData.SECTORS_BLOQUE_A.clear()
+                    PacScheduleData.SECTORS_BLOQUE_A.addAll(arr.map { it.jsonPrimitive.content })
+                }
+                obj["sectorsB"]?.jsonArray?.let { arr ->
+                    PacScheduleData.SECTORS_BLOQUE_B.clear()
+                    PacScheduleData.SECTORS_BLOQUE_B.addAll(arr.map { it.jsonPrimitive.content })
+                }
+                obj["sectorsC"]?.jsonArray?.let { arr ->
+                    PacScheduleData.SECTORS_BLOQUE_C.clear()
+                    PacScheduleData.SECTORS_BLOQUE_C.addAll(arr.map { it.jsonPrimitive.content })
+                }
+                obj["sectorsD"]?.jsonArray?.let { arr ->
+                    PacScheduleData.SECTORS_BLOQUE_D.clear()
+                    PacScheduleData.SECTORS_BLOQUE_D.addAll(arr.map { it.jsonPrimitive.content })
+                }
+
+                PacScheduleData.scheduleVersion = remoteUpdatedAt
+                syncPrefs.edit().putLong("last_applied_pac_updated_at", remoteUpdatedAt).apply()
+
+                PacSchedulePrefs.saveSchedule(context)
+                _pacScheduleUpdatedFlow.tryEmit(remoteUpdatedAt)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error applying remote PAC schedule JSON", e)
+        }
     }
 
     fun stopRealtimeSync() {
