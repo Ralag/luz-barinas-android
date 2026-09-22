@@ -62,6 +62,15 @@ android {
   }
 }
 
+androidComponents {
+    onVariants { variant ->
+        val version = android.defaultConfig.versionName
+        variant.outputs.forEach { output ->
+            output.outputFileName.set("PAC-BARINAS-v\${version}-\${variant.name}.apk")
+        }
+    }
+}
+
 // Configure the Secrets Gradle Plugin to use .env and .env.example files
 // to match the convention used in Web projects.
 secrets {
