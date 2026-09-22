@@ -5,8 +5,8 @@ import android.content.Context
 data class PacAlertSettings(
     val advanceMinutes: Int = 10,
     val isNotificationEnabled: Boolean = true,
-    val isAlarmEnabled: Boolean = false,
-    val isRestoreAlarmEnabled: Boolean = false,
+    val isAlarmEnabled: Boolean = true,
+    val isRestoreAlarmEnabled: Boolean = true,
     val isVibrationEnabled: Boolean = true
 )
 
@@ -23,8 +23,8 @@ object PacAlertPrefs {
         return PacAlertSettings(
             advanceMinutes = prefs.getInt(KEY_ADVANCE_MINUTES, 10),
             isNotificationEnabled = prefs.getBoolean(KEY_NOTIF_ENABLED, true),
-            isAlarmEnabled = prefs.getBoolean(KEY_ALARM_ENABLED, false),
-            isRestoreAlarmEnabled = prefs.getBoolean(KEY_RESTORE_ALARM_ENABLED, false),
+            isAlarmEnabled = prefs.getBoolean(KEY_ALARM_ENABLED, true),
+            isRestoreAlarmEnabled = prefs.getBoolean(KEY_RESTORE_ALARM_ENABLED, true),
             isVibrationEnabled = prefs.getBoolean(KEY_VIBRATION_ENABLED, true)
         )
     }

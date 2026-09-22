@@ -100,6 +100,8 @@ class CloudSyncRepository(
 
     private val _updateInfoFlow = MutableStateFlow<com.example.ui.viewmodel.AppUpdateInfo?>(null)
     val updateInfoFlow: StateFlow<com.example.ui.viewmodel.AppUpdateInfo?> = _updateInfoFlow.asStateFlow()
+    private val _donationUrlFlow = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+    val donationUrlFlow = _donationUrlFlow.asStateFlow()
 
     private val _pacScheduleUpdatedFlow = MutableSharedFlow<Long>(extraBufferCapacity = 1)
     val pacScheduleUpdatedFlow: SharedFlow<Long> = _pacScheduleUpdatedFlow.asSharedFlow()
@@ -194,6 +196,9 @@ class CloudSyncRepository(
                 } else {
                     _broadcastNoticeFlow.value = null
                 }
+            }
+            "donations_url" -> {
+                _donationUrlFlow.value = obj["url"]?.jsonPrimitive?.content
             }
             "version" -> {
                 val versionCode = obj["versionCode"]?.jsonPrimitive?.intOrNull ?: 1

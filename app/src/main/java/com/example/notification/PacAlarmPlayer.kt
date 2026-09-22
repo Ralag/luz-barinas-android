@@ -10,14 +10,19 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.Log
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
 object PacAlarmPlayer {
     private const val TAG = "PacAlarmPlayer"
     private var ringtone: Ringtone? = null
     private var vibrator: Vibrator? = null
-    private var isPlaying = false
+    
+    private val _isPlayingFlow = MutableStateFlow(false)
+    val isPlayingFlow = _isPlayingFlow.asStateFlow()
 
     fun startAlarm(context: Context, vibrate: Boolean = true) {
-        if (isPlaying) return
+        if (_isPlayingFlow.value) return
         try {
             val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                 ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
@@ -52,7 +57,7 @@ object PacAlarmPlayer {
                 }
             }
 
-            isPlaying = true
+            _isPlayingFlow.value = true
             Log.i(TAG, "PAC Alarm started successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start alarm: ${e.message}", e)
@@ -65,12 +70,12 @@ object PacAlarmPlayer {
             ringtone = null
             vibrator?.cancel()
             vibrator = null
-            isPlaying = false
+            _isPlayingFlow.value = false
             Log.i(TAG, "PAC Alarm stopped")
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping alarm: ${e.message}", e)
         }
     }
 
-    fun isAlarmActive(): Boolean = isPlaying
+    fun isAlarmActive(): Boolean = _isPlayingFlow.value
 }

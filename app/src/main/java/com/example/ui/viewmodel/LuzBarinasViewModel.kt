@@ -49,7 +49,8 @@ data class LuzBarinasUiState(
     val sectorsC: List<String> = PacScheduleData.SECTORS_BLOQUE_C.toList(),
     val sectorsD: List<String> = PacScheduleData.SECTORS_BLOQUE_D.toList(),
     val activeBroadcastNotice: BroadcastNotice? = null,
-    val updateAvailable: AppUpdateInfo? = null
+    val updateAvailable: AppUpdateInfo? = null,
+    val donationUrl: String? = null
 )
 
 data class AppUpdateInfo(

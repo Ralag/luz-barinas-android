@@ -18,6 +18,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+
+import com.example.notification.PacAlarmPlayer
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -203,23 +207,44 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         viewModel.setTab(0)
     }
 
+    val isAlarmActive by PacAlarmPlayer.isPlayingFlow.collectAsStateWithLifecycle(initialValue = false)
+    var showSettingsDialog by remember { mutableStateOf(false) }
+
+    com.example.ui.components.SystemSettingsDialog(
+        isOpen = showSettingsDialog,
+        onDismiss = { showSettingsDialog = false },
+        onRestartOnboarding = { viewModel.setOnboardingOpen(true) },
+        onCheckUpdate = { forceShowUpdateDialog = true },
+        donationUrl = uiState.donationUrl
+    )
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            if (isAlarmActive) {
+                androidx.compose.material3.ExtendedFloatingActionButton(
+                    onClick = { PacAlarmPlayer.stopAlarm(context) },
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    icon = { Icon(Icons.Default.Close, "Apagar") },
+                    text = { Text("APAGAR ALARMA") }
+                )
+            }
+        },
         topBar = {
             TopAppBar(
                 title = {
                     Column(
-                        modifier = Modifier
-                            .padding(vertical = 4.dp)
-                            .clickable { forceShowUpdateDialog = true }
+                        modifier = Modifier.padding(vertical = 4.dp)
                     ) {
                         Text(
                             text = "⚡ PAC Barinas",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.primary,
+                            letterSpacing = (-0.5).sp
                         )
                         Text(
                             text = "Control Eléctrico Oficial • En vivo",
@@ -257,13 +282,26 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
 
                     // Location / Address Selector
                     IconButton(
-                        onClick = { viewModel.setOnboardingOpen(true) },
+                        onClick = { showAddressDialog = true },
                         modifier = Modifier.testTag("action_select_location")
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.LocationOn,
                             contentDescription = "Configurar Ubicación y Bloque",
                             tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // System Settings (Ruedita)
+                    IconButton(
+                        onClick = { showSettingsDialog = true },
+                        modifier = Modifier.testTag("action_system_settings")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Configuración del Sistema",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
                     }
