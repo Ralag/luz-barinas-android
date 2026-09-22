@@ -146,6 +146,12 @@ class CloudSyncRepository(
                 for (config in configs) {
                     processConfig(config.config_key, config.config_value.jsonObject)
                 }
+
+                // Check GitHub Releases for OTA Updates
+                val updateInfo = com.example.utils.AppUpdater.checkForUpdates()
+                if (updateInfo != null) {
+                    _updateInfoFlow.value = updateInfo
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to start Supabase realtime sync", e)
             }

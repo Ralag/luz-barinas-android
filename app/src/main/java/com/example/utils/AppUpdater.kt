@@ -18,6 +18,72 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 object AppUpdater {
+
+    suspend fun checkForUpdates(): com.example.ui.viewmodel.AppUpdateInfo? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val apiUrl = URL("https://api.github.com/repos/Ralag/luz-barinas-android/releases/latest")
+                val connection = apiUrl.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
+                
+                if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                    return@withContext null
+                }
+                
+                val responseStr = connection.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(responseStr)
+                
+                val tagName = json.getString("tag_name")
+                val body = json.optString("body", "Nueva actualización disponible.")
+                val htmlUrl = json.getString("html_url")
+                
+                val remoteVersionName = tagName.replace("v", "", ignoreCase = true).trim()
+                val remoteParts = remoteVersionName.split(".").map { it.toIntOrNull() ?: 0 }
+                
+                val currentVersionName = com.example.BuildConfig.VERSION_NAME.replace("v", "", ignoreCase = true).trim()
+                val currentParts = currentVersionName.split(".").map { it.toIntOrNull() ?: 0 }
+                
+                var isNewer = false
+                for (i in 0 until maxOf(remoteParts.size, currentParts.size)) {
+                    val r = remoteParts.getOrElse(i) { 0 }
+                    val c = currentParts.getOrElse(i) { 0 }
+                    if (r > c) {
+                        isNewer = true
+                        break
+                    } else if (r < c) {
+                        break
+                    }
+                }
+                
+                if (isNewer) {
+                    var apkUrl = htmlUrl
+                    val assets = json.optJSONArray("assets")
+                    if (assets != null) {
+                        for (i in 0 until assets.length()) {
+                            val asset = assets.getJSONObject(i)
+                            if (asset.getString("name").endsWith(".apk")) {
+                                apkUrl = asset.getString("browser_download_url")
+                                break
+                            }
+                        }
+                    }
+                    
+                    return@withContext com.example.ui.viewmodel.AppUpdateInfo(
+                        versionCode = com.example.BuildConfig.VERSION_CODE + 1,
+                        versionName = remoteVersionName,
+                        releaseNotes = body,
+                        downloadUrl = apkUrl,
+                        isMandatory = body.contains("[MANDATORY]", ignoreCase = true)
+                    )
+                }
+                null
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+    }
     
     suspend fun downloadAndInstallLatestRelease(context: Context) {
         withContext(Dispatchers.IO) {
@@ -72,8 +138,16 @@ object AppUpdater {
                     setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, apkName)
                 }
                 
-                // Remove old file if exists
                 val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), apkName)
+                if (file.exists() && file.length() > 5000000) { // If it's larger than 5MB, assume it's fully downloaded
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Actualización ya descargada. Iniciando instalación...", Toast.LENGTH_SHORT).show()
+                    }
+                    installApk(context, file)
+                    return@withContext
+                }
+                
+                // If partial or doesn't exist, delete and re-download
                 if (file.exists()) {
                     file.delete()
                 }
