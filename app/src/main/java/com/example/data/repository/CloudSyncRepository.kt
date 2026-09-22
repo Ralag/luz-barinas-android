@@ -223,9 +223,7 @@ class CloudSyncRepository(
                 val channel = supabase.realtime.channel("public-sectors-$sectorId")
                 channel.postgresChangeFlow<PostgresAction>(schema = "public") {
                     table = "sectors"
-                    filter {
-                        eq("id", sectorId)
-                    }
+                    filter("id", io.github.jan.supabase.postgrest.query.filter.FilterOperator.EQ, sectorId)
                 }.onEach { action ->
                     if (action is PostgresAction.Update) {
                         val updated = jsonFormat.decodeFromJsonElement<SupabaseSector>(action.record)
