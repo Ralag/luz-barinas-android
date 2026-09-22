@@ -135,8 +135,9 @@ class EnergyRepository(
             sectorDao.insertOrUpdateSectors(initialSectors)
         }
 
-        // Seed sectors and active PAC schedule to Firebase Firestore if empty
-        cloudSync.seedSectorsIfEmpty()
+        // Client-side Firebase seeding removed to prevent massive write quota exhaustion.
+        // Seeding should only be performed via the admin python script (seed_firestore.py).
+        // cloudSync.seedSectorsIfEmpty()
 
         // Seed realistic historical records for modular arithmetic calculations
         if (outageDao.getCount() == 0) {

@@ -7,6 +7,7 @@ plugins {
   alias(libs.plugins.roborazzi)
   alias(libs.plugins.secrets)
   alias(libs.plugins.google.services)
+  alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -108,10 +109,15 @@ dependencies {
   implementation(libs.androidx.room.ktx)
   implementation(libs.androidx.room.runtime)
   implementation(libs.converter.moshi)
-  // Firebase Firestore & Analytics
-  implementation(libs.firebase.firestore)
-  implementation(libs.firebase.analytics)
+  // Firebase Auth (if used), FCM etc can stay, but Firestore is removed
   implementation("com.google.firebase:firebase-messaging")
+  
+  // Supabase
+  implementation(libs.supabase.postgrest)
+  implementation(libs.supabase.realtime)
+  implementation(libs.ktor.client.android)
+  implementation(libs.ktor.client.core)
+  implementation(libs.kotlinx.serialization.json)
 
   // Uncomment ALL FOUR of the following dependencies together to use Firebase Auth and Google
   // Sign-In via Credential Manager:

@@ -112,6 +112,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
                 // Refresh prediction whenever sectors change
                 _uiState.value.selectedSector?.let { sector ->
                     refreshPrediction(sector.id)
+                    repository.cloudSync.listenToSector(sector.id)
                 }
             }
         }
@@ -161,6 +162,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             .apply()
         _uiState.update { it.copy(selectedSector = sector, userAddress = sector.name) }
         refreshPrediction(sector.id)
+        repository.cloudSync.listenToSector(sector.id)
     }
 
     fun selectSectorByName(name: String) {
@@ -429,7 +431,10 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             )
         }
 
-        matchingSector?.let { refreshPrediction(it.id) }
+        matchingSector?.let { 
+            refreshPrediction(it.id) 
+            repository.cloudSync.listenToSector(it.id)
+        }
     }
 
     fun publishScheduleNotification() {
