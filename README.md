@@ -29,10 +29,5 @@ El proyecto fue desarrollado aplicando las mejores prácticas de ingeniería de 
 - Android 7.0 (API 24) o superior.
 - Conexión a internet (para sincronización de cortes y telemetría en tiempo real).
 
-## 📄 Licencia
-
-Este proyecto está disponible bajo la [Licencia MIT](LICENSE). 
-Puedes clonar, bifurcar y colaborar con el proyecto de forma libre y gratuita.
-
 ---
 *Hecho por y para la comunidad de Barinas.*
