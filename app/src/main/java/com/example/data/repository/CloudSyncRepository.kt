@@ -41,6 +41,7 @@ import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.jsonArray
 
 @Serializable
 data class SupabaseAppConfig(
@@ -126,7 +127,9 @@ class CloudSyncRepository(
                 supabase.realtime.connect()
                 val channel = supabase.realtime.channel("public-app_config")
                 
-                appConfigJob = channel.postgresChangeFlow<PostgresAction>("public", "app_config")
+                appConfigJob = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
+                    table = "app_config"
+                }
                     .onEach { action ->
                         when (action) {
                             is PostgresAction.Insert -> handleConfigChange(action.record)
@@ -218,8 +221,11 @@ class CloudSyncRepository(
 
                 // Realtime subscription
                 val channel = supabase.realtime.channel("public-sectors-$sectorId")
-                channel.postgresChangeFlow<PostgresAction>("public", "sectors") {
-                    eq("id", sectorId)
+                channel.postgresChangeFlow<PostgresAction>(schema = "public") {
+                    table = "sectors"
+                    filter {
+                        eq("id", sectorId)
+                    }
                 }.onEach { action ->
                     if (action is PostgresAction.Update) {
                         val updated = jsonFormat.decodeFromJsonElement<SupabaseSector>(action.record)
