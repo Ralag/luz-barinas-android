@@ -158,6 +158,7 @@ fun PacScheduleView(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
                 }
             }
         }
@@ -596,6 +597,7 @@ fun PacOfficialMatrixCard(
     todayIdx: Int = -1,
     currentSlotIdx: Int = -1,
     userBlock: String? = null,
+    selectedDayIdx: Int = -1,
     onDayHeaderClicked: ((Int) -> Unit)? = null
 ) {
     Card(
@@ -656,13 +658,13 @@ fun PacOfficialMatrixCard(
 
                     PacScheduleData.DAYS.forEachIndexed { dayIdx, day ->
                         val isToday = highlightToday && dayIdx == todayIdx
-                        val isSelected = highlightToday && dayIdx == currentSlotIdx // Just a hack, wait.
+                        val isSelected = dayIdx == selectedDayIdx
                         Box(
                             modifier = Modifier
                                 .width(46.dp)
                                 .clickable { onDayHeaderClicked?.invoke(dayIdx) }
                                 .then(
-                                    if (isToday) Modifier.background(
+                                    if (isSelected) Modifier.background(
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                                         RoundedCornerShape(4.dp)
                                     ) else Modifier
@@ -673,15 +675,15 @@ fun PacOfficialMatrixCard(
                                 Text(
                                     text = day.shortName,
                                     fontSize = 11.sp,
-                                    fontWeight = if (isToday) FontWeight.ExtraBold else FontWeight.Bold,
-                                    color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                 )
                                 if (isToday) {
                                     Text(
                                         text = "HOY",
                                         fontSize = 8.sp,
                                         fontWeight = FontWeight.Black,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -723,33 +725,45 @@ fun PacOfficialMatrixCard(
                         // Day Cells (A, B, C, D)
                         for (dayIdx in 0..6) {
                             val block = matrix.getOrNull(slotIdx)?.getOrNull(dayIdx) ?: "A"
-                            val blockColor = getBlockColor(block)
+                            val isSelectedDay = dayIdx == selectedDayIdx
+                            val blockColor = if (isSelectedDay) getBlockColor(block) else getBlockColor(block).copy(alpha = 0.5f)
                             val isCellNow = highlightToday && dayIdx == todayIdx && slotIdx == currentSlotIdx
                             val isUserTarget = userBlock != null && block.equals(userBlock, ignoreCase = true)
 
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = blockColor,
-                                border = if (isCellNow) {
-                                    androidx.compose.foundation.BorderStroke(2.dp, Color.White)
-                                } else if (isUserTarget && highlightToday && dayIdx == todayIdx) {
-                                    androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.onSurface)
-                                } else null,
-                                shadowElevation = if (isCellNow) 3.dp else 0.dp,
+                            Box(
                                 modifier = Modifier
                                     .padding(horizontal = 2.dp)
                                     .size(width = 42.dp, height = 36.dp)
+                                    .then(
+                                        if (isSelectedDay && !isCellNow) Modifier.background(
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                            RoundedCornerShape(8.dp)
+                                        ) else Modifier
+                                    ),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = blockColor,
+                                    border = if (isCellNow) {
+                                        androidx.compose.foundation.BorderStroke(2.dp, Color.White)
+                                    } else if (isUserTarget && highlightToday && dayIdx == todayIdx) {
+                                        androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.onSurface)
+                                    } else null,
+                                    shadowElevation = if (isCellNow) 3.dp else 0.dp,
+                                    modifier = Modifier.fillMaxSize()
                                 ) {
-                                    Text(
-                                        text = block,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = Color.White
-                                    )
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = block,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = if (isSelectedDay) Color.White else Color.White.copy(alpha = 0.7f)
+                                        )
+                                    }
                                 }
                             }
                         }

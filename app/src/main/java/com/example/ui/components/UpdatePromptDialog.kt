@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.ui.viewmodel.AppUpdateInfo
+import kotlinx.coroutines.launch
 
 @Composable
 fun UpdatePromptDialog(
@@ -105,13 +106,20 @@ fun UpdatePromptDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                val scope = rememberCoroutineScope()
                 Button(
                     onClick = {
                         try {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(updateInfo.downloadUrl))
-                            context.startActivity(intent)
+                            // If they already have an update URL but want a native download
+                            scope.launch {
+                                com.example.utils.AppUpdater.downloadAndInstallLatestRelease(context)
+                                onDismiss()
+                            }
                         } catch (e: Exception) {
                             e.printStackTrace()
+                            // Fallback
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(updateInfo.downloadUrl))
+                            context.startActivity(intent)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
