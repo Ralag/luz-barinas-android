@@ -61,6 +61,7 @@ import com.example.notification.NotificationHelper
 import com.example.ui.components.AdaptiveBannerAd
 import com.example.ui.components.BarinasAddressDialog
 import com.example.ui.components.PacScheduleView
+import com.example.ui.components.UpdatePromptDialog
 import com.example.ui.screens.DashboardScreen
 import com.example.ui.screens.MapScreen
 import com.example.ui.theme.MyApplicationTheme
@@ -146,20 +147,45 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         onDismiss = { isSettingsOpen = false }
     )
 
+    // Permissions Onboarding Flow
+    var showAddressDialog by remember { mutableStateOf(false) }
+
+    com.example.ui.components.OnboardingFlowDialog(
+        isOpen = uiState.isOnboardingOpen && !showAddressDialog,
+        onComplete = {
+            showAddressDialog = true
+        }
+    )
+
     // Onboarding / Location Selector Dialog (Barinas Locations Catalog)
     BarinasAddressDialog(
-        isOpen = uiState.isOnboardingOpen,
+        isOpen = (uiState.isOnboardingOpen && showAddressDialog) || (uiState.userAddress == null && !uiState.isOnboardingOpen),
         currentAddress = uiState.userAddress,
         onLocationSelected = { location ->
             viewModel.setUserLocation(location)
+            showAddressDialog = false
         },
         onDismiss = {
             viewModel.setOnboardingOpen(false)
+            showAddressDialog = false
         },
         onRegisterNewCommunity = { name, municipio, parroquia, block, circuit ->
             viewModel.registerCommunityLocation(name, municipio, parroquia, block, circuit)
+            showAddressDialog = false
         }
     )
+
+    // App Update OTA Dialog
+    var dismissedUpdateVersion by remember { mutableStateOf<Int?>(null) }
+    val update = uiState.updateAvailable
+    if (update != null && dismissedUpdateVersion != update.versionCode) {
+        UpdatePromptDialog(
+            updateInfo = update,
+            onDismiss = {
+                dismissedUpdateVersion = update.versionCode
+            }
+        )
+    }
 
     // Back navigation
     BackHandler(enabled = uiState.currentTab != 0) {
@@ -253,7 +279,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                 AdaptiveBannerAd()
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 3.dp,
+                    tonalElevation = 8.dp,
                     modifier = Modifier.testTag("main_bottom_nav")
                 ) {
                     // Tab 0: Hoy (Estado actual, próximo corte y reporte rápido)

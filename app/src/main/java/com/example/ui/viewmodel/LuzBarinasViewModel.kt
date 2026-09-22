@@ -48,7 +48,16 @@ data class LuzBarinasUiState(
     val sectorsB: List<String> = PacScheduleData.SECTORS_BLOQUE_B.toList(),
     val sectorsC: List<String> = PacScheduleData.SECTORS_BLOQUE_C.toList(),
     val sectorsD: List<String> = PacScheduleData.SECTORS_BLOQUE_D.toList(),
-    val activeBroadcastNotice: BroadcastNotice? = null
+    val activeBroadcastNotice: BroadcastNotice? = null,
+    val updateAvailable: AppUpdateInfo? = null
+)
+
+data class AppUpdateInfo(
+    val versionCode: Int,
+    val versionName: String,
+    val releaseNotes: String,
+    val downloadUrl: String,
+    val isMandatory: Boolean
 )
 
 class LuzBarinasViewModel(application: Application) : AndroidViewModel(application) {
@@ -133,6 +142,13 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             repository.broadcastNoticeFlow.collectLatest { notice ->
                 _uiState.update { it.copy(activeBroadcastNotice = notice) }
+            }
+        }
+
+        // Collect OTA update info
+        viewModelScope.launch {
+            repository.updateInfoFlow.collectLatest { updateInfo ->
+                _uiState.update { it.copy(updateAvailable = updateInfo) }
             }
         }
     }

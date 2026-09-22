@@ -19,6 +19,9 @@ android {
     targetSdk = 36
     versionCode = 1
     versionName = "1.0"
+    
+    // AdMob Test ID by default (User will replace it later)
+    manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-3940256099942544~3347511713"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -98,6 +101,7 @@ dependencies {
   // Firebase Firestore & Analytics
   implementation(libs.firebase.firestore)
   implementation(libs.firebase.analytics)
+  implementation("com.google.firebase:firebase-messaging")
 
   // Uncomment ALL FOUR of the following dependencies together to use Firebase Auth and Google
   // Sign-In via Credential Manager:

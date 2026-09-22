@@ -45,6 +45,9 @@ class CloudSyncRepository(
     private val _broadcastNoticeFlow = MutableStateFlow<BroadcastNotice?>(null)
     val broadcastNoticeFlow: StateFlow<BroadcastNotice?> = _broadcastNoticeFlow.asStateFlow()
 
+    private val _updateInfoFlow = MutableStateFlow<com.example.ui.viewmodel.AppUpdateInfo?>(null)
+    val updateInfoFlow: StateFlow<com.example.ui.viewmodel.AppUpdateInfo?> = _updateInfoFlow.asStateFlow()
+
     private val _pacScheduleUpdatedFlow = MutableSharedFlow<Long>(extraBufferCapacity = 1)
     val pacScheduleUpdatedFlow: SharedFlow<Long> = _pacScheduleUpdatedFlow.asSharedFlow()
 
@@ -127,28 +130,26 @@ class CloudSyncRepository(
             Log.w(TAG, "Failed to attach sectors listener", e)
         }
 
-        // 3. Real-time listener for official broadcast notices published by admin
+        // 3. Real-time listener for emergency broadcast notices
         try {
             broadcastListener = db.collection("app_config")
                 .document("broadcast_notice")
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
-                        Log.w(TAG, "Error listening to broadcast notice", error)
+                        Log.w(TAG, "Error listening to broadcast updates", error)
                         return@addSnapshotListener
                     }
                     if (snapshot != null && snapshot.exists()) {
-                        val data = snapshot.data ?: return@addSnapshotListener
-                        val active = data["active"] as? Boolean ?: false
+                        val active = snapshot.getBoolean("active") ?: false
                         if (active) {
-                            val title = data["title"] as? String ?: "Aviso Oficial"
-                            val message = data["message"] as? String ?: ""
-                            val level = data["level"] as? String ?: "INFO"
-                            val timestamp = (data["timestamp"] as? Number)?.toLong() ?: System.currentTimeMillis()
+                            val title = snapshot.getString("title") ?: "Aviso Oficial"
+                            val message = snapshot.getString("message") ?: ""
+                            val level = snapshot.getString("level") ?: "INFO"
+                            val timestamp = snapshot.getLong("timestamp") ?: System.currentTimeMillis()
 
-                            val notice = BroadcastNotice(title, message, level, timestamp, true)
+                            val notice = BroadcastNotice(title, message, level, timestamp, active)
                             _broadcastNoticeFlow.value = notice
 
-                            // Alert citizen with high priority system notification if notice is new
                             val lastSeen = syncPrefs.getLong("last_seen_broadcast_timestamp", 0L)
                             if (timestamp > lastSeen) {
                                 syncPrefs.edit().putLong("last_seen_broadcast_timestamp", timestamp).apply()
@@ -163,6 +164,32 @@ class CloudSyncRepository(
                 }
         } catch (e: Exception) {
             Log.w(TAG, "Failed to attach broadcast notice listener", e)
+        }
+
+        // 4. Real-time listener for OTA updates
+        try {
+            db.collection("app_config")
+                .document("version")
+                .addSnapshotListener { snapshot, error ->
+                    if (error == null && snapshot != null && snapshot.exists()) {
+                        val versionCode = snapshot.getLong("versionCode")?.toInt() ?: 1
+                        val currentVersionCode = com.example.BuildConfig.VERSION_CODE
+                        
+                        if (versionCode > currentVersionCode) {
+                            _updateInfoFlow.value = com.example.ui.viewmodel.AppUpdateInfo(
+                                versionCode = versionCode,
+                                versionName = snapshot.getString("versionName") ?: "1.0",
+                                releaseNotes = snapshot.getString("releaseNotes") ?: "Nueva actualización disponible.",
+                                downloadUrl = snapshot.getString("apkDownloadUrl") ?: "",
+                                isMandatory = snapshot.getBoolean("isMandatory") ?: false
+                            )
+                        } else {
+                            _updateInfoFlow.value = null
+                        }
+                    }
+                }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to attach version listener", e)
         }
     }
 

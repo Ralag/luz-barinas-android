@@ -41,6 +41,9 @@ class EnergyRepository(
     val broadcastNoticeFlow: StateFlow<BroadcastNotice?>
         get() = cloudSync.broadcastNoticeFlow
 
+    val updateInfoFlow: StateFlow<com.example.ui.viewmodel.AppUpdateInfo?>
+        get() = cloudSync.updateInfoFlow
+
     val pacScheduleUpdatedFlow: SharedFlow<Long>
         get() = cloudSync.pacScheduleUpdatedFlow
 
