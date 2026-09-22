@@ -29,7 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material.icons.outlined.ViewWeek
 import androidx.compose.material3.Card
@@ -76,10 +75,10 @@ import java.util.TimeZone
 @Composable
 fun PacScheduleView(
     selectedSector: Sector?,
+    modifier: Modifier = Modifier,
     onSectorClicked: (String) -> Unit = {},
     pacMatrix: List<List<String>> = PacScheduleData.getMatrixSnapshot(),
-    pacSlots: List<PacSlot> = PacScheduleData.getSlotsSnapshot(),
-    modifier: Modifier = Modifier
+    pacSlots: List<PacSlot> = PacScheduleData.getSlotsSnapshot()
 ) {
     val cal = remember { Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")) }
     val todayIdx = remember { PacScheduleData.getDayIndex(cal.get(Calendar.DAY_OF_WEEK)) }
@@ -119,16 +118,16 @@ fun PacScheduleView(
         tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
-    val monthlyWeeks by produceState<List<PacWeekPlan>>(initialValue = emptyList(), key1 = selectedMonthName, key2 = selectedMonthDays, key3 = PacScheduleData.scheduleVersion) {
-        try {
+    val monthlyWeeks: List<PacWeekPlan> by produceState(initialValue = emptyList(), key1 = selectedMonthName, key2 = selectedMonthDays, key3 = PacScheduleData.scheduleVersion) {
+        value = try {
             val response = com.example.data.remote.ApiClient.api.getMonthlyWeeks(selectedMonthName, selectedMonthDays)
             if (response.isSuccessful) {
-                value = response.body()?.weeks ?: emptyList()
+                response.body()?.weeks ?: emptyList()
             } else {
-                value = emptyList()
+                emptyList()
             }
-        } catch (e: Exception) {
-            value = emptyList()
+        } catch (_: Exception) {
+            emptyList()
         }
     }
 
@@ -300,8 +299,7 @@ fun PacScheduleView(
                                 highlightToday = true,
                                 todayIdx = todayIdx,
                                 currentSlotIdx = currentSlotIdx,
-                                userBlock = userBlock,
-                                selectedSectorName = selectedSector?.name
+                                userBlock = userBlock
                             )
 
                             Column {
@@ -322,13 +320,14 @@ fun PacScheduleView(
                                         val isToday = index == todayIdx
 
                                         Surface(
+                                            onClick = { selectedDayIdx = index },
                                             shape = RoundedCornerShape(14.dp),
                                             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
                                             border = androidx.compose.foundation.BorderStroke(
                                                 1.dp,
                                                 if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                                             ),
-                                            modifier = Modifier.clickable { selectedDayIdx = index }
+                                            modifier = Modifier
                                         ) {
                                             Column(
                                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -533,13 +532,12 @@ fun PacScheduleView(
                                 val isCurrentWeek = (selectedMonthIdx == currentMonthIdx && week.weekNumber == currentWeekNumber)
                                 PacOfficialMatrixCard(
                                     title = week.dateRangeLabel,
-                                    matrix = week.matrix.map { it.toList() },
+                                    matrix = week.matrix,
                                     slots = pacSlots,
                                     highlightToday = isCurrentWeek,
                                     todayIdx = if (isCurrentWeek) todayIdx else -1,
                                     currentSlotIdx = if (isCurrentWeek) currentSlotIdx else -1,
-                                    userBlock = userBlock,
-                                    selectedSectorName = selectedSector?.name
+                                    userBlock = userBlock
                                 )
                             }
 
@@ -605,14 +603,13 @@ fun PacScheduleView(
 @Composable
 fun PacOfficialMatrixCard(
     title: String,
+    modifier: Modifier = Modifier,
     matrix: List<List<String>> = PacScheduleData.getMatrixSnapshot(),
     slots: List<PacSlot> = PacScheduleData.getSlotsSnapshot(),
     highlightToday: Boolean = false,
     todayIdx: Int = -1,
     currentSlotIdx: Int = -1,
-    userBlock: String? = null,
-    selectedSectorName: String? = null,
-    modifier: Modifier = Modifier
+    userBlock: String? = null
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -810,8 +807,8 @@ fun PacOfficialMatrixCard(
  */
 @Composable
 fun PacBlockSectorsGrid(
-    onSectorClicked: (String) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSectorClicked: (String) -> Unit = {}
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -858,9 +855,9 @@ fun BlockSectorsCard(
     blockName: String,
     headerColor: Color,
     sectors: List<String>,
+    modifier: Modifier = Modifier,
     onSectorClicked: (String) -> Unit = {},
-    note: String? = null,
-    modifier: Modifier = Modifier
+    note: String? = null
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),

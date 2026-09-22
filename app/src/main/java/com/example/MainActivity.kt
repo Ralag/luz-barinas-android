@@ -298,7 +298,8 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         )
                     )
 
-                    // Tab 2: Mapa de Circuitos
+                    /*
+                    // Tab 2: Mapa de Circuitos (Deshabilitado temporalmente)
                     NavigationBarItem(
                         selected = uiState.currentTab == 2,
                         onClick = { viewModel.setTab(2) },
@@ -318,6 +319,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                             unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
+                    */
                 }
             }
         }

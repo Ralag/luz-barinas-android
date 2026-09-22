@@ -18,9 +18,9 @@ object PacAlarmScheduler {
     private const val REQUEST_CODE_RESTORE_ALERT = 5002
 
     fun scheduleNextAlarm(context: Context) {
-        val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val userBlock = prefs.getString("selected_sector_block", "A") ?: "A"
-        val userSectorName = prefs.getString("selected_sector_name", "Mi Sector") ?: "Mi Sector"
+        val prefs = context.getSharedPreferences("luz_barinas_user_prefs", Context.MODE_PRIVATE)
+        val userBlock = prefs.getString("saved_sector_block", "A") ?: "A"
+        val userSectorName = prefs.getString("saved_address", "Mi Sector") ?: "Mi Sector"
 
         val settings = PacAlertPrefs.getSettings(context)
         if (!settings.isNotificationEnabled && !settings.isAlarmEnabled && !settings.isRestoreAlarmEnabled) {

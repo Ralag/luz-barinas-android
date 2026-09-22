@@ -86,7 +86,7 @@ data class PacScheduleWindow(
 data class PacWeekPlan(
     val weekNumber: Int,
     val dateRangeLabel: String,
-    val matrix: Array<Array<String>>
+    val matrix: List<List<String>>
 )
 
 object PacScheduleData {

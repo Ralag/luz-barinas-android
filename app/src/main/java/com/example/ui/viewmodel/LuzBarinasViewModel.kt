@@ -141,6 +141,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         userPrefs.edit()
             .putString("saved_sector_id", sector.id)
             .putString("saved_address", sector.name)
+            .putString("saved_sector_block", sector.rotationBlock.uppercase().replace("BLOQUE", "").trim())
             .apply()
         _uiState.update { it.copy(selectedSector = sector, userAddress = sector.name) }
         refreshPrediction(sector.id)
