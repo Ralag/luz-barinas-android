@@ -29,9 +29,9 @@ fun getBannerAdUnitId(): String {
     return try {
         val field = com.example.BuildConfig::class.java.getField("ADMOB_BANNER_UNIT_ID")
         val id = field.get(null) as? String
-        if (!id.isNullOrBlank() && !id.contains("xxxx")) id else "ca-app-pub-3940256099942544/9214589741"
+        if (!id.isNullOrBlank() && !id.contains("xxxx")) id else "ca-app-pub-7639154379634043/8172800723"
     } catch (e: Exception) {
-        "ca-app-pub-3940256099942544/9214589741"
+        "ca-app-pub-7639154379634043/8172800723"
     }
 }
 

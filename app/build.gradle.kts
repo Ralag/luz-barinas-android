@@ -20,8 +20,8 @@ android {
     versionCode = 1
     versionName = "1.0"
     
-    // AdMob Test ID by default (User will replace it later)
-    manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-3940256099942544~3347511713"
+    // AdMob Production ID
+    manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-7639154379634043~2576948404"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
