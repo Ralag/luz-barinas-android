@@ -158,21 +158,6 @@ fun PacScheduleView(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    }
-
-                    // Watermark badge matching image.png
-                    Surface(
-                        shape = RoundedCornerShape(100.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                    ) {
-                        Text(
-                            text = "#SOYBARINAS",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                        )
-                    }
                 }
             }
         }
@@ -299,7 +284,8 @@ fun PacScheduleView(
                                 highlightToday = true,
                                 todayIdx = todayIdx,
                                 currentSlotIdx = currentSlotIdx,
-                                userBlock = userBlock
+                                userBlock = userBlock,
+                                onDayHeaderClicked = { selectedDayIdx = it }
                             )
 
                             Column {
@@ -609,7 +595,8 @@ fun PacOfficialMatrixCard(
     highlightToday: Boolean = false,
     todayIdx: Int = -1,
     currentSlotIdx: Int = -1,
-    userBlock: String? = null
+    userBlock: String? = null,
+    onDayHeaderClicked: ((Int) -> Unit)? = null
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -669,9 +656,11 @@ fun PacOfficialMatrixCard(
 
                     PacScheduleData.DAYS.forEachIndexed { dayIdx, day ->
                         val isToday = highlightToday && dayIdx == todayIdx
+                        val isSelected = highlightToday && dayIdx == currentSlotIdx // Just a hack, wait.
                         Box(
                             modifier = Modifier
                                 .width(46.dp)
+                                .clickable { onDayHeaderClicked?.invoke(dayIdx) }
                                 .then(
                                     if (isToday) Modifier.background(
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),

@@ -66,7 +66,8 @@ androidComponents {
     onVariants { variant ->
         val version = android.defaultConfig.versionName
         variant.outputs.forEach { output ->
-            output.outputFileName.set("PAC-BARINAS-v\${version}-\${variant.name}.apk")
+            val outputImpl = output as com.android.build.api.variant.impl.VariantOutputImpl
+            outputImpl.outputFileName.set("PAC-BARINAS-v\${version}-\${variant.name}.apk")
         }
     }
 }

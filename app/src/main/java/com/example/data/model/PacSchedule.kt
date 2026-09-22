@@ -83,6 +83,8 @@ data class PacScheduleWindow(
     val hoursUntil: Float
 )
 
+@androidx.annotation.Keep
+@com.squareup.moshi.JsonClass(generateAdapter = true)
 data class PacWeekPlan(
     val weekNumber: Int,
     val dateRangeLabel: String,

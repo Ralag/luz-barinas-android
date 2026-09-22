@@ -175,14 +175,24 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         }
     )
 
+    var forceShowUpdateDialog by remember { mutableStateOf(false) }
+
     // App Update OTA Dialog
     var dismissedUpdateVersion by remember { mutableStateOf<Int?>(null) }
     val update = uiState.updateAvailable
-    if (update != null && dismissedUpdateVersion != update.versionCode) {
+    if ((update != null && dismissedUpdateVersion != update.versionCode) || forceShowUpdateDialog) {
+        val displayUpdate = update ?: com.example.ui.viewmodel.AppUpdateInfo(
+            versionCode = com.example.BuildConfig.VERSION_CODE,
+            versionName = com.example.BuildConfig.VERSION_NAME,
+            releaseNotes = "Estás utilizando la versión actual.\nSi deseas forzar una actualización manual o verificar detalles técnicos, presiona Descargar e Instalar.",
+            downloadUrl = "https://github.com/Ralag/luz-barinas-android/releases",
+            isMandatory = false
+        )
         UpdatePromptDialog(
-            updateInfo = update,
+            updateInfo = displayUpdate,
             onDismiss = {
-                dismissedUpdateVersion = update.versionCode
+                dismissedUpdateVersion = displayUpdate.versionCode
+                forceShowUpdateDialog = false
             }
         )
     }
@@ -200,7 +210,9 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
             TopAppBar(
                 title = {
                     Column(
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        modifier = Modifier
+                            .padding(vertical = 4.dp)
+                            .clickable { forceShowUpdateDialog = true }
                     ) {
                         Text(
                             text = "⚡ PAC Barinas",

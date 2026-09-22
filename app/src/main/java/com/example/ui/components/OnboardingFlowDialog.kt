@@ -224,7 +224,10 @@ private fun BatteryStep(onNext: () -> Unit) {
                     val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
                     intent.data = Uri.parse("package:" + context.packageName)
                     context.startActivity(intent)
-                } catch (e: Exception) { e.printStackTrace() }
+                } catch (e: Exception) { 
+                    e.printStackTrace()
+                    android.widget.Toast.makeText(context, "No se pudo abrir automáticamente. Por favor, ve a Configuración de tu teléfono > Aplicaciones > PAC Barinas y en 'Batería' selecciona 'Sin restricciones' para que las alarmas funcionen.", android.widget.Toast.LENGTH_LONG).show()
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
