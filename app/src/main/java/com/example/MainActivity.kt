@@ -10,8 +10,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import android.content.Context
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -205,8 +203,8 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
     val update = uiState.updateAvailable
     if ((update != null && dismissedUpdateVersion != update.versionCode) || forceShowUpdateDialog) {
         val displayUpdate = update ?: com.example.ui.viewmodel.AppUpdateInfo(
-            versionCode = com.example.BuildConfig.VERSION_CODE,
-            versionName = com.example.BuildConfig.VERSION_NAME,
+            versionCode = BuildConfig.VERSION_CODE,
+            versionName = BuildConfig.VERSION_NAME,
             releaseNotes = "Estás utilizando la versión actual.\nSi deseas forzar una actualización manual o verificar detalles técnicos, presiona Descargar e Instalar.",
             downloadUrl = "https://github.com/Ralag/luz-barinas-android/releases",
             isMandatory = false

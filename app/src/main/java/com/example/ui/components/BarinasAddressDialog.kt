@@ -103,12 +103,12 @@ fun BarinasAddressDialog(
                 id = sector.id,
                 name = sector.name,
                 type = if (sector.isCommunity) "Sector Comunitario 🤝" else "Sector Oficial",
-                parroquia = sector.parroquia ?: "Barinas",
+                parroquia = "Barinas",
                 block = cleanBlock,
                 circuitCode = sector.circuitCode,
                 sectorEntityId = sector.id,
                 description = if (sector.isCommunity) "Incorporado por la comunidad" else "Sector de Barinas",
-                keywords = listOf(sector.name.lowercase(), sector.circuitCode.lowercase(), (sector.parroquia ?: "").lowercase()),
+                keywords = listOf(sector.name.lowercase(), sector.circuitCode.lowercase(), "barinas"),
                 municipio = "Barinas"
             )
         }

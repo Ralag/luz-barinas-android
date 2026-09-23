@@ -50,7 +50,8 @@ data class LuzBarinasUiState(
     val sectorsD: List<String> = PacScheduleData.SECTORS_BLOQUE_D.toList(),
     val activeBroadcastNotice: BroadcastNotice? = null,
     val updateAvailable: AppUpdateInfo? = null,
-    val donationUrl: String? = null
+    val donationUrl: String? = null,
+    val donationConfig: com.example.data.model.DonationConfig? = null
 )
 
 data class AppUpdateInfo(
@@ -151,6 +152,13 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             repository.updateInfoFlow.collectLatest { updateInfo ->
                 _uiState.update { it.copy(updateAvailable = updateInfo) }
+            }
+        }
+
+        // Collect donation config
+        viewModelScope.launch {
+            repository.cloudSync.donationConfigFlow.collectLatest { config ->
+                _uiState.update { it.copy(donationConfig = config) }
             }
         }
     }
