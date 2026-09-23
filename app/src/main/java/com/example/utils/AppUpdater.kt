@@ -135,10 +135,10 @@ object AppUpdater {
                     setTitle("Actualizando PAC Barinas")
                     setDescription("Descargando la última versión...")
                     setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, apkName)
+                    setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, apkName)
                 }
                 
-                val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), apkName)
+                val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), apkName)
                 if (file.exists() && file.length() > 5000000) { // If it's larger than 5MB, assume it's fully downloaded
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "Actualización ya descargada. Iniciando instalación...", Toast.LENGTH_SHORT).show()
@@ -198,7 +198,9 @@ object AppUpdater {
             context.startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(context, "Error al instalar. Busca el APK en tu carpeta de Descargas.", Toast.LENGTH_LONG).show()
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                Toast.makeText(context, "Error al instalar: " + e.message, Toast.LENGTH_LONG).show()
+            }
         }
     }
 }

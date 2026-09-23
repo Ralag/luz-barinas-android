@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <external-public-path name="downloads" path="Download/" />
+    <external-path name="downloads" path="Download/" />
+    <external-path name="external_root" path="." />
+    <external-files-path name="external_files" path="." />
 </paths>
