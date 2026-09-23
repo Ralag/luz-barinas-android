@@ -95,33 +95,32 @@ fun SystemSettingsDialog(
                 
                                 HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
 
-                // Donation Button
-                if (!donationUrl.isNullOrEmpty()) {
-                    val context = LocalContext.current
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onDismiss()
-                                try {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(donationUrl))
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {}
-                            }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.FavoriteBorder,
-                            contentDescription = null,
-                            tint = androidx.compose.ui.graphics.Color(0xFFE91E63),
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text("Donar al Proyecto", fontWeight = FontWeight.SemiBold)
-                            Text("Apóyanos para mantener los servidores", style = MaterialTheme.typography.bodySmall)
+                // Donation Button - always visible with fallback
+                val context = LocalContext.current
+                val effectiveDonationUrl = if (!donationUrl.isNullOrEmpty()) donationUrl else "https://paypal.me/pacbarinas"
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onDismiss()
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(effectiveDonationUrl))
+                                context.startActivity(intent)
+                            } catch (e: Exception) {}
                         }
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.FavoriteBorder,
+                        contentDescription = null,
+                        tint = androidx.compose.ui.graphics.Color(0xFFE91E63),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text("Donar al Proyecto", fontWeight = FontWeight.SemiBold, color = androidx.compose.ui.graphics.Color(0xFFE91E63))
+                        Text("Apóyanos para mantener los servidores", style = MaterialTheme.typography.bodySmall)
                     }
                 }
                 

@@ -28,8 +28,6 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.ui.components.PacSettingsDialog
@@ -86,6 +84,16 @@ class MainActivity : ComponentActivity() {
 
         // Initialize AdMob SDK
         com.example.ui.components.initializeAdMob(this)
+
+        // Preload interstitial and app open ads
+        com.example.ui.components.InterstitialAdManager.preload(this)
+        com.example.ui.components.AppOpenAdManager.loadAd(this)
+
+        // Show splash ad after a short delay to let it load
+        val activity = this
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            com.example.ui.components.AppOpenAdManager.showAdIfAvailable(activity)
+        }, 2000)
 
         // Start predictive notification worker (checks every 30 min for upcoming outages)
         com.example.worker.PredictiveNotificationWorker.enqueue(this)
@@ -164,7 +172,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
 
     // Onboarding / Location Selector Dialog (Barinas Locations Catalog)
     BarinasAddressDialog(
-        isOpen = (uiState.isOnboardingOpen && showAddressDialog) || (uiState.userAddress == null && !uiState.isOnboardingOpen),
+        isOpen = showAddressDialog || (uiState.userAddress == null && !uiState.isOnboardingOpen),
         currentAddress = uiState.userAddress,
         onLocationSelected = { location ->
             viewModel.setUserLocation(location)
@@ -306,18 +314,6 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         )
                     }
 
-                    // Test push notification simulation
-                    IconButton(
-                        onClick = { viewModel.triggerPushAlertSimulation() },
-                        modifier = Modifier.testTag("action_test_push")
-                    ) {
-                        Icon(
-                            Icons.Outlined.Notifications,
-                            contentDescription = "Simular Alerta de Corte",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
