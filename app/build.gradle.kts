@@ -18,8 +18,8 @@ android {
     applicationId = "com.aistudio.luzbarinas.wvykrp"
     minSdk = 24
     targetSdk = 36
-    versionCode = 3
-    versionName = "1.1.1"
+    versionCode = 4
+    versionName = "1.2"
     
     // AdMob Production ID
     manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-7639154379634043~2576948404"

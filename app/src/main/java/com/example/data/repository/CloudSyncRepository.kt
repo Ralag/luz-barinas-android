@@ -52,10 +52,15 @@ data class SupabaseAppConfig(
 @Serializable
 data class SupabaseSector(
     val id: String,
+    val name: String? = null,
+    val municipio: String? = null,
+    val parroquia: String? = null,
+    val circuitCode: String? = null,
     val status: String,
     val voltage: Double,
     val confirmedReportsCount: Int,
     val withoutPowerPercentage: Int,
+    val rotationBlock: String? = null,
     val lastUpdatedMillis: Long
 )
 
@@ -148,6 +153,41 @@ class CloudSyncRepository(
                 for (config in configs) {
                     processConfig(config.config_key, config.config_value.jsonObject)
                 }
+
+                // Sync all sectors (especially to get community sectors approved by admin)
+                val allSectors = supabase.postgrest["sectors"].select().decodeList<SupabaseSector>()
+                val sectorDao = database.sectorDao()
+                
+                val entitiesToUpdate = allSectors.map { s ->
+                    val existing = sectorDao.getSectorById(s.id)
+                    val isCom = s.id.startsWith("sec_com_") || s.id.startsWith("sec_community_")
+                    if (existing != null) {
+                        existing.copy(
+                            status = s.status,
+                            voltage = s.voltage.toFloat(),
+                            confirmedReportsCount = s.confirmedReportsCount,
+                            withoutPowerPercentage = s.withoutPowerPercentage,
+                            lastUpdatedMillis = s.lastUpdatedMillis,
+                            isCommunity = isCom
+                        )
+                    } else {
+                        // It's a new sector (likely community)
+                        com.example.data.local.entity.SectorEntity(
+                            id = s.id,
+                            name = s.name ?: s.id,
+                            circuitCode = s.circuitCode ?: "Circuito Urbano",
+                            status = s.status,
+                            voltage = s.voltage.toFloat(),
+                            confirmedReportsCount = s.confirmedReportsCount,
+                            withoutPowerPercentage = s.withoutPowerPercentage,
+                            lastUpdatedMillis = s.lastUpdatedMillis,
+                            rotationBlock = s.rotationBlock ?: "Bloque C",
+                            polygonPointsRaw = "8.625,-70.220;8.635,-70.208;8.620,-70.202;8.615,-70.215",
+                            isCommunity = isCom
+                        )
+                    }
+                }
+                sectorDao.insertOrUpdateSectors(entitiesToUpdate)
 
                 // Check GitHub Releases for OTA Updates
                 val updateInfo = com.example.utils.AppUpdater.checkForUpdates()
@@ -315,7 +355,7 @@ class CloudSyncRepository(
         circuit: String
     ): Boolean = withContext(Dispatchers.IO) {
         try {
-            val cleanId = "sec_community_" + name.lowercase().replace("[^a-z0-9]".toRegex(), "_")
+            val cleanId = "sec_com_" + name.lowercase().replace("[^a-z0-9]".toRegex(), "_")
             val loc = SupabaseCommunityLocation(
                 id = cleanId,
                 name = name.trim(),

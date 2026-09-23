@@ -378,7 +378,8 @@ class EnergyRepository(
                 withoutPowerPercentage = 0,
                 lastUpdatedMillis = System.currentTimeMillis(),
                 rotationBlock = block.trim(),
-                polygonPointsRaw = "8.625,-70.220;8.635,-70.208;8.620,-70.202;8.615,-70.215"
+                polygonPointsRaw = "8.625,-70.220;8.635,-70.208;8.620,-70.202;8.615,-70.215",
+                isCommunity = true
             )
             sectorDao.insertOrUpdateSector(newSector)
 

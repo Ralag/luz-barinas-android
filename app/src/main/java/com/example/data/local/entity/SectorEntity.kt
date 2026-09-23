@@ -16,7 +16,8 @@ data class SectorEntity(
     val withoutPowerPercentage: Int,
     val lastUpdatedMillis: Long,
     val rotationBlock: String,
-    val polygonPointsRaw: String // "lat,lng;lat,lng;..."
+    val polygonPointsRaw: String, // "lat,lng;lat,lng;..."
+    val isCommunity: Boolean = false
 ) {
     fun toDomain(): Sector {
         val parsedCoords = polygonPointsRaw.split(";").mapNotNull { pair ->
@@ -44,7 +45,8 @@ data class SectorEntity(
             withoutPowerPercentage = withoutPowerPercentage,
             lastUpdatedMillis = lastUpdatedMillis,
             rotationBlock = rotationBlock,
-            coordinates = parsedCoords
+            coordinates = parsedCoords,
+            isCommunity = isCommunity
         )
     }
 }

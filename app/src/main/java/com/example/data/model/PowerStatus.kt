@@ -19,7 +19,8 @@ data class Sector(
     val withoutPowerPercentage: Int,
     val lastUpdatedMillis: Long,
     val rotationBlock: String, // Bloque A, B, C, D
-    val coordinates: List<Pair<Double, Double>> // Polygons for the circuit in Barinas
+    val coordinates: List<Pair<Double, Double>>, // Polygons for the circuit in Barinas
+    val isCommunity: Boolean = false
 )
 
 data class OutageRecord(
