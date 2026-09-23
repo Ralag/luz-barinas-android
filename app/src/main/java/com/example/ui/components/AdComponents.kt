@@ -79,7 +79,7 @@ object InterstitialAdManager {
     private const val MIN_INTERVAL_MS = 5 * 60 * 1000L // 5 minutes between interstitials
 
     // Use test ID for development; replace with production ID later
-    private const val AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712" // Google test interstitial ID
+    private const val AD_UNIT_ID = "ca-app-pub-7639154379634043/1963218233"
 
     fun preload(context: Context) {
         val adRequest = AdRequest.Builder().build()
@@ -129,7 +129,7 @@ object AppOpenAdManager {
     private var hasShownOnce = false
 
     // Use test ID for development; replace with production ID later
-    private const val AD_UNIT_ID = "ca-app-pub-3940256099942544/9257395921" // Google test app open ID
+    private const val AD_UNIT_ID = "ca-app-pub-7639154379634043/8337054893"
 
     fun loadAd(context: Context) {
         if (appOpenAd != null || hasShownOnce) return
