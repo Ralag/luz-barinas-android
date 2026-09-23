@@ -43,6 +43,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -162,6 +163,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
 
     // Permissions Onboarding Flow
     var showAddressDialog by remember { mutableStateOf(false) }
+        var showDonationsDialog by remember { mutableStateOf(false) }
 
     com.example.ui.components.OnboardingFlowDialog(
         isOpen = uiState.isOnboardingOpen && !showAddressDialog,
@@ -301,6 +303,10 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         )
                     }
 
+                    TextButton(onClick = { showDonationsDialog = true }) {
+                        Text("Dona Aquí", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = androidx.compose.ui.graphics.Color(0xFFE91E63))
+                    }
+                    
                     // System Settings (Ruedita)
                     IconButton(
                         onClick = { showSettingsDialog = true },
@@ -448,3 +454,6 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         }
     }
 }
+
+
+

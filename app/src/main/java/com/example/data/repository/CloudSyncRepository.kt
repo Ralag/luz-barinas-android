@@ -105,8 +105,8 @@ class CloudSyncRepository(
 
     private val _updateInfoFlow = MutableStateFlow<com.example.ui.viewmodel.AppUpdateInfo?>(null)
     val updateInfoFlow: StateFlow<com.example.ui.viewmodel.AppUpdateInfo?> = _updateInfoFlow.asStateFlow()
-    private val _donationUrlFlow = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
-    val donationUrlFlow = _donationUrlFlow.asStateFlow()
+    private val _donationConfigFlow = kotlinx.coroutines.flow.MutableStateFlow<com.example.data.model.DonationConfig?>(null)
+    val donationConfigFlow = _donationConfigFlow.asStateFlow()
 
     private val _pacScheduleUpdatedFlow = MutableSharedFlow<Long>(extraBufferCapacity = 1)
     val pacScheduleUpdatedFlow: SharedFlow<Long> = _pacScheduleUpdatedFlow.asSharedFlow()
@@ -237,8 +237,14 @@ class CloudSyncRepository(
                     _broadcastNoticeFlow.value = null
                 }
             }
-            "donations_url" -> {
-                _donationUrlFlow.value = obj["url"]?.jsonPrimitive?.content
+            "donations_config" -> {
+                _donationConfigFlow.value = com.example.data.model.DonationConfig(
+                    paypal = obj["paypal"]?.jsonPrimitive?.content ?: "",
+                    binance = obj["binance"]?.jsonPrimitive?.content ?: "",
+                    pmBank = obj["pmBank"]?.jsonPrimitive?.content ?: "",
+                    pmPhone = obj["pmPhone"]?.jsonPrimitive?.content ?: "",
+                    pmId = obj["pmId"]?.jsonPrimitive?.content ?: ""
+                )
             }
             "version" -> {
                 val versionCode = obj["versionCode"]?.jsonPrimitive?.intOrNull ?: 1
@@ -470,3 +476,4 @@ class CloudSyncRepository(
         private const val TAG = "CloudSyncRepository"
     }
 }
+

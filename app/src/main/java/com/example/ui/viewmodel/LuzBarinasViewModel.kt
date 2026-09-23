@@ -480,3 +480,4 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     }
 }
 
+
