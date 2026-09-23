@@ -101,114 +101,229 @@
 
 ---
 
-## 3. REPOSITORIOS Y ESTRUCTURA DE ARCHIVOS
+## 3. REPOSITORIOS, UBICACIONES FÍSICAS Y ESTRUCTURA DE ARCHIVOS
+
+### ⚡ UBICACIÓN FÍSICA DEL PROYECTO (MUY IMPORTANTE)
+
+> **DATO CLAVE:** Tanto la app Android como la página web administrativa están en la MISMA carpeta padre `e:\LUZ BARINAS\`, pero son **dos repositorios Git separados** que apuntan a dos repos de GitHub diferentes.
+
+```
+e:\LUZ BARINAS\                          ← CARPETA RAÍZ (repo Git: luz-barinas-android)
+├── app\                                 ← APP ANDROID (código Kotlin/Compose)
+│   └── src\main\java\com\example\       ← Código fuente de la app
+├── admin-web\                           ← PÁGINA WEB ADMIN (repo Git SEPARADO: luz-barinas-admin-web)
+│   ├── .git\                            ← Su PROPIO repositorio Git independiente
+│   ├── app.js                           ← Lógica JavaScript de la web
+│   ├── index.html                       ← Interfaz HTML de la web
+│   └── api\                             ← APIs serverless de Vercel
+└── .git\                                ← Repositorio Git de la app Android
+```
+
+**Relación entre los repos:**
+- `e:\LUZ BARINAS\` es el repo Git del **Android App** → push a `github.com/Ralag/luz-barinas-android`
+- `e:\LUZ BARINAS\admin-web\` es un repo Git **independiente** dentro de la misma carpeta → push a `github.com/Ralag/luz-barinas-admin-web`
+- El `.gitignore` del repo Android tiene la línea `admin-web/` para excluir la subcarpeta web del tracking del repo Android
+- Cada uno se maneja con `git add/commit/push` POR SEPARADO desde su carpeta
 
 ### Repositorios GitHub
 
-| Repo | URL | Contenido |
-|---|---|---|
-| **Android App** | `https://github.com/Ralag/luz-barinas-android` | Código fuente de la app |
-| **Admin Web** | `https://github.com/Ralag/luz-barinas-admin-web` | Panel web administrativo |
+| Repo | URL | Carpeta Local | Contenido |
+|---|---|---|---|
+| **Android App** | `https://github.com/Ralag/luz-barinas-android` | `e:\LUZ BARINAS\` | App Android completa |
+| **Admin Web** | `https://github.com/Ralag/luz-barinas-admin-web` | `e:\LUZ BARINAS\admin-web\` | Panel web + APIs serverless |
 
 > ⚠️ **AMBOS REPOSITORIOS SON PÚBLICOS.** No incluir contraseñas, claves privadas ni credenciales de servicio en el código fuente.
 
-### Estructura del Proyecto Android
+### Cómo Hacer Push a Cada Repo
+
+```powershell
+# Push del repo ANDROID (desde la carpeta raíz):
+cd "e:\LUZ BARINAS"
+git add . ; git commit -m "mensaje" ; git push
+
+# Push del repo ADMIN WEB (desde la subcarpeta):
+cd "e:\LUZ BARINAS\admin-web"
+git add . ; git commit -m "mensaje" ; git push
+```
+
+### Estructura Completa del Proyecto
 
 ```
-e:\LUZ BARINAS\
+e:\LUZ BARINAS\                              ← RAÍZ DEL PROYECTO
+│
+│   ══════════════════════════════════════════
+│   ARCHIVOS DE CONFIGURACIÓN (RAÍZ - REPO ANDROID)
+│   ══════════════════════════════════════════
+├── build.gradle.kts                         # Build raíz: declara plugins sin aplicar
+├── settings.gradle.kts                      # rootProject.name = "Luz Barinas", include(":app")
+├── gradle.properties                        # Config Gradle (memoria, AndroidX, etc.)
+├── .env.example                             # Variables de entorno ejemplo (IDs test AdMob)
+├── .gitignore                               # Excluye: admin-web/, *.jks, *.py, *.apk, .env, etc.
+├── supabase_schema.sql                      # Schema SQL completo de Supabase (4 tablas)
+├── seed_supabase.py                         # Script Python para sembrar datos iniciales
+├── update_script.py                         # Script Python para parchear PacScheduleView.kt
+├── my-upload-key.jks                        # Keystore para firmar APK release
+├── metadata.json                            # Metadata del proyecto (nombre, desc)
+├── DOCUMENTACION_SISTEMA.md                 # ← ESTE ARCHIVO
+│
+│   ══════════════════════════════════════════
+│   APP ANDROID (módulo :app)
+│   Ubicación: e:\LUZ BARINAS\app\
+│   ══════════════════════════════════════════
 ├── app/
-│   ├── build.gradle.kts              # Config del módulo (dependencias, AdMob, signing)
-│   ├── proguard-rules.pro            # Reglas de ofuscación
+│   ├── build.gradle.kts                     # applicationId, SDK, AdMob, signing, dependencias
+│   ├── proguard-rules.pro                   # Reglas de ofuscación para release
 │   └── src/main/
-│       ├── AndroidManifest.xml        # Permisos, receptores, servicios
-│       ├── res/                       # Recursos (drawables, strings, layouts)
-│       └── java/com/example/
-│           ├── MainActivity.kt        # Punto de entrada, Scaffold principal
-│           ├── data/
-│           │   ├── PacSchedulePrefs.kt           # Persistencia del cronograma en SharedPrefs
+│       │
+│       ├── AndroidManifest.xml              # Permisos, Activity, Receivers, Services, Provider
+│       │
+│       ├── res/
+│       │   ├── drawable/                    # Iconos y gráficos
+│       │   ├── mipmap-*/                    # Iconos de lanzador (hdpi a xxxhdpi)
+│       │   ├── values/
+│       │   │   ├── strings.xml              # app_name = "PAC Barinas"
+│       │   │   ├── colors.xml               # Colores XML legacy
+│       │   │   └── themes.xml               # Tema base
+│       │   └── xml/
+│       │       ├── backup_rules.xml         # Reglas de backup Android
+│       │       ├── data_extraction_rules.xml # Reglas de extracción datos
+│       │       ├── file_paths.xml           # Paths FileProvider (OTA install)
+│       │       └── luz_barinas_widget_info.xml  # Definición del Widget Home Screen
+│       │
+│       └── java/com/example/               # ← TODO EL CÓDIGO KOTLIN AQUÍ
+│           │
+│           ├── MainActivity.kt              # Punto de entrada (465 líneas)
+│           │
+│           ├── data/                        # ═══ CAPA DE DATOS ═══
+│           │   ├── PacSchedulePrefs.kt      # Persistencia cronograma SharedPrefs (120 lín)
 │           │   ├── local/
-│           │   │   ├── AppDatabase.kt             # Room DB (versión 3)
+│           │   │   ├── AppDatabase.kt       # Room DB v3 singleton (54 lín)
 │           │   │   ├── dao/
-│           │   │   │   ├── SectorDao.kt           # CRUD sectores
-│           │   │   │   ├── OutageRecordDao.kt     # Historial de cortes
-│           │   │   │   └── PendingReportDao.kt    # Reportes pendientes
+│           │   │   │   ├── SectorDao.kt     # DAO sectores (37 lín)
+│           │   │   │   ├── OutageRecordDao.kt   # DAO historial (27 lín)
+│           │   │   │   └── PendingReportDao.kt  # DAO reportes (34 lín)
 │           │   │   └── entity/
-│           │   │       ├── SectorEntity.kt        # Entidad sector (tabla "sectors")
-│           │   │       ├── OutageRecordEntity.kt  # Entidad historial (tabla "outage_records")
-│           │   │       └── PendingReportEntity.kt # Entidad reportes (tabla "pending_reports")
+│           │   │       ├── SectorEntity.kt      # @Entity "sectors" (53 lín)
+│           │   │       ├── OutageRecordEntity.kt    # @Entity "outage_records" (41 lín)
+│           │   │       └── PendingReportEntity.kt   # @Entity "pending_reports" (34 lín)
 │           │   ├── model/
-│           │   │   ├── PowerStatus.kt             # Enums, Sector, CitizenReport, OutagePrediction
-│           │   │   ├── PacSchedule.kt             # PacScheduleData singleton, PacSlot, matrices
-│           │   │   ├── BarinasLocationsData.kt    # Catálogo hardcodeado de 100+ ubicaciones
-│           │   │   ├── PacAlertSettings.kt        # Config alarma PAC
-│           │   │   ├── DonationConfig.kt          # Config donaciones
-│           │   │   └── MonthlyWeeksResponse.kt    # DTO para API mensual
+│           │   │   ├── PowerStatus.kt           # ServiceStatus enum, Sector, CitizenReport (61 lín)
+│           │   │   ├── PacSchedule.kt           # PacScheduleData singleton + 12 data classes (603 lín)
+│           │   │   ├── BarinasLocationsData.kt  # Catálogo hardcodeado 100+ ubicaciones (1204 lín)
+│           │   │   ├── PacAlertSettings.kt      # Config alarma PAC (43 lín)
+│           │   │   ├── DonationConfig.kt        # Config donaciones (10 lín)
+│           │   │   └── MonthlyWeeksResponse.kt  # DTO API mensual (12 lín)
 │           │   ├── remote/
-│           │   │   ├── ApiClient.kt               # Retrofit + OkHttp client
-│           │   │   ├── LuzBarinasApi.kt           # Interface Retrofit endpoints
+│           │   │   ├── ApiClient.kt             # Retrofit + OkHttp → Vercel APIs (44 lín)
+│           │   │   ├── LuzBarinasApi.kt         # Interface endpoints REST (37 lín)
 │           │   │   └── dto/
-│           │   │       └── TelemetryDtos.kt       # DTOs: SectorDto, TelemetryReportRequest/Response
+│           │   │       └── TelemetryDtos.kt     # SectorDto, ReportRequest/Response (37 lín)
 │           │   └── repository/
-│           │       ├── EnergyRepository.kt        # Repositorio principal (Room + Cloud)
-│           │       └── CloudSyncRepository.kt     # Sync Supabase Realtime + REST
-│           ├── engine/
-│           │   └── OutagePredictionEngine.kt      # Motor de predicción (delega a API)
-│           ├── notification/
-│           │   ├── NotificationHelper.kt          # Crear notificaciones
-│           │   ├── NotificationActionReceiver.kt  # Receiver para acciones de 1 toque
-│           │   ├── PacAlarmPlayer.kt              # Reproducir alarma sonora
-│           │   ├── PacAlarmReceiver.kt            # BroadcastReceiver para AlarmManager
-│           │   ├── PacAlarmScheduler.kt           # Programar alarmas exactas
-│           │   └── MyFirebaseMessagingService.kt   # FCM token y mensajes entrantes
-│           ├── utils/
-│           │   └── AppUpdater.kt                  # OTA: check + download + install
-│           ├── worker/
-│           │   ├── ReportPowerWorker.kt           # WorkManager para sync reportes
-│           │   └── PredictiveNotificationWorker.kt # Worker periódico (30 min)
-│           └── ui/
+│           │       ├── EnergyRepository.kt      # Repositorio principal Room+Cloud (395 lín)
+│           │       └── CloudSyncRepository.kt   # Motor sync Supabase Realtime (480 lín)
+│           │
+│           ├── engine/                      # ═══ MOTOR DE PREDICCIÓN ═══
+│           │   └── OutagePredictionEngine.kt    # Delega predicción a API Vercel
+│           │
+│           ├── glance/                      # ═══ WIDGET DE PANTALLA DE INICIO ═══
+│           │   └── LuzBarinasWidget.kt      # Widget Glance con botones 1-click (231 lín)
+│           │
+│           ├── notification/                # ═══ NOTIFICACIONES Y ALARMAS ═══
+│           │   ├── NotificationHelper.kt        # Crear y mostrar 4 tipos de notificaciones
+│           │   ├── NotificationActionReceiver.kt    # Receiver acciones desde notificación
+│           │   ├── PacAlarmPlayer.kt            # Reproducir alarma sonora + vibración
+│           │   ├── PacAlarmReceiver.kt          # BroadcastReceiver para AlarmManager
+│           │   ├── PacAlarmScheduler.kt         # Programar alarmas exactas con anticipación
+│           │   └── MyFirebaseMessagingService.kt    # FCM: onNewToken + onMessageReceived
+│           │
+│           ├── utils/                       # ═══ UTILIDADES ═══
+│           │   └── AppUpdater.kt            # OTA: check GitHub Releases + download + install
+│           │
+│           ├── worker/                      # ═══ TAREAS EN BACKGROUND ═══
+│           │   ├── ReportPowerWorker.kt         # WorkManager: sync reportes offline→cloud
+│           │   └── PredictiveNotificationWorker.kt  # Worker periódico cada 30 min
+│           │
+│           └── ui/                          # ═══ CAPA DE INTERFAZ ═══
 │               ├── viewmodel/
-│               │   └── LuzBarinasViewModel.kt     # ViewModel central (492 líneas)
+│               │   └── LuzBarinasViewModel.kt   # ViewModel central MVVM (492 lín)
 │               ├── theme/
-│               │   ├── Color.kt                   # Paleta de colores (100 líneas)
-│               │   ├── Shape.kt                   # Formas Material 3
-│               │   ├── Theme.kt                   # Tema claro/oscuro
-│               │   └── Type.kt                    # Tipografía
+│               │   ├── Color.kt                 # Paleta 50+ colores brand/bloque/estado (100 lín)
+│               │   ├── Shape.kt                 # Formas Material 3 (14 lín)
+│               │   ├── Theme.kt                 # Tema claro/oscuro + dynamic color (88 lín)
+│               │   └── Type.kt                  # 15 estilos tipográficos (120 lín)
 │               ├── components/
-│               │   ├── AdComponents.kt            # Banner, Interstitial, AppOpen ads
-│               │   ├── BarinasAddressDialog.kt    # Selector de ubicación (763 líneas)
-│               │   ├── DonationsDialog.kt         # Diálogo de donaciones (145 líneas)
-│               │   ├── GoogleSearchBar.kt         # Barra de búsqueda estilo Google
-│               │   ├── InteractiveBarinasMap.kt   # Mapa Canvas interactivo (490 líneas)
-│               │   ├── OnboardingFlowDialog.kt    # Wizard bienvenida 3 pasos
-│               │   ├── PacScheduleView.kt         # Vista horarios PAC (993 líneas)
-│               │   ├── PacSettingsDialog.kt       # Config alarmas PAC (506 líneas)
-│               │   ├── StatusBadge.kt             # Badge de estado (Normal/Corte/Avería)
-│               │   ├── SystemSettingsDialog.kt    # Ajustes del sistema
-│               │   └── UpdatePromptDialog.kt      # Diálogo OTA actualización
+│               │   ├── AdComponents.kt          # Banner, Interstitial, AppOpen ads (175 lín)
+│               │   ├── BarinasAddressDialog.kt  # Selector ubicación + registro sector (763 lín)
+│               │   ├── DonationsDialog.kt       # Diálogo PayPal/Binance/PagoMóvil (145 lín)
+│               │   ├── GoogleSearchBar.kt       # Barra búsqueda con sugerencias (299 lín)
+│               │   ├── InteractiveBarinasMap.kt # Mapa Canvas río/calles/nodos (490 lín)
+│               │   ├── OnboardingFlowDialog.kt  # Wizard bienvenida 3 pasos (249 lín)
+│               │   ├── PacScheduleView.kt       # Horarios PAC semanal/mensual/bloques (993 lín)
+│               │   ├── PacSettingsDialog.kt     # Config alarmas y anticipación (506 lín)
+│               │   ├── StatusBadge.kt           # Badge animado Normal/Corte/Avería (111 lín)
+│               │   ├── SystemSettingsDialog.kt  # Ajustes del sistema (161 lín)
+│               │   └── UpdatePromptDialog.kt    # Diálogo OTA actualización (151 lín)
 │               └── screens/
-│                   ├── DashboardScreen.kt         # Pantalla "Hoy" (760 líneas)
-│                   ├── MapScreen.kt               # Pantalla Mapa de Red (338 líneas)
-│                   ├── TelemetryScreen.kt         # Pantalla Telemetría (345 líneas)
-│                   └── AdminScreen.kt             # Pantalla Admin in-app (1188 líneas)
-├── admin-web/
-│   ├── index.html                    # SPA HTML (1104 líneas)
-│   ├── app.js                        # Lógica JS principal (1983 líneas)
-│   ├── styles.css                    # Estilos Material 3 Dark (153 líneas)
-│   ├── vercel.json                   # Config Vercel hosting
-│   ├── package.json                  # Dependencias npm
-│   └── api/
-│       ├── getMonthlyWeeks.js        # Serverless: proyección mensual
-│       ├── getOutagePrediction.js    # Serverless: predicción de cortes
-│       └── sendPushAlert.js          # Serverless: push FCM
-├── build.gradle.kts                  # Build raíz (plugins)
-├── settings.gradle.kts               # Settings Gradle
-├── gradle.properties                 # Propiedades Gradle
-├── .env.example                      # Variables de entorno ejemplo
-├── supabase_schema.sql               # Schema SQL de Supabase
-├── seed_supabase.py                  # Script de siembra de datos
-├── my-upload-key.jks                 # Keystore de release
-└── metadata.json                     # Metadata del proyecto
+│                   ├── DashboardScreen.kt       # Tab "Hoy": estado + reporte rápido (760 lín)
+│                   ├── MapScreen.kt             # Tab "Mapa": mapa interactivo (338 lín)
+│                   ├── TelemetryScreen.kt       # Pantalla telemetría ciudadana (345 lín)
+│                   └── AdminScreen.kt           # Panel admin in-app (1188 lín)
+│
+│   ══════════════════════════════════════════
+│   PÁGINA WEB ADMINISTRATIVA
+│   Ubicación: e:\LUZ BARINAS\admin-web\
+│   (Repo Git INDEPENDIENTE del Android)
+│   ══════════════════════════════════════════
+├── admin-web/                               ← REPO GIT INDEPENDIENTE
+│   ├── .git/                                # Su PROPIO repositorio Git
+│   ├── .gitignore                           # Excluye: .vercel/, node_modules/, .env
+│   ├── .firebaserc                          # Project Firebase: luzbarinas-6cabc
+│   ├── firebase.json                        # Config Firebase Hosting (legacy, ahora usa Vercel)
+│   ├── vercel.json                          # Config Vercel: rewrites SPA → index.html
+│   ├── package.json                         # Deps npm: @supabase/supabase-js, firebase-admin
+│   ├── README.md                            # Documentación del panel web
+│   │
+│   ├── index.html                           # SPA HTML completa (1104 líneas)
+│   ├── app.js                               # Toda la lógica JavaScript (1983 lín, 63 funciones)
+│   ├── styles.css                           # Estilos Material 3 Dark + glassmorphism (153 lín)
+│   │
+│   └── api/                                 # APIs Serverless (Vercel Functions)
+│       ├── getMonthlyWeeks.js               # Proyección mensual rotación PAC (92 lín)
+│       ├── getOutagePrediction.js           # Predicción algorítmica de cortes (181 lín)
+│       └── sendPushAlert.js                 # Push FCM masivo al tópico global (60 lín)
 ```
+
+### AndroidManifest.xml — Permisos y Componentes Registrados
+
+**Ruta:** `e:\LUZ BARINAS\app\src\main\AndroidManifest.xml` (97 líneas)
+
+**Permisos declarados:**
+
+| Permiso | Propósito |
+|---|---|
+| `INTERNET` | Conexión a Supabase, Vercel, Firebase, GitHub |
+| `ACCESS_NETWORK_STATE` | Verificar conectividad antes de sync |
+| `POST_NOTIFICATIONS` | Mostrar alertas y alarmas PAC (Android 13+) |
+| `VIBRATE` | Vibración en alarmas de corte |
+| `SCHEDULE_EXACT_ALARM` | Alarmas exactas con AlarmManager (Android 12+) |
+| `RECEIVE_BOOT_COMPLETED` | Reprogramar alarmas tras reinicio del teléfono |
+| `WAKE_LOCK` | Mantener CPU activa durante reproducción de alarma |
+| `REQUEST_INSTALL_PACKAGES` | Instalar APK descargado por OTA |
+
+**Componentes registrados en el Manifest:**
+
+| Componente | Tipo | Propósito |
+|---|---|---|
+| `.MainActivity` | Activity (LAUNCHER) | Punto de entrada de la app |
+| `.notification.NotificationActionReceiver` | BroadcastReceiver | Acciones "Tengo luz"/"Sin luz" desde notificaciones |
+| `.notification.PacAlarmReceiver` | BroadcastReceiver | Alarma PAC + re-schedule tras BOOT_COMPLETED |
+| `.glance.LuzBarinasWidgetReceiver` | BroadcastReceiver | Widget Glance de pantalla de inicio |
+| `.notification.MyFirebaseMessagingService` | Service | Recepción de push FCM |
+| `FileProvider` | ContentProvider | Compartir APK para instalación OTA |
+
+**Meta-data:**
+- `com.google.android.gms.ads.APPLICATION_ID` → `${ADMOB_APP_ID}` (inyectado desde `build.gradle.kts`)
+- Widget info: `@xml/luz_barinas_widget_info`
 
 ---
 
