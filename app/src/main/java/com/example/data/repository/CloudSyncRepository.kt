@@ -379,12 +379,17 @@ class CloudSyncRepository(
             
             supabase.postgrest["community_locations"].upsert(loc)
             
+            val cleanBlock = block.trim().replace("Bloque", "", true).trim().ifEmpty { "C" }
             val sec = SupabaseSector(
                 id = loc.id,
+                name = loc.name,
+                parroquia = loc.parroquia,
+                circuitCode = loc.circuitCode,
                 status = loc.status,
                 voltage = loc.voltage,
                 confirmedReportsCount = loc.confirmedReportsCount,
                 withoutPowerPercentage = loc.withoutPowerPercentage,
+                rotationBlock = cleanBlock,
                 lastUpdatedMillis = loc.submittedAt
             )
             supabase.postgrest["sectors"].upsert(sec)
