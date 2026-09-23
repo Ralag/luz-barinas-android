@@ -76,6 +76,7 @@ fun BarinasAddressDialog(
     onLocationSelected: (BarinasLocation) -> Unit,
     onDismiss: () -> Unit,
     onRegisterNewCommunity: ((name: String, municipio: String, parroquia: String, block: String, circuit: String) -> Unit)? = null,
+    availableSectors: List<com.example.data.model.Sector> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     if (!isOpen) return
@@ -91,14 +92,46 @@ fun BarinasAddressDialog(
     var selectedPreviewLocation by remember { mutableStateOf<BarinasLocation?>(null) }
     val focusManager = LocalFocusManager.current
 
+    val dynamicLocations = remember(availableSectors) {
+        availableSectors.map { sector ->
+            val cleanBlock = if (sector.rotationBlock.startsWith("Bloque", ignoreCase = true)) {
+                sector.rotationBlock
+            } else {
+                "Bloque ${sector.rotationBlock}"
+            }
+            BarinasLocation(
+                id = sector.id,
+                name = sector.name,
+                type = if (sector.isCommunity) "Sector Comunitario 🤝" else "Sector Oficial",
+                parroquia = sector.parroquia ?: "Barinas",
+                block = cleanBlock,
+                circuitCode = sector.circuitCode,
+                sectorEntityId = sector.id,
+                description = if (sector.isCommunity) "Incorporado por la comunidad" else "Sector de Barinas",
+                keywords = listOf(sector.name.lowercase(), sector.circuitCode.lowercase(), (sector.parroquia ?: "").lowercase()),
+                municipio = "Barinas"
+            )
+        }
+    }
+
     // Debounced search to avoid blocking main thread on every keystroke
     var results by remember { mutableStateOf(emptyList<BarinasLocation>()) }
-    LaunchedEffect(query) {
+    LaunchedEffect(query, dynamicLocations) {
         if (query.length >= 2) {
-            delay(300L) // 300ms debounce
-            results = BarinasLocationsCatalog.searchLocations(query)
+            delay(200L) // 200ms debounce
+            val dynamicMatches = dynamicLocations.filter { loc ->
+                loc.name.contains(query, ignoreCase = true) ||
+                loc.circuitCode.contains(query, ignoreCase = true) ||
+                loc.parroquia.contains(query, ignoreCase = true) ||
+                loc.keywords.any { it.contains(query, ignoreCase = true) }
+            }
+            val catalogMatches = BarinasLocationsCatalog.searchLocations(query)
+            // Dynamic matches (especially community sectors) first, distinct by name
+            results = (dynamicMatches + catalogMatches).distinctBy { it.name.trim().lowercase() }
         } else {
-            results = emptyList()
+            // When query is empty, show Community sectors at the top!
+            val communitySectors = dynamicLocations.filter { it.type.contains("Comunitario") }
+            results = communitySectors
         }
     }
 
@@ -434,11 +467,16 @@ fun BarinasAddressDialog(
                         }
                     }
                 } else {
+                    val isShowingCommunityInitial = query.isEmpty() && results.isNotEmpty()
                     Text(
-                        text = "Resultados encontrados (${results.size}):",
+                        text = if (isShowingCommunityInitial) {
+                            "Sectores comunitarios activos (${results.size}) 🤝:"
+                        } else {
+                            "Resultados encontrados (${results.size}):"
+                        },
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isShowingCommunityInitial) Color(0xFFFFB300) else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp, bottom = 6.dp)
                     )
 
@@ -482,12 +520,30 @@ fun BarinasAddressDialog(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = loc.name,
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = loc.name,
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            if (loc.type.contains("Comunitario")) {
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Surface(
+                                                    shape = RoundedCornerShape(6.dp),
+                                                    color = Color(0xFFFFB300).copy(alpha = 0.2f),
+                                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFB300))
+                                                ) {
+                                                    Text(
+                                                        text = "Comunitario 🤝",
+                                                        fontSize = 9.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color(0xFFFFB300),
+                                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
                                         Text(
                                             text = "${loc.parroquia} • ${loc.circuitCode}",
                                             fontSize = 11.sp,

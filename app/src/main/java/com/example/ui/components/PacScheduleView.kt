@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.model.PacDay
 import com.example.data.model.PacScheduleData
 import com.example.data.model.PacSlot
 import com.example.data.model.PacWeekPlan
@@ -274,7 +275,7 @@ fun PacScheduleView(
                     fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(300))
                 },
                 label = "schedule_tab_transition"
-            ) { tab ->
+            ) { tab: Int ->
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     when (tab) {
                         0 -> {
@@ -302,7 +303,7 @@ fun PacScheduleView(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    itemsIndexed(PacScheduleData.DAYS, key = { _, day -> day.name }) { index, day ->
+                                    itemsIndexed(items = PacScheduleData.DAYS, key = { _: Int, day: PacDay -> day.name }) { index: Int, day: PacDay ->
                                         val isSelected = selectedDayIdx == index
                                         val isToday = index == todayIdx
 
@@ -493,7 +494,7 @@ fun PacScheduleView(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    itemsIndexed(PacScheduleData.MONTH_NAMES, key = { _, monthName -> monthName }) { index, monthName ->
+                                    itemsIndexed(items = PacScheduleData.MONTH_NAMES, key = { _: Int, monthName: String -> monthName }) { index: Int, monthName: String ->
                                         val isSelected = selectedMonthIdx == index
                                         FilterChip(
                                             selected = isSelected,

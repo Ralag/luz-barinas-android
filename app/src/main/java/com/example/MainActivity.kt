@@ -172,10 +172,11 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         }
     )
 
-    // Onboarding / Location Selector Dialog (Barinas Locations Catalog)
+    // Onboarding / Location Selector Dialog (Barinas Locations Catalog + Live Community Sectors)
     BarinasAddressDialog(
         isOpen = showAddressDialog || (uiState.userAddress == null && !uiState.isOnboardingOpen),
         currentAddress = uiState.userAddress,
+        availableSectors = uiState.sectors,
         onLocationSelected = { location ->
             viewModel.setUserLocation(location)
             showAddressDialog = false
@@ -189,6 +190,13 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
             showAddressDialog = false
         }
     )
+
+    if (showDonationsDialog) {
+        com.example.ui.components.DonationsDialog(
+            config = uiState.donationConfig,
+            onDismiss = { showDonationsDialog = false }
+        )
+    }
 
     var forceShowUpdateDialog by remember { mutableStateOf(false) }
 
@@ -224,8 +232,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         isOpen = showSettingsDialog,
         onDismiss = { showSettingsDialog = false },
         onRestartOnboarding = { viewModel.setOnboardingOpen(true) },
-        onCheckUpdate = { forceShowUpdateDialog = true },
-        donationUrl = uiState.donationUrl
+        onCheckUpdate = { forceShowUpdateDialog = true }
     )
 
     Scaffold(
@@ -426,7 +433,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         onReportStatus = { hasPower, reportType, voltage ->
                             viewModel.reportPowerStatus(hasPower, reportType, voltage)
                         },
-                        onChangeAddressClicked = { viewModel.setOnboardingOpen(true) },
+                        onChangeAddressClicked = { showAddressDialog = true },
                         onNavigateToSchedule = { viewModel.setTab(1) },
                         onOpenAlarmSettings = { isSettingsOpen = true }
                     )
