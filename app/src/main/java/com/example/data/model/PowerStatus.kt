@@ -41,8 +41,9 @@ data class CitizenReport(
     val sectorName: String,
     val hasPower: Boolean,
     val reportedAtMillis: Long,
-    val reportType: String, // "NORMAL", "SIN_LUZ", "BAJON"
+    val reportType: String, // "NORMAL", "SIN_LUZ", "BAJON", "FALLA_IRREGULAR"
     val voltageObserved: Float?,
+    val observation: String? = null,
     val isSynced: Boolean = false
 )
 

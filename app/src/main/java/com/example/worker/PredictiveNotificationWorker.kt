@@ -29,12 +29,21 @@ class PredictiveNotificationWorker(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            val prefs = applicationContext.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            val userSectorId = prefs.getString("selected_sector_id", null) ?: return@withContext Result.success()
-            val userSectorName = prefs.getString("selected_sector_name", "Tu sector") ?: "Tu sector"
-            val userBlock = prefs.getString("selected_sector_block", "A") ?: "A"
+            val prefs = applicationContext.getSharedPreferences("luz_barinas_user_prefs", Context.MODE_PRIVATE)
+            val userSectorId = prefs.getString("saved_sector_id", null)
+                ?: prefs.getString("selected_sector_id", null)
+                ?: return@withContext Result.success()
+            val userSectorName = prefs.getString("saved_address", null)
+                ?: prefs.getString("selected_sector_name", "Tu sector")
+                ?: "Tu sector"
+            val rawBlock = prefs.getString("saved_sector_block", null)
+                ?: prefs.getString("saved_block", null)
+                ?: prefs.getString("selected_sector_block", "A")
+                ?: "A"
+            val cleanMatch = Regex("[ABCD]").find(rawBlock.uppercase())
+            val userBlock = cleanMatch?.value ?: "A"
 
-            val cal = Calendar.getInstance(TimeZone.getTimeZone("America/Caracas"))
+            val cal = Calendar.getInstance()
             val currentHour = cal.get(Calendar.HOUR_OF_DAY)
             val currentMinute = cal.get(Calendar.MINUTE)
             val currentDayIdx = PacScheduleData.getDayIndex(cal.get(Calendar.DAY_OF_WEEK))

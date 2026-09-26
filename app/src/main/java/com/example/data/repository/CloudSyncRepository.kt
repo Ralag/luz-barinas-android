@@ -71,6 +71,7 @@ data class SupabaseCitizenReport(
     val hasPower: Boolean,
     val reportType: String,
     val voltage: Double,
+    val observation: String? = null,
     val deviceOrigin: String,
     val timestamp: Long
 )
@@ -315,7 +316,8 @@ class CloudSyncRepository(
         sectorName: String,
         hasPower: Boolean,
         reportType: String,
-        voltage: Float?
+        voltage: Float?,
+        observation: String? = null
     ): Boolean = withContext(Dispatchers.IO) {
         try {
             val report = SupabaseCitizenReport(
@@ -324,6 +326,7 @@ class CloudSyncRepository(
                 hasPower = hasPower,
                 reportType = reportType,
                 voltage = (voltage ?: if (hasPower) 118f else 0f).toDouble(),
+                observation = observation,
                 deviceOrigin = "LuzBarinas_Citizen_App",
                 timestamp = System.currentTimeMillis()
             )

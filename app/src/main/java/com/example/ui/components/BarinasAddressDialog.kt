@@ -102,7 +102,7 @@ fun BarinasAddressDialog(
             BarinasLocation(
                 id = sector.id,
                 name = sector.name,
-                type = if (sector.isCommunity) "Sector Comunitario 🤝" else "Sector Oficial",
+                type = if (sector.isCommunity) "Sector Comunitario 🤝" else "Catálogo Base",
                 parroquia = "Barinas",
                 block = cleanBlock,
                 circuitCode = sector.circuitCode,
@@ -182,7 +182,7 @@ fun BarinasAddressDialog(
                     ) {
                         Icon(
                             Icons.Outlined.LocationOn,
-                            contentDescription = null,
+                            contentDescription = "Icono de ubicación",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -420,7 +420,7 @@ fun BarinasAddressDialog(
                                     shape = RoundedCornerShape(12.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = blockColor)
                                 ) {
-                                    Icon(Icons.Outlined.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Icon(Icons.Outlined.Check, contentDescription = "Confirmar", modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text("Confirmar y Fijar esta Ubicación", fontWeight = FontWeight.Bold)
                                 }
@@ -449,7 +449,7 @@ fun BarinasAddressDialog(
                                 .padding(14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+                            Icon(Icons.Outlined.LocationOn, contentDescription = "Icono de advertencia", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
@@ -727,7 +727,7 @@ fun BarinasAddressDialog(
                                 .height(48.dp),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Icon(Icons.Outlined.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Outlined.Check, contentDescription = "Guardar", modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Guardar y Registrar en la Nube", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         }

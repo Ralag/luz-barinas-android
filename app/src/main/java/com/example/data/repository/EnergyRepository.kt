@@ -135,9 +135,8 @@ class EnergyRepository(
             sectorDao.insertOrUpdateSectors(initialSectors)
         }
 
-        // Client-side Firebase seeding removed to prevent massive write quota exhaustion.
-        // Seeding should only be performed via the admin python script (seed_firestore.py).
-        // cloudSync.seedSectorsIfEmpty()
+        // Client-side cloud seeding removed to prevent write quota exhaustion.
+        // Seeding should only be performed via the admin python script (seed_supabase.py).
 
         // Seed realistic historical records for modular arithmetic calculations
         if (outageDao.getCount() == 0) {
@@ -226,7 +225,8 @@ class EnergyRepository(
         sectorName: String,
         hasPower: Boolean,
         reportType: String,
-        voltage: Float?
+        voltage: Float?,
+        observation: String? = null
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             // 1. Save locally to Room (Zero data loss, 100% Offline-First)
@@ -237,6 +237,7 @@ class EnergyRepository(
                 reportedAtMillis = System.currentTimeMillis(),
                 reportType = reportType,
                 voltageObserved = voltage,
+                observation = observation,
                 isSynced = false
             )
             pendingDao.insertReport(entity)
@@ -245,9 +246,9 @@ class EnergyRepository(
             val sector = sectorDao.getSectorById(sectorId)
             if (sector != null) {
                 val updatedStatus = if (hasPower) {
-                    if (reportType == "BAJON") "NORMAL" else "NORMAL"
+                    "NORMAL"
                 } else {
-                    if (reportType == "AVERIA") "IRREGULAR_OUTAGE" else "SCHEDULED_OUTAGE"
+                    if (reportType == "FALLA_IRREGULAR" || reportType == "AVERIA") "IRREGULAR_OUTAGE" else "SCHEDULED_OUTAGE"
                 }
                 val newVoltage = voltage ?: if (hasPower) 118f else 0f
                 val newCount = sector.confirmedReportsCount + 1
@@ -290,15 +291,16 @@ class EnergyRepository(
                 workRequest
             )
 
-            // 4. Try immediate sync via Firestore & REST (non-blocking, offline resilient)
+            // 4. Try immediate sync via Supabase & REST (non-blocking, offline resilient)
             try {
-                // Real-time Firestore sync
+                // Real-time Supabase sync
                 val firestoreSynced = cloudSync.uploadCitizenReport(
                     sectorId = sectorId,
                     sectorName = sector?.name ?: sectorId,
                     hasPower = hasPower,
                     reportType = reportType,
-                    voltage = voltage
+                    voltage = voltage,
+                    observation = observation
                 )
 
                 if (firestoreSynced) {
@@ -313,7 +315,8 @@ class EnergyRepository(
                         hasPower = hasPower,
                         timestamp = System.currentTimeMillis(),
                         reportType = reportType,
-                        voltageReading = voltage
+                        voltageReading = voltage,
+                        observation = observation
                     )
                     val response = ApiClient.api.submitPowerReport(request)
                     if (response.isSuccessful && response.body()?.success == true) {

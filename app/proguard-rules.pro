@@ -42,8 +42,7 @@
 -keep public class com.google.ads.** { public *; }
 -dontwarn com.google.android.gms.ads.**
 
-# ---- Firebase ----
--keep class com.google.firebase.** { *; }
+# ---- Firebase (Cleanup) ----
 -dontwarn com.google.firebase.**
 
 # ---- Kotlin Coroutines ----

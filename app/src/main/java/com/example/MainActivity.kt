@@ -10,26 +10,29 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-
-import com.example.notification.PacAlarmPlayer
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.LightMode
-import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.ui.components.PacSettingsDialog
 import com.example.notification.PacAlarmScheduler
+import com.example.notification.PacAlarmPlayer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,6 +69,7 @@ import com.example.ui.components.PacScheduleView
 import com.example.ui.components.UpdatePromptDialog
 import com.example.ui.screens.DashboardScreen
 import com.example.ui.screens.MapScreen
+import com.example.ui.screens.SettingsScreen
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.viewmodel.LuzBarinasViewModel
 
@@ -224,17 +228,11 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
     }
 
     val isAlarmActive by PacAlarmPlayer.isPlayingFlow.collectAsStateWithLifecycle(initialValue = false)
-    var showSettingsDialog by remember { mutableStateOf(false) }
+    var showSettingsScreen by remember { mutableStateOf(false) }
 
-    com.example.ui.components.SystemSettingsDialog(
-        isOpen = showSettingsDialog,
-        onDismiss = { showSettingsDialog = false },
-        onRestartOnboarding = { viewModel.setOnboardingOpen(true) },
-        onCheckUpdate = { forceShowUpdateDialog = true }
-    )
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
@@ -262,69 +260,57 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                             letterSpacing = (-0.5).sp
                         )
                         Text(
-                            text = "Control Eléctrico Oficial • En vivo",
+                            text = "Cronograma PAC Comunitario • Estado Estimado",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 actions = {
-                    // Theme Switcher (Sun / Moon)
-                    IconButton(
-                        onClick = { viewModel.toggleDarkMode() },
-                        modifier = Modifier.testTag("action_toggle_theme")
+                    // Botón estilizado y llamativo de Donaciones ("Donar")
+                    Surface(
+                        onClick = { showDonationsDialog = true },
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFFE91E63).copy(alpha = if (uiState.isDarkMode) 0.18f else 0.1f),
+                        border = BorderStroke(
+                            1.dp,
+                            Color(0xFFE91E63).copy(alpha = if (uiState.isDarkMode) 0.45f else 0.35f)
+                        ),
+                        modifier = Modifier.padding(end = 4.dp)
                     ) {
-                        Icon(
-                            imageVector = if (uiState.isDarkMode) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
-                            contentDescription = if (uiState.isDarkMode) "Activar modo claro" else "Activar modo oscuro",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "Donar al proyecto",
+                                tint = Color(0xFFE91E63),
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Text(
+                                text = "Donar",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = if (uiState.isDarkMode) Color(0xFFFF80AB) else Color(0xFFC2185B),
+                                letterSpacing = 0.3.sp
+                            )
+                        }
                     }
 
-                    // Alert & Alarm Settings Dialog
+                    // Acceso a Configuración completa (Ruedita)
                     IconButton(
-                        onClick = { isSettingsOpen = true },
-                        modifier = Modifier.testTag("action_alarm_settings")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Alarm,
-                            contentDescription = "Configurar Alertas y Alarma PAC",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    // Location / Address Selector
-                    IconButton(
-                        onClick = { showAddressDialog = true },
-                        modifier = Modifier.testTag("action_select_location")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.LocationOn,
-                            contentDescription = "Configurar Ubicación y Bloque",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    TextButton(onClick = { showDonationsDialog = true }) {
-                        Text("Dona Aquí", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = androidx.compose.ui.graphics.Color(0xFFE91E63))
-                    }
-                    
-                    // System Settings (Ruedita)
-                    IconButton(
-                        onClick = { showSettingsDialog = true },
+                        onClick = { showSettingsScreen = true },
                         modifier = Modifier.testTag("action_system_settings")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Configuración del Sistema",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
-
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -428,8 +414,8 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         activeNotice = uiState.activeBroadcastNotice,
                         onDismissNotice = { viewModel.dismissBroadcastNotice() },
                         onSectorSelected = { viewModel.selectSector(it) },
-                        onReportStatus = { hasPower, reportType, voltage ->
-                            viewModel.reportPowerStatus(hasPower, reportType, voltage)
+                        onReportStatus = { hasPower, reportType, voltage, observation ->
+                            viewModel.reportPowerStatus(hasPower, reportType, voltage, observation)
                         },
                         onChangeAddressClicked = { showAddressDialog = true },
                         onNavigateToSchedule = { viewModel.setTab(1) },
@@ -456,6 +442,28 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                     )
                 }
             }
+        }
+    }
+
+        androidx.compose.animation.AnimatedVisibility(
+            visible = showSettingsScreen,
+            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { it },
+            exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically { it }
+        ) {
+            SettingsScreen(
+                onBack = { showSettingsScreen = false },
+                onToggleDarkMode = { viewModel.toggleDarkMode() },
+                isDarkMode = uiState.isDarkMode,
+                onChangeLocation = { showAddressDialog = true },
+                onRestartOnboarding = { 
+                    viewModel.setOnboardingOpen(true)
+                    showSettingsScreen = false 
+                },
+                onOpenAlarmSettings = { isSettingsOpen = true },
+                onCheckUpdate = { forceShowUpdateDialog = true },
+                onOpenDonations = { showDonationsDialog = true },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }

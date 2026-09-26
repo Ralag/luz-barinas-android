@@ -58,6 +58,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import com.example.data.model.PacAlertPrefs
 import com.example.data.model.BroadcastNotice
@@ -89,13 +91,15 @@ fun DashboardScreen(
     activeNotice: BroadcastNotice? = null,
     onDismissNotice: () -> Unit = {},
     onSectorSelected: (Sector) -> Unit,
-    onReportStatus: (Boolean, String, Float?) -> Unit,
+    onReportStatus: (Boolean, String, Float?, String?) -> Unit,
     onChangeAddressClicked: () -> Unit = {},
     onNavigateToSchedule: () -> Unit = {},
     onOpenAlarmSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var reportFeedback by remember { mutableStateOf<String?>(null) }
+    var observationText by remember { mutableStateOf("") }
+    var showObservationInput by remember { mutableStateOf(false) }
 
     val userBlock = remember(selectedSector) {
         selectedSector?.rotationBlock?.uppercase()?.replace("BLOQUE", "")?.trim() ?: "A"
@@ -111,7 +115,7 @@ fun DashboardScreen(
         }
     }
 
-    // Calendar & slot calculation for Barinas timezone (recalculates every minute)
+    // Calendar & slot calculation using local device time (recalculates every minute)
     var timeKey by remember { androidx.compose.runtime.mutableLongStateOf(System.currentTimeMillis() / 60_000L) }
     androidx.compose.runtime.LaunchedEffect(Unit) {
         while (true) {
@@ -119,9 +123,11 @@ fun DashboardScreen(
             timeKey = System.currentTimeMillis() / 60_000L
         }
     }
-    val cal = remember(timeKey) { Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")) }
+    val cal = remember(timeKey) { Calendar.getInstance() }
     val currentDayIdx = remember(timeKey) { PacScheduleData.getDayIndex(cal.get(Calendar.DAY_OF_WEEK)) }
-    val currentSlotIdx = remember(timeKey) { PacScheduleData.getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY)) }
+    val currentSlotIdx = remember(timeKey) { 
+        PacScheduleData.getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE)) 
+    }
     val currentDayOfMonth = remember(timeKey) { cal.get(Calendar.DAY_OF_MONTH) }
 
     // Check if the current slot has PAC cut for the user's block considering the exact week rotation
@@ -215,7 +221,7 @@ fun DashboardScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.LocationOn,
-                                        contentDescription = null,
+                                        contentDescription = "Icono de ubicación",
                                         tint = blockColor,
                                         modifier = Modifier.size(20.dp)
                                     )
@@ -235,14 +241,14 @@ fun DashboardScreen(
                                             Spacer(modifier = Modifier.width(6.dp))
                                             Surface(
                                                 shape = RoundedCornerShape(4.dp),
-                                                color = Color(0xFF9C27B0).copy(alpha = 0.15f),
-                                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF9C27B0).copy(alpha = 0.3f))
+                                                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
+                                                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f))
                                             ) {
                                                 Text(
                                                     text = "Comunitario \uD83E\uDD1D", // Handshake emoji
                                                     fontSize = 9.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = Color(0xFF9C27B0),
+                                                    color = MaterialTheme.colorScheme.tertiary,
                                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                                 )
                                             }
@@ -285,7 +291,7 @@ fun DashboardScreen(
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
                                     color = MaterialTheme.colorScheme.surfaceVariant,
-                                    modifier = Modifier.clickable { onChangeAddressClicked() }
+                                    modifier = Modifier.clickable(role = androidx.compose.ui.semantics.Role.Button) { onChangeAddressClicked() }
                                 ) {
                                     Text(
                                         text = "Cambiar",
@@ -327,7 +333,7 @@ fun DashboardScreen(
                                 ) {
                                     Icon(
                                         imageVector = if (hasPowerNow) Icons.Outlined.Bolt else Icons.Outlined.PowerOff,
-                                        contentDescription = null,
+                                        contentDescription = if (hasPowerNow) "Icono de servicio eléctrico activo" else "Icono de corte de energía",
                                         tint = Color.White,
                                         modifier = Modifier.size(22.dp)
                                     )
@@ -337,7 +343,7 @@ fun DashboardScreen(
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = if (hasPowerNow) "🟢 Servicio Eléctrico Activo (Con Luz)" else "🔴 Corte de PAC en progreso",
+                                        text = if (hasPowerNow) "🟢 Turno con Servicio Estimado (Con Luz)" else "🔴 Turno de Corte Programado",
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = if (hasPowerNow) StatusNormalGreen else StatusScheduledRed
@@ -384,7 +390,7 @@ fun DashboardScreen(
                         ) {
                             Text("Ver mensual", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                             Spacer(modifier = Modifier.width(2.dp))
-                            Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = "Ir al horario mensual", modifier = Modifier.size(14.dp))
                         }
                     }
 
@@ -483,7 +489,7 @@ fun DashboardScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onOpenAlarmSettings() },
+                    .clickable(role = androidx.compose.ui.semantics.Role.Button) { onOpenAlarmSettings() },
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
@@ -518,7 +524,7 @@ fun DashboardScreen(
                         ) {
                             Icon(
                                 imageVector = if (alertSettings.isAlarmEnabled) Icons.Default.Alarm else Icons.Default.NotificationsActive,
-                                contentDescription = null,
+                                contentDescription = if (alertSettings.isAlarmEnabled) "Alarma activada" else "Notificaciones activadas",
                                 tint = if (alertSettings.isAlarmEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(22.dp)
                             )
@@ -575,40 +581,139 @@ fun DashboardScreen(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Button(
                             onClick = {
-                                onReportStatus(true, "NORMAL", 118f)
+                                val obs = observationText.trim().ifEmpty { null }
+                                onReportStatus(true, "NORMAL", 118f, obs)
                                 reportFeedback = "¡Gracias! Reportaste servicio con luz."
+                                observationText = ""
+                                showObservationInput = false
                             },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(48.dp)
-                                .testTag("report_power_on_button"),
+                                .height(46.dp)
+                                .testTag("report_power_on_button")
+                                .semantics { contentDescription = "Reportar que tengo servicio eléctrico" },
                             colors = ButtonDefaults.buttonColors(containerColor = StatusNormalGreen),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 4.dp)
                         ) {
-                            Icon(Icons.Outlined.Bolt, contentDescription = "Tengo luz", modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Tengo luz", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Icon(Icons.Outlined.Bolt, contentDescription = "Con luz", modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Con Luz", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
 
                         Button(
                             onClick = {
-                                onReportStatus(false, "SIN_LUZ", 0f)
-                                reportFeedback = "Reporte guardado: Sin luz."
+                                val obs = observationText.trim().ifEmpty { null }
+                                onReportStatus(false, "SIN_LUZ", 0f, obs)
+                                reportFeedback = "Reporte guardado: Sin luz (Corte)."
+                                observationText = ""
+                                showObservationInput = false
                             },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(48.dp)
-                                .testTag("report_power_off_button"),
+                                .height(46.dp)
+                                .testTag("report_power_off_button")
+                                .semantics { contentDescription = "Reportar que no hay servicio eléctrico" },
                             colors = ButtonDefaults.buttonColors(containerColor = StatusScheduledRed),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 4.dp)
                         ) {
-                            Icon(Icons.Outlined.PowerOff, contentDescription = "Se fue la luz", modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Se fue la luz", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Icon(Icons.Outlined.PowerOff, contentDescription = "Sin luz", modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Sin Luz", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+
+                        Button(
+                            onClick = {
+                                val obs = observationText.trim().ifEmpty { "Avería o falla fuera de horario" }
+                                onReportStatus(false, "FALLA_IRREGULAR", 0f, obs)
+                                reportFeedback = "Reporte guardado: Falla Irregular."
+                                observationText = ""
+                                showObservationInput = false
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp)
+                                .testTag("report_irregular_fault_button")
+                                .semantics { contentDescription = "Reportar falla irregular o avería fuera de cronograma" },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9333EA)),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 4.dp)
+                        ) {
+                            Icon(Icons.Default.Warning, contentDescription = "Falla irregular", modifier = Modifier.size(15.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Falla Irreg.", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Optional Observation Toggle
+                    TextButton(
+                        onClick = { showObservationInput = !showObservationInput },
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text(
+                            text = if (showObservationInput) "▲ Ocultar observación" else "➕ Agregar observación comunitaria (opcional)",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    AnimatedVisibility(visible = showObservationInput) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            val quickChips = listOf(
+                                "Explosión de transformador",
+                                "Guaya caída",
+                                "Fase caída / 110V",
+                                "Fluctuación / Bajón"
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                quickChips.take(2).forEach { chip ->
+                                    androidx.compose.material3.FilterChip(
+                                        selected = observationText == chip,
+                                        onClick = { observationText = if (observationText == chip) "" else chip },
+                                        label = { Text(chip, fontSize = 10.sp) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                quickChips.drop(2).forEach { chip ->
+                                    androidx.compose.material3.FilterChip(
+                                        selected = observationText == chip,
+                                        onClick = { observationText = if (observationText == chip) "" else chip },
+                                        label = { Text(chip, fontSize = 10.sp) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+
+                            androidx.compose.material3.OutlinedTextField(
+                                value = observationText,
+                                onValueChange = { observationText = it },
+                                label = { Text("Detalle u observación de la falla") },
+                                placeholder = { Text("Ej: Explotó transformador cerca de la cancha...") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp)
+                            )
                         }
                     }
 
@@ -690,8 +795,8 @@ fun BroadcastNoticeBanner(
 
     val tagText = when {
         isEmergency -> "🚨 AVISO DE EMERGENCIA"
-        isWarning -> "⚠️ ALERTA PAC OFICIAL"
-        else -> "📢 COMUNICADO OFICIAL"
+        isWarning -> "⚠️ ALERTA DE CRONOGRAMA PAC"
+        else -> "📢 COMUNICADO INFORMATIVO"
     }
 
     Card(
@@ -710,7 +815,7 @@ fun BroadcastNoticeBanner(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Warning,
-                        contentDescription = null,
+                        contentDescription = "Aviso oficial",
                         tint = iconTint,
                         modifier = Modifier.size(18.dp)
                     )

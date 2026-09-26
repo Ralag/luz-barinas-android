@@ -24,6 +24,7 @@ data class TelemetryReportRequest(
     @Json(name = "timestamp") val timestamp: Long,
     @Json(name = "report_type") val reportType: String,
     @Json(name = "voltage_reading") val voltageReading: Float? = null,
+    @Json(name = "observation") val observation: String? = null,
     @Json(name = "client_device_id") val clientDeviceId: String = "barinas_citizen_app"
 )
 

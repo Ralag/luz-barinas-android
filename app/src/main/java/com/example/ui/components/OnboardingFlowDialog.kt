@@ -91,7 +91,7 @@ private fun WelcomeStep(onNext: () -> Unit) {
         ) {
             Icon(
                 imageVector = Icons.Default.Bolt,
-                contentDescription = null,
+                contentDescription = "Icono de electricidad",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
             )
@@ -136,7 +136,7 @@ private fun PermissionsStep(onNext: () -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Default.NotificationsActive,
-            contentDescription = null,
+            contentDescription = "Icono de notificaciones",
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(64.dp)
         )
@@ -197,7 +197,7 @@ private fun BatteryStep(onNext: () -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Default.BatteryAlert,
-            contentDescription = null,
+            contentDescription = "Icono de alerta de batería",
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(64.dp)
         )

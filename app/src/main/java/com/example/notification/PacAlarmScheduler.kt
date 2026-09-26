@@ -19,8 +19,15 @@ object PacAlarmScheduler {
 
     fun scheduleNextAlarm(context: Context) {
         val prefs = context.getSharedPreferences("luz_barinas_user_prefs", Context.MODE_PRIVATE)
-        val userBlock = prefs.getString("saved_sector_block", "A") ?: "A"
-        val userSectorName = prefs.getString("saved_address", "Mi Sector") ?: "Mi Sector"
+        val rawBlock = prefs.getString("saved_sector_block", null)
+            ?: prefs.getString("saved_block", null)
+            ?: prefs.getString("selected_sector_block", "A")
+            ?: "A"
+        val cleanMatch = Regex("[ABCD]").find(rawBlock.uppercase())
+        val userBlock = cleanMatch?.value ?: "A"
+        val userSectorName = prefs.getString("saved_address", null)
+            ?: prefs.getString("selected_sector_name", "Mi Sector")
+            ?: "Mi Sector"
 
         val settings = PacAlertPrefs.getSettings(context)
         if (!settings.isNotificationEnabled && !settings.isAlarmEnabled && !settings.isRestoreAlarmEnabled) {

@@ -478,12 +478,15 @@ object PacScheduleData {
         return activeMatrix.getOrNull(slotIdx)?.getOrNull(dayIdx) ?: "-"
     }
 
-    fun getCurrentSlotIndex(hourOfDay: Int): Int {
+    fun getCurrentSlotIndex(hourOfDay: Int, minuteOfHour: Int = 0): Int {
+        val totalMinutes = hourOfDay * 60 + minuteOfHour
         val found = activeSlots.indexOfFirst { slot ->
-            if (slot.startHour < slot.endHour) {
-                hourOfDay in slot.startHour until slot.endHour
+            val startMin = slot.startHour * 60
+            val endMin = slot.endHour * 60
+            if (startMin < endMin) {
+                totalMinutes in startMin until endMin
             } else {
-                hourOfDay >= slot.startHour || hourOfDay < slot.endHour
+                totalMinutes >= startMin || totalMinutes < endMin
             }
         }
         if (found >= 0) return found

@@ -36,45 +36,47 @@ fun DonationsDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 8.dp,
-            modifier = Modifier.fillMaxWidth()
+            tonalElevation = 6.dp,
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header
+                // Header Icon
                 Box(
                     modifier = Modifier
-                        .size(64.dp)
-                        .background(Color(0xFFE91E63).copy(alpha = 0.1f), RoundedCornerShape(32.dp)),
+                        .size(68.dp)
+                        .background(Color(0xFFE91E63).copy(alpha = 0.12f), RoundedCornerShape(34.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
-                        contentDescription = null,
+                        contentDescription = "Icono de corazón",
                         tint = Color(0xFFE91E63),
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(34.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Apoya a PAC Barinas",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Este proyecto es gratuito y sin fines de lucro. Tu aporte nos ayuda a mantener los servidores activos para todos los barineses.",
+                    text = "Iniciativa independiente y sin fines de lucro. Tu aporte voluntario nos ayuda a mantener activos los servidores y el servicio para todos los barineses.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    lineHeight = 20.sp
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(22.dp))
 
                 // PayPal
                 val paypalUrl = config?.paypal?.takeIf { it.isNotBlank() } ?: "https://paypal.me/pacbarinas"
@@ -83,9 +85,17 @@ fun DonationsDialog(
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(paypalUrl))
                         context.startActivity(intent)
                     },
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF003087)),
-                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
                 ) {
+                    Icon(
+                        Icons.Outlined.AccountBalanceWallet,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Donar vía PayPal", fontWeight = FontWeight.Bold, color = Color.White)
                 }
 
@@ -96,16 +106,18 @@ fun DonationsDialog(
                 if (binanceId != null) {
                     OutlinedCard(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.outlinedCardColors(containerColor = Color(0xFFFCD535).copy(alpha = 0.1f))
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.outlinedCardColors(containerColor = Color(0xFFFCD535).copy(alpha = 0.08f)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFCD535).copy(alpha = 0.4f))
                     ) {
                         Row(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            modifier = Modifier.padding(14.dp).fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text("Binance Pay ID", fontWeight = FontWeight.Bold, color = Color(0xFFC99700))
-                                Text(binanceId, style = MaterialTheme.typography.bodyMedium)
+                                Text("Binance Pay ID", fontWeight = FontWeight.ExtraBold, color = Color(0xFFC99700), fontSize = 12.sp)
+                                Text(binanceId, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                             }
                             IconButton(onClick = { clipboardManager.setText(AnnotatedString(binanceId)) }) {
                                 Icon(Icons.Default.ContentCopy, contentDescription = "Copiar ID", tint = Color(0xFFC99700))
@@ -122,21 +134,43 @@ fun DonationsDialog(
 
                 if (pmBank != null && pmPhone != null && pmId != null) {
                     OutlinedCard(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                     ) {
-                        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-                            Text("Pago Móvil", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Banco: $pmBank", style = MaterialTheme.typography.bodySmall)
-                            Text("Teléfono: $pmPhone", style = MaterialTheme.typography.bodySmall)
-                            Text("Cédula/RIF: $pmId", style = MaterialTheme.typography.bodySmall)
+                        Column(modifier = Modifier.padding(14.dp).fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Pago Móvil (Venezuela)", fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
+                                IconButton(
+                                    onClick = {
+                                        clipboardManager.setText(AnnotatedString("Banco: $pmBank | Telf: $pmPhone | CI: $pmId"))
+                                    },
+                                    modifier = Modifier.size(28.dp)
+                                ) {
+                                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar datos", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Banco: $pmBank", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                            Text("Teléfono: $pmPhone", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                            Text("Cédula/RIF: $pmId", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
                         }
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text("Cerrar")
+                Spacer(modifier = Modifier.height(4.dp))
+
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth().height(44.dp)
+                ) {
+                    Text("Cerrar", fontWeight = FontWeight.Bold)
                 }
             }
         }

@@ -164,14 +164,21 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun selectSector(sector: Sector) {
+        val cleanMatch = Regex("[ABCD]").find(sector.rotationBlock.uppercase())
+        val cleanBlock = cleanMatch?.value ?: "A"
         userPrefs.edit()
             .putString("saved_sector_id", sector.id)
+            .putString("selected_sector_id", sector.id)
             .putString("saved_address", sector.name)
-            .putString("saved_sector_block", sector.rotationBlock.uppercase().replace("BLOQUE", "").trim())
+            .putString("selected_sector_name", sector.name)
+            .putString("saved_block", sector.rotationBlock)
+            .putString("saved_sector_block", cleanBlock)
+            .putString("selected_sector_block", cleanBlock)
             .apply()
         _uiState.update { it.copy(selectedSector = sector, userAddress = sector.name) }
         refreshPrediction(sector.id)
         repository.cloudSync.listenToSector(sector.id)
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
     }
 
     fun selectSectorByName(name: String) {
@@ -198,7 +205,8 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun reportPowerStatus(
         hasPower: Boolean,
         reportType: String = if (hasPower) "NORMAL" else "SIN_LUZ",
-        voltage: Float? = if (hasPower) 118f else 0f
+        voltage: Float? = if (hasPower) 118f else 0f,
+        observation: String? = null
     ) {
         val targetSector = _uiState.value.selectedSector ?: return
         viewModelScope.launch {
@@ -207,14 +215,20 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
                 sectorName = targetSector.name,
                 hasPower = hasPower,
                 reportType = reportType,
-                voltage = voltage
+                voltage = voltage,
+                observation = observation
             )
 
             if (result.isSuccess) {
-                val actionDesc = if (hasPower) "Con Luz (118V)" else "Sin Luz (Corte reportado)"
+                val actionDesc = when (reportType) {
+                    "NORMAL" -> "Con Luz (118V)"
+                    "FALLA_IRREGULAR" -> "Falla Irregular (Avería reportada)"
+                    else -> "Sin Luz (Corte reportado)"
+                }
+                val obsText = if (!observation.isNullOrBlank()) " • Obs: $observation" else ""
                 _uiState.update {
                     it.copy(
-                        userMessage = "✅ Telemetría para ${targetSector.name} registrada como '$actionDesc'."
+                        userMessage = "✅ Telemetría para ${targetSector.name} registrada como '$actionDesc'$obsText."
                     )
                 }
                 refreshPrediction(targetSector.id)
@@ -397,7 +411,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        userMessage = "✅ ¡Comunidad '${name}' registrada y sincronizada en Firebase!"
+                        userMessage = "✅ ¡Comunidad '${name}' registrada y sincronizada con éxito!"
                     )
                 }
             } else {
@@ -417,7 +431,8 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
 
     fun setUserLocation(location: BarinasLocation) {
         // Match sector in current list or find appropriate sector for block
-        val cleanBlock = location.block.replace("Bloque", "").trim().uppercase()
+        val cleanMatch = Regex("[ABCD]").find(location.block.uppercase())
+        val cleanBlock = cleanMatch?.value ?: "A"
         val matchingSector = _uiState.value.sectors.find { it.id == location.sectorEntityId }
             ?: _uiState.value.sectors.find { it.name.contains(location.name, ignoreCase = true) }
             ?: _uiState.value.sectors.find { it.rotationBlock.contains(cleanBlock, ignoreCase = true) }
@@ -426,8 +441,12 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         val resolvedSectorId = matchingSector?.id ?: location.sectorEntityId
         userPrefs.edit()
             .putString("saved_address", location.name)
+            .putString("selected_sector_name", location.name)
             .putString("saved_block", location.block)
+            .putString("saved_sector_block", cleanBlock)
+            .putString("selected_sector_block", cleanBlock)
             .putString("saved_sector_id", resolvedSectorId)
+            .putString("selected_sector_id", resolvedSectorId)
             .putBoolean("onboarding_done", true)
             .apply()
 
@@ -436,7 +455,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
                 userAddress = location.name,
                 isOnboardingOpen = false,
                 selectedSector = matchingSector ?: current.selectedSector,
-                userMessage = "📍 Ubicación fijada en ${location.name} • ${location.block}."
+                userMessage = "📍 Ubicación fijada en ${location.name} • Bloque ${cleanBlock}."
             )
         }
 
@@ -444,6 +463,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             refreshPrediction(it.id) 
             repository.cloudSync.listenToSector(it.id)
         }
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
     }
 
     fun publishScheduleNotification() {

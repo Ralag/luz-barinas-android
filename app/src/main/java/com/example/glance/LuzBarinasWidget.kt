@@ -54,10 +54,10 @@ class LuzBarinasWidget : GlanceAppWidget() {
         val sectorName = defaultSector?.name ?: "Alto Barinas 1"
         val statusText = when (defaultSector?.status) {
             "SCHEDULED_OUTAGE" -> "🔴 Corte Programado (PAC)"
-            "IRREGULAR_OUTAGE" -> "🟣 Corte Irregular (Avería)"
-            else -> "🟢 Servicio Activo (Con Luz)"
+            "IRREGULAR_OUTAGE" -> "🟣 Corte No Programado"
+            else -> "🟢 Servicio Estimado (Con Luz)"
         }
-        val voltageText = if (defaultSector?.status == "NORMAL") "${defaultSector.voltage.toInt()} V" else "0 V"
+        val voltageText = if (defaultSector?.status == "NORMAL") "Ref: ${defaultSector.voltage.toInt()} V" else "0 V"
 
         provideContent {
             Box(

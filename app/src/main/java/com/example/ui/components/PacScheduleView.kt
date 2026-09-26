@@ -41,12 +41,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -81,21 +84,30 @@ fun PacScheduleView(
     pacMatrix: List<List<String>> = PacScheduleData.getMatrixSnapshot(),
     pacSlots: List<PacSlot> = PacScheduleData.getSlotsSnapshot()
 ) {
-    val cal = remember { Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")) }
-    val todayIdx = remember { PacScheduleData.getDayIndex(cal.get(Calendar.DAY_OF_WEEK)) }
-    val currentSlotIdx = remember { PacScheduleData.getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY)) }
+    var timeKey by remember { mutableLongStateOf(System.currentTimeMillis() / 60_000L) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(10_000L)
+            timeKey = System.currentTimeMillis() / 60_000L
+        }
+    }
+    val cal = remember(timeKey) { Calendar.getInstance() }
+    val todayIdx = remember(timeKey) { PacScheduleData.getDayIndex(cal.get(Calendar.DAY_OF_WEEK)) }
+    val currentSlotIdx = remember(timeKey) { 
+        PacScheduleData.getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE)) 
+    }
 
     var selectedDayIdx by remember { mutableIntStateOf(todayIdx) }
     var mainTab by remember { mutableIntStateOf(0) } // 0: Semanal, 1: Mensual, 2: Bloques
-    val currentMonthIdx = remember { cal.get(Calendar.MONTH) }
+    val currentMonthIdx = remember(timeKey) { cal.get(Calendar.MONTH) }
     var selectedMonthIdx by remember { mutableIntStateOf(currentMonthIdx) }
 
     val userBlock = remember(selectedSector) {
         selectedSector?.rotationBlock?.uppercase()?.replace("BLOQUE", "")?.trim() ?: "A"
     }
 
-    val currentYear = remember { cal.get(Calendar.YEAR) }
-    val todayDayOfMonth = remember { cal.get(Calendar.DAY_OF_MONTH) }
+    val currentYear = remember(timeKey) { cal.get(Calendar.YEAR) }
+    val todayDayOfMonth = remember(timeKey) { cal.get(Calendar.DAY_OF_MONTH) }
 
     val currentWeekNumber = remember(todayDayOfMonth) {
         when (todayDayOfMonth) {
@@ -188,7 +200,7 @@ fun PacScheduleView(
                         ) {
                             Icon(
                                 Icons.Outlined.ViewWeek,
-                                contentDescription = null,
+                                contentDescription = "Vista semanal",
                                 modifier = Modifier.size(16.dp),
                                 tint = if (mainTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -218,7 +230,7 @@ fun PacScheduleView(
                         ) {
                             Icon(
                                 Icons.Outlined.CalendarMonth,
-                                contentDescription = null,
+                                contentDescription = "Vista mensual",
                                 modifier = Modifier.size(16.dp),
                                 tint = if (mainTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -248,7 +260,7 @@ fun PacScheduleView(
                         ) {
                             Icon(
                                 Icons.Outlined.ViewAgenda,
-                                contentDescription = null,
+                                contentDescription = "Vista por bloques",
                                 modifier = Modifier.size(16.dp),
                                 tint = if (mainTab == 2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -429,7 +441,7 @@ fun PacScheduleView(
                                                                 color = MaterialTheme.colorScheme.onSurface
                                                             )
                                                             Text(
-                                                                text = if (isCutForUser) "🔴 Corte PAC asignado a tu bloque" else "🟢 Servicio eléctrico con luz garantizada",
+                                                                text = if (isCutForUser) "🔴 Corte PAC asignado a tu bloque" else "🟢 Sin corte programado en tu bloque",
                                                                 fontSize = 11.sp,
                                                                 color = if (isCutForUser) StatusScheduledRed else StatusNormalGreen
                                                             )

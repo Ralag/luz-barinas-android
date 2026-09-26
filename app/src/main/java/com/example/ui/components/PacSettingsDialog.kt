@@ -12,10 +12,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Power
@@ -118,7 +118,7 @@ fun PacSettingsDialog(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Alarm,
-                                contentDescription = null,
+                                contentDescription = "Icono de alarma",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(22.dp)
                             )
@@ -152,7 +152,7 @@ fun PacSettingsDialog(
                     }
                 }
 
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.padding(vertical = 12.dp),
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                 )
@@ -181,7 +181,7 @@ fun PacSettingsDialog(
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Power,
-                                    contentDescription = null,
+                                    contentDescription = "Icono de energía",
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -325,6 +325,60 @@ fun PacSettingsDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                            // Selector de Modo: Notificación Estándar vs Alarma Continua
+                            Text(
+                                text = "🔔 Modo de Aviso PAC",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                FilterChip(
+                                    selected = !isAlarmEnabled,
+                                    onClick = {
+                                        isAlarmEnabled = false
+                                        isRestoreAlarmEnabled = false
+                                        isNotificationEnabled = true
+                                    },
+                                    label = {
+                                        Text(
+                                            text = "📲 Notificaciones (Default)",
+                                            fontSize = 11.sp,
+                                            fontWeight = if (!isAlarmEnabled) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                FilterChip(
+                                    selected = isAlarmEnabled,
+                                    onClick = {
+                                        isAlarmEnabled = true
+                                        isRestoreAlarmEnabled = true
+                                    },
+                                    label = {
+                                        Text(
+                                            text = "⏰ Alarma Sirena",
+                                            fontSize = 11.sp,
+                                            fontWeight = if (isAlarmEnabled) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            Text(
+                                text = if (!isAlarmEnabled)
+                                    "✓ Notificación estándar no intrusiva con sonido y vibración diferenciados al irse y volver la luz."
+                                else
+                                    "⚠️ Método antiguo: sonará como un despertador audible en bucle continuo hasta que presiones Apagar Alarma.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (!isAlarmEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                            )
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
                             // Switch 1: Pre-cut notification
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -350,7 +404,7 @@ fun PacSettingsDialog(
                                 )
                             }
 
-                            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
 
                             // Switch 2: Audible Alarm for Outage
                             Row(
@@ -379,7 +433,7 @@ fun PacSettingsDialog(
                                 )
                             }
 
-                            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
 
                             // Switch 3: Restore Alarm (Power back on)
                             Row(
@@ -389,7 +443,7 @@ fun PacSettingsDialog(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "💡 Alarma al Regresar la Luz",
+                                        text = "💡 Alarma de Fin de Turno PAC",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.SemiBold,
                                         color = MaterialTheme.colorScheme.onSurface
@@ -406,7 +460,7 @@ fun PacSettingsDialog(
                                 )
                             }
 
-                            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
 
                             // Switch 4: Vibration
                             Row(
@@ -460,8 +514,8 @@ fun PacSettingsDialog(
                         )
                     ) {
                         Icon(
-                            imageVector = if (isTestingAlarm) Icons.Default.Close else Icons.Default.VolumeUp,
-                            contentDescription = null,
+                            imageVector = if (isTestingAlarm) Icons.Default.Close else Icons.AutoMirrored.Filled.VolumeUp,
+                            contentDescription = if (isTestingAlarm) "Detener" else "Probar sonido",
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -483,7 +537,8 @@ fun PacSettingsDialog(
                             isNotificationEnabled = isNotificationEnabled,
                             isAlarmEnabled = isAlarmEnabled,
                             isRestoreAlarmEnabled = isRestoreAlarmEnabled,
-                            isVibrationEnabled = isVibrationEnabled
+                            isVibrationEnabled = isVibrationEnabled,
+                            useLegacyAlarmSiren = isAlarmEnabled
                         )
                         PacAlertPrefs.saveSettings(context, newSettings)
                         PacAlarmScheduler.scheduleNextAlarm(context)

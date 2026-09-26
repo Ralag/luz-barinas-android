@@ -17,6 +17,7 @@ data class PendingReportEntity(
     val reportedAtMillis: Long,
     val reportType: String,
     val voltageObserved: Float?,
+    val observation: String? = null,
     val isSynced: Boolean = false,
     val retryCount: Int = 0
 ) {
@@ -28,6 +29,7 @@ data class PendingReportEntity(
         reportedAtMillis = reportedAtMillis,
         reportType = reportType,
         voltageObserved = voltageObserved,
+        observation = observation,
         isSynced = isSynced
     )
 }

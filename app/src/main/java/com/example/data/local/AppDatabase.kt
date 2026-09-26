@@ -43,7 +43,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "luz_barinas.db"
                 )
                 .addMigrations(MIGRATION_2_3)
-                .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
                 INSTANCE = instance
                 instance

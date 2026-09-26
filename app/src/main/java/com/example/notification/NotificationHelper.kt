@@ -14,27 +14,70 @@ import com.example.R
 object NotificationHelper {
     const val CHANNEL_ID = "alertas_cortes_barinas"
     const val CHANNEL_NAME = "Alertas PAC Barinas"
+
+    const val CHANNEL_ID_OUTAGE = "pac_corte_luz"
+    const val CHANNEL_NAME_OUTAGE = "Aviso de Corte de Luz (PAC)"
+
+    const val CHANNEL_ID_RESTORE = "pac_restablecimiento_luz"
+    const val CHANNEL_NAME_RESTORE = "Restablecimiento del Servicio Eléctrico"
+
     const val NOTIFICATION_ID_ALERT = 1001
     const val NOTIFICATION_ID_CONFIRMATION = 1002
     const val NOTIFICATION_ID_PREDICTIVE = 1003
     const val NOTIFICATION_ID_BROADCAST = 1004
+    const val NOTIFICATION_ID_RESTORE = 1005
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                importance
-            ).apply {
-                description = "Notificaciones oficiales, alarmas y telemetría de cortes PAC Barinas"
-                enableVibration(true)
-                setShowBadge(true)
-            }
-
             val notificationManager: NotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+
+            val soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION)
+            val audioAttributes = android.media.AudioAttributes.Builder()
+                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                .build()
+
+            // 1. Canal General PAC
+            val generalChannel = NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notificaciones comunitarias y avisos de PAC Barinas"
+                enableVibration(true)
+                setShowBadge(true)
+                setSound(soundUri, audioAttributes)
+            }
+            notificationManager.createNotificationChannel(generalChannel)
+
+            // 2. Canal de Corte de Luz (Vibración enfática y redundante)
+            val outageChannel = NotificationChannel(
+                CHANNEL_ID_OUTAGE,
+                CHANNEL_NAME_OUTAGE,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Avisos previos e inicio de corte de energía eléctrica (PAC)"
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 500, 250, 500, 250, 500)
+                setShowBadge(true)
+                setSound(soundUri, audioAttributes)
+            }
+            notificationManager.createNotificationChannel(outageChannel)
+
+            // 3. Canal de Restablecimiento de Luz (Patrón suave de retorno)
+            val restoreChannel = NotificationChannel(
+                CHANNEL_ID_RESTORE,
+                CHANNEL_NAME_RESTORE,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notificaciones al finalizar el turno de racionamiento cuando retorna la luz"
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 200, 100, 200, 100, 400)
+                setShowBadge(true)
+                setSound(soundUri, audioAttributes)
+            }
+            notificationManager.createNotificationChannel(restoreChannel)
         }
     }
 
@@ -88,10 +131,10 @@ object NotificationHelper {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_bolt)
             .setContentTitle("⚡ ¿Tienes servicio en $sectorName?")
-            .setContentText("Circuito $circuitCode reporta variación. Confirma tu estado con un toque:")
+            .setContentText("Consulta comunitaria del circuito $circuitCode. Confirma tu estado con un toque:")
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText("Se detectó un cambio en el circuito $circuitCode ($sectorName). Tu telemetría actualiza el mapa ciudadano en tiempo real:")
+                    .bigText("Consulta ciudadana sobre el circuito $circuitCode ($sectorName). Tu reporte actualiza el mapa comunitario:")
             )
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(contentPendingIntent)
@@ -119,12 +162,12 @@ object NotificationHelper {
         sectorName: String,
         hasPower: Boolean
     ) {
-        val statusText = if (hasPower) "Servicio Activo (Con Luz)" else "Corte Eléctrico Reportado"
+        val statusText = if (hasPower) "Con Luz" else "Sin Luz"
         val icon = if (hasPower) R.drawable.ic_power_on else R.drawable.ic_power_off
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(icon)
-            .setContentTitle("✅ Telemetría registrada")
+            .setContentTitle("✅ Reporte ciudadano registrado")
             .setContentText("Reporte para $sectorName: $statusText. Sincronizando en segundo plano.")
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setAutoCancel(true)
@@ -156,7 +199,7 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID_OUTAGE)
             .setSmallIcon(R.drawable.ic_notification_bolt)
             .setContentTitle("⚡ Corte programado en ~$minutesUntil min")
             .setContentText("$sectorName: corte PAC de $slotLabel. ¡Carga tus dispositivos!")
@@ -165,7 +208,7 @@ object NotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-            .setVibrate(longArrayOf(0, 300, 150, 300))
+            .setVibrate(longArrayOf(0, 500, 250, 500, 250, 500))
 
         try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_PREDICTIVE, builder.build())
@@ -196,7 +239,7 @@ object NotificationHelper {
         val prefix = when (level.uppercase()) {
             "EMERGENCY" -> "🚨 AVISO URGENTE"
             "WARNING" -> "⚠️ ALERTA PAC"
-            else -> "📢 COMUNICADO OFICIAL"
+            else -> "📢 COMUNICADO INFORMATIVO"
         }
 
         val fullTitle = "$prefix: $title"

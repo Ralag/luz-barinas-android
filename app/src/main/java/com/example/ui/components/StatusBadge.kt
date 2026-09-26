@@ -55,7 +55,7 @@ fun StatusBadge(
         ServiceStatus.IRREGULAR_OUTAGE -> Triple(
             GoogleAIPurple,
             Icons.Outlined.Warning,
-            "Corte Irregular (Avería)"
+            "Corte No Programado"
         )
     }
 
@@ -94,7 +94,7 @@ fun StatusBadge(
         Spacer(modifier = Modifier.width(6.dp))
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = label,
             tint = color,
             modifier = Modifier.size(if (isLarge) 18.dp else 14.dp)
         )

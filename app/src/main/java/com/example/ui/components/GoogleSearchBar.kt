@@ -240,7 +240,7 @@ fun GoogleSearchBar(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.LocationOn,
-                                        contentDescription = null,
+                                        contentDescription = "Icono de ubicación",
                                         tint = blockColor,
                                         modifier = Modifier.size(16.dp)
                                     )

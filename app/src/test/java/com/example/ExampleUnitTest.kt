@@ -11,7 +11,7 @@ import org.junit.Test
 
 class ExampleUnitTest {
   @Test
-  fun `test modular arithmetic outage prediction engine`() {
+  fun `test modular arithmetic outage prediction engine`() = kotlinx.coroutines.test.runTest {
     val sector = Sector(
       id = "sector_alto_barinas_norte",
       name = "Alto Barinas Norte",
@@ -60,11 +60,11 @@ class ExampleUnitTest {
     )
 
     assertNotNull(prediction)
-    assertEquals(sector.id, prediction.sectorId)
-    assertTrue("Estimated duration should be 4.0 hours", prediction.estimatedDurationHours in 3.5f..4.5f)
-    assertTrue("Confidence percentage should be at least 70%", prediction.confidencePercentage >= 70)
-    assertTrue("Next start should be in future or now", prediction.nextEstimatedStartMillis >= now - 1000)
-    assertTrue("Next end must be after start", prediction.nextEstimatedEndMillis > prediction.nextEstimatedStartMillis)
+    assertEquals(sector.id, prediction?.sectorId)
+    assertTrue("Estimated duration should be 4.0 hours", (prediction?.estimatedDurationHours ?: 0f) in 3.5f..4.5f)
+    assertTrue("Confidence percentage should be at least 70%", (prediction?.confidencePercentage ?: 0) >= 70)
+    assertTrue("Next start should be in future or now", (prediction?.nextEstimatedStartMillis ?: 0L) >= now - 1000)
+    assertTrue("Next end must be after start", (prediction?.nextEstimatedEndMillis ?: 0L) > (prediction?.nextEstimatedStartMillis ?: 0L))
   }
 }
 

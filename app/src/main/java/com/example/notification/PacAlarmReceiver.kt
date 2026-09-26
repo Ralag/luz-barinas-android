@@ -45,10 +45,13 @@ class PacAlarmReceiver : BroadcastReceiver() {
     private fun handleRestoreAlert(context: Context, intent: Intent) {
         val sectorName = intent.getStringExtra(EXTRA_SECTOR_NAME) ?: "Tu sector"
         val settings = PacAlertPrefs.getSettings(context)
-        if (!settings.isRestoreAlarmEnabled) return
+        if (!settings.isNotificationEnabled && !settings.isRestoreAlarmEnabled) return
 
-        PacAlarmPlayer.startAlarm(context, settings.isVibrationEnabled)
-        showRestoreNotification(context, sectorName)
+        if (settings.isAlarmEnabled && settings.isRestoreAlarmEnabled) {
+            PacAlarmPlayer.startAlarm(context, settings.isVibrationEnabled)
+        }
+
+        showRestoreNotification(context, sectorName, isAlarm = settings.isAlarmEnabled && settings.isRestoreAlarmEnabled)
         PacAlarmScheduler.scheduleNextAlarm(context)
     }
 
@@ -83,14 +86,6 @@ class PacAlarmReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val stopIntent = Intent(context, PacAlarmReceiver::class.java).apply {
-            action = ACTION_STOP_ALARM
-        }
-        val stopPendingIntent = PendingIntent.getBroadcast(
-            context, 101, stopIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
         val title = if (minutesUntil == 0) {
             "⚡ ¡Inicia Corte PAC ahora!"
         } else {
@@ -99,7 +94,7 @@ class PacAlarmReceiver : BroadcastReceiver() {
 
         val body = "$sectorName ($timeLabel). ¡Carga tus dispositivos y desconecta equipos sensibles!"
 
-        val builder = NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID_OUTAGE)
             .setSmallIcon(R.drawable.ic_notification_bolt)
             .setContentTitle(title)
             .setContentText(body)
@@ -108,13 +103,21 @@ class PacAlarmReceiver : BroadcastReceiver() {
                     .setBigContentTitle(title)
                     .bigText("$body\n\n🔋 Asegura carga en celulares y linternas\n🔌 Desconecta electrodomésticos para protegerlos")
             )
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(if (isAlarm) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
+            .setCategory(if (isAlarm) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_EVENT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(contentPendingIntent)
+            .setVibrate(longArrayOf(0, 500, 250, 500, 250, 500))
             .setAutoCancel(true)
 
         if (isAlarm) {
+            val stopIntent = Intent(context, PacAlarmReceiver::class.java).apply {
+                action = ACTION_STOP_ALARM
+            }
+            val stopPendingIntent = PendingIntent.getBroadcast(
+                context, 101, stopIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
             builder.addAction(R.drawable.ic_power_off, "🔕 Detener Alarma", stopPendingIntent)
             builder.setOngoing(true)
         }
@@ -126,7 +129,7 @@ class PacAlarmReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun showRestoreNotification(context: Context, sectorName: String) {
+    private fun showRestoreNotification(context: Context, sectorName: String, isAlarm: Boolean) {
         NotificationHelper.createNotificationChannel(context)
 
         val openIntent = Intent(context, MainActivity::class.java).apply {
@@ -137,25 +140,35 @@ class PacAlarmReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val stopIntent = Intent(context, PacAlarmReceiver::class.java).apply {
-            action = ACTION_STOP_ALARM
-        }
-        val stopPendingIntent = PendingIntent.getBroadcast(
-            context, 102, stopIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val builder = NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID_RESTORE)
             .setSmallIcon(R.drawable.ic_power_on)
             .setContentTitle("💡 ¡Luz restablecida según cronograma!")
-            .setContentText("El turno PAC para $sectorName ha finalizado.")
+            .setContentText("El turno PAC para $sectorName ha finalizado. Regresó el suministro.")
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle("💡 ¡Luz restablecida en tu sector!")
+                    .bigText("El turno PAC para $sectorName ha culminado exitosamente. Ya puedes reconectar tus equipos de manera progresiva.")
+            )
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(if (isAlarm) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_EVENT)
             .setContentIntent(contentPendingIntent)
+            .setVibrate(longArrayOf(0, 200, 100, 200, 100, 400))
             .setAutoCancel(true)
-            .addAction(R.drawable.ic_power_on, "🔕 Detener Alarma", stopPendingIntent)
+
+        if (isAlarm) {
+            val stopIntent = Intent(context, PacAlarmReceiver::class.java).apply {
+                action = ACTION_STOP_ALARM
+            }
+            val stopPendingIntent = PendingIntent.getBroadcast(
+                context, 102, stopIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.addAction(R.drawable.ic_power_on, "🔕 Detener Alarma", stopPendingIntent)
+            builder.setOngoing(true)
+        }
 
         try {
-            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_PAC_ALARM, builder.build())
+            NotificationManagerCompat.from(context).notify(NotificationHelper.NOTIFICATION_ID_RESTORE, builder.build())
         } catch (e: SecurityException) {
             Log.w("PacAlarmReceiver", "Permission POST_NOTIFICATIONS missing")
         }

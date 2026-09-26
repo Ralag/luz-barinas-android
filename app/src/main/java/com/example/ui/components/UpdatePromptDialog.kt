@@ -64,7 +64,7 @@ fun UpdatePromptDialog(
                 ) {
                     Icon(
                         imageVector = Icons.Default.SystemUpdate,
-                        contentDescription = "Update",
+                        contentDescription = "Actualizar",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(32.dp)
                     )
