@@ -339,7 +339,31 @@ object PacScheduleData {
         "El Tambor",
         "Cdad Bolivia II",
         "Mijagua 34,5 kV",
-        "Mirí"
+        "Mirí",
+        "Las Ingenieras I, II y III",
+        "Los Pozones",
+        // Sectores Comunitarios y Ampliados de Barinas
+        "Alto Barinas Norte",
+        "calle caroní",
+        "Calle Mérida",
+        "corocito sector 1",
+        "El Molino",
+        "los profesionales",
+        "mi jardín",
+        "Primero de Diciembre",
+        "rosa mistica",
+        "Urb El Pilar",
+        "Urb. Campo Móvil",
+        "Urb. José Antonio Páez",
+        "Urb. Juan Pablo II",
+        "Urb. La Rosaleda",
+        "Urb. Los Próceres",
+        "Urb. Raúl Leoni",
+        "Urb. Villas del Pilar",
+        "Urb. Vista Hermosa",
+        "urb.las palmas",
+        "Urbanización Juan Pablo II",
+        "Zona Industrial"
     )
 
     val SECTORS_BLOQUE_B = mutableListOf(
@@ -361,7 +385,31 @@ object PacScheduleData {
         "Curbati",
         "Ticoporo",
         "Capitanejo 34,5 kV",
-        "Santa Elena kV"
+        "Santa Elena kV",
+        "5 de Julio",
+        "Mi Jardín (Sectores 1, 2, 3)",
+        // Sectores Comunitarios y Ampliados de Barinas
+        "25 de mayo",
+        "Barrio 5 de Julio",
+        "Barrio Negro Primero",
+        "bloques del cambio",
+        "calle cedeño a mijagua barrio la candelaria",
+        "cambio",
+        "Carlos andres",
+        "Centro Residencia",
+        "Ciudad Tavacare Sector A-C",
+        "Ciudad Tavacare Sector D-G",
+        "Ciudad Varyna Bucares",
+        "Ciudad Varyna Los Samanes",
+        "Independencia I",
+        "la cuatri",
+        "Palacio del Pan / Av. 23 de Enero",
+        "Santa Rosa",
+        "Urb palacio Fajardo",
+        "Urb. Cuatricentenaria",
+        "Urb. La Floresta",
+        "Urbanización Linda Barinas",
+        "urbanización negro primero"
     )
 
     val SECTORS_BLOQUE_C = mutableListOf(
@@ -380,7 +428,41 @@ object PacScheduleData {
         "El Paguey",
         "Cdad Bolivia I",
         "Fundacea",
-        "Estadio"
+        "Estadio",
+        "Barrio El Carmen",
+        "La Cincuentena I, II y III",
+        "La Paz / Barrio La Paz",
+        "Barinas II y IV",
+        // Sectores Comunitarios y Ampliados de Barinas
+        "Alto Barinas Sur",
+        "Altos de la Arenosa",
+        "apure",
+        "Av. Medina Jiménez",
+        "Barrio El Cambio",
+        "Barrio La Paz",
+        "Brisas de Corozal",
+        "Casco Central / Plaza Bolívar",
+        "Ciudad Tavacare - Sector C",
+        "la Trinidad 2",
+        "Lomas de Alto Barinas",
+        "Sector Punta Gorda",
+        "sector santa clara",
+        "Socopó I",
+        "urb lomas de Alto Barinas conjunto la lagunita",
+        "Urb. Agustín Codazzi",
+        "Urb. Barinas II",
+        "Urb. Barinas IV",
+        "Urb. Cinqueña 3",
+        "Urb. Don Samuel",
+        "Urb. La Cincuentena Etapa IV",
+        "Urb. La Cincuentena I y II",
+        "Urb. La Cincuentena III",
+        "Urb. La Concordia",
+        "Urb. Llano Alto",
+        "Urb. Palma de Oro",
+        "Urb. Simón Bolívar",
+        "Urbanización Coromoto",
+        "zulia"
     )
 
     val SECTORS_BLOQUE_D = mutableListOf(
@@ -398,7 +480,15 @@ object PacScheduleData {
         "Boconoito",
         "Otopum-Pajen",
         "Canagua 34,5 kV",
-        "Libertad"
+        "Libertad",
+        "La Caramuca",
+        "Punta Gorda",
+        // Sectores Comunitarios y Ampliados de Barinas
+        "El Corozo",
+        "Quebrada Seca",
+        "Sector La Caramuca",
+        "Urb. Agustin Codazzi",
+        "Urb. Codazzi"
     )
 
     fun addSectorToBlock(sectorName: String, blockCode: String) {
