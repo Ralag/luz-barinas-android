@@ -160,3 +160,31 @@ fun RefundPolicyContent() {
     Text("Contacto", fontWeight = FontWeight.Bold)
     Text("Para cualquier consulta relacionada con donaciones, por favor contáctenos a: jorluis255@gmail.com (Teléfono: 04122644894)")
 }
+
+@Composable
+fun SystemDocumentationContent() {
+    Text("Documentación del Sistema PAC Barinas", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+    Spacer(modifier = Modifier.height(8.dp))
+    Text("Versión 2.0 • Septiembre 2026", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text("1. Visión y Propósito", fontWeight = FontWeight.Bold)
+    Text("PAC Barinas es una plataforma integral de telemetría ciudadana para el monitoreo en tiempo real del Plan de Administración de Carga (PAC) y el estado del servicio eléctrico en los 12 municipios del Estado Barinas, Venezuela.")
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Text("2. Arquitectura Global", fontWeight = FontWeight.Bold)
+    Text("• App Android: Interfaz nativa moderna construida 100% con Jetpack Compose y arquitectura MVVM (StateFlow, Coroutines).\n• Backend Cloud: Supabase (PostgreSQL 15 + WebSockets Realtime) para sincronización bidireccional instantánea sin polling.\n• APIs Serverless: Funciones serverless en Vercel para modelos de predicción y cálculo de rotaciones mensuales.\n• Panel Web Administrativo: Consola de control para gestión de la matriz PAC, atlas cartográfico neón y bandeja de sectores comunitarios.")
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Text("3. Notificaciones y Alarmas", fontWeight = FontWeight.Bold)
+    Text("• Notificaciones Push Estándar (Default): Avisos predictivos con sonidos cortos y exclusivos para corte y retorno de luz.\n• Modo Sirena Continua: Opción configurable para usuarios que requieran una alarma audible continua hasta apagarla manualmente.\n• Enrutamiento por Bloque: Suscripción granular a tópicos según el bloque rotativo asignado (A, B, C o D).")
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Text("4. Persistencia y Modo Offline (Offline-First)", fontWeight = FontWeight.Bold)
+    Text("• Base de datos local SQLite con Room (Versión 3) para garantizar acceso al cronograma aún sin conexión de datos.\n• SharedPreferences para parámetros de configuración del usuario y ubicación guardada.")
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Text("5. Repositorio y Documentación Completa", fontWeight = FontWeight.Bold)
+    Text("El documento maestro 'DOCUMENTACION_SISTEMA.md' con más de 1.400 líneas de detalles técnicos, esquemas DDL y flujos de datos se encuentra disponible en la raíz del repositorio oficial en GitHub:\nhttps://github.com/Ralag/luz-barinas-android")
+}
+

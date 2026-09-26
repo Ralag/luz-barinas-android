@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.example.BuildConfig
 
 enum class LegalPage {
-    PRIVACY, TERMS, DEVELOPER, REFUND
+    PRIVACY, TERMS, DEVELOPER, REFUND, SYSTEM_DOC
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,6 +56,7 @@ fun SettingsScreen(
                 LegalPage.TERMS -> "Términos y Condiciones"
                 LegalPage.DEVELOPER -> "Datos del Desarrollador"
                 LegalPage.REFUND -> "Política de Reembolsos"
+                LegalPage.SYSTEM_DOC -> "Documentación del Sistema"
             }
             LegalScreen(title = title, onBack = { currentLegalPage = null }) {
                 when (legalPage) {
@@ -63,6 +64,7 @@ fun SettingsScreen(
                     LegalPage.TERMS -> TermsAndConditionsContent()
                     LegalPage.DEVELOPER -> DeveloperInfoContent()
                     LegalPage.REFUND -> RefundPolicyContent()
+                    LegalPage.SYSTEM_DOC -> SystemDocumentationContent()
                 }
             }
         } else {
@@ -259,24 +261,31 @@ fun SettingsScreen(
                     item {
                         SettingsCategory(title = "Información del Sistema") {
                             SettingsItem(
+                                icon = Icons.Outlined.MenuBook,
+                                title = "Documentación Técnica del Sistema",
+                                subtitle = "Arquitectura, módulos, bases de datos y flujos",
+                                onClick = { currentLegalPage = LegalPage.SYSTEM_DOC }
+                            )
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                            SettingsItem(
                                 icon = Icons.Outlined.Build,
                                 title = "Detalles Técnicos",
                                 subtitle = "Versión: ${BuildConfig.VERSION_NAME}\nBuild ID: ${BuildConfig.VERSION_CODE}",
-                                onClick = {}
+                                onClick = { currentLegalPage = LegalPage.SYSTEM_DOC }
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                             SettingsItem(
                                 icon = Icons.Outlined.IntegrationInstructions,
                                 title = "Integraciones Activas",
                                 subtitle = "AdMob (Anuncios), Supabase (Base de Datos y Tiempo Real)",
-                                onClick = {}
+                                onClick = { currentLegalPage = LegalPage.SYSTEM_DOC }
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                             SettingsItem(
                                 icon = Icons.Outlined.DataUsage,
                                 title = "Datos Recopilados",
                                 subtitle = "Sector seleccionado, reportes anónimos, preferencias",
-                                onClick = {}
+                                onClick = { currentLegalPage = LegalPage.PRIVACY }
                             )
                         }
                     }
