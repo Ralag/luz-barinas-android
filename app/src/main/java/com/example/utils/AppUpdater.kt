@@ -125,7 +125,13 @@ object AppUpdater {
                     return@withContext
                 }
                 
-                // 2. Start Download using DownloadManager
+                // 2. Prepare file destination and clean stale APKs to avoid DownloadManager duplicate renames (-1.apk)
+                val destDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                val file = File(destDir, apkName)
+                if (file.exists()) {
+                    file.delete()
+                }
+
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Descargando actualización en segundo plano...", Toast.LENGTH_LONG).show()
                 }
@@ -138,20 +144,6 @@ object AppUpdater {
                     setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, apkName)
                 }
                 
-                val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), apkName)
-                if (file.exists() && file.length() > 5000000) { // If it's larger than 5MB, assume it's fully downloaded
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Actualización ya descargada. Iniciando instalación...", Toast.LENGTH_SHORT).show()
-                    }
-                    installApk(context, file)
-                    return@withContext
-                }
-                
-                // If partial or doesn't exist, delete and re-download
-                if (file.exists()) {
-                    file.delete()
-                }
-                
                 val downloadId = downloadManager.enqueue(request)
                 
                 // 3. Register Receiver to install APK once downloaded
@@ -160,7 +152,9 @@ object AppUpdater {
                         val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                         if (id == downloadId) {
                             installApk(ctxt, file)
-                            ctxt.unregisterReceiver(this)
+                            try {
+                                ctxt.unregisterReceiver(this)
+                            } catch (_: Exception) {}
                         }
                     }
                 }
@@ -181,9 +175,31 @@ object AppUpdater {
     }
     
     private fun installApk(context: Context, apkFile: File) {
-        if (!apkFile.exists()) return
+        if (!apkFile.exists() || apkFile.length() == 0L) {
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                Toast.makeText(context, "Archivo de instalación incompleto o dañado.", Toast.LENGTH_LONG).show()
+            }
+            return
+        }
         
         try {
+            // Check unknown apps install permission on Android 8.0+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (!context.packageManager.canRequestPackageInstalls()) {
+                    val settingsIntent = Intent(
+                        android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        Uri.parse("package:${context.packageName}")
+                    ).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(settingsIntent)
+                    android.os.Handler(android.os.Looper.getMainLooper()).post {
+                        Toast.makeText(context, "Por favor autoriza la instalación de actualizaciones para PAC Barinas e intenta de nuevo.", Toast.LENGTH_LONG).show()
+                    }
+                    return
+                }
+            }
+
             val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 FileProvider.getUriForFile(context, "${context.packageName}.provider", apkFile)
             } else {
@@ -195,11 +211,25 @@ object AppUpdater {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
+
+            // Explicitly grant read URI permission to all potential package installers
+            val resolvedActivities = context.packageManager.queryIntentActivities(
+                intent,
+                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+            )
+            for (resolveInfo in resolvedActivities) {
+                context.grantUriPermission(
+                    resolveInfo.activityInfo.packageName,
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+
             context.startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
             android.os.Handler(android.os.Looper.getMainLooper()).post {
-                Toast.makeText(context, "Error al instalar: " + e.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Error al iniciar instalador: " + e.message, Toast.LENGTH_LONG).show()
             }
         }
     }

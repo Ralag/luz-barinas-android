@@ -89,6 +89,9 @@ fun DashboardScreen(
     prediction: OutagePrediction?,
     unsyncedCount: Int,
     activeNotice: BroadcastNotice? = null,
+    activeProfile: String = "home",
+    hasWorkProfile: Boolean = false,
+    onSwitchProfile: (String) -> Unit = {},
     onDismissNotice: () -> Unit = {},
     onSectorSelected: (Sector) -> Unit,
     onReportStatus: (Boolean, String, Float?, String?) -> Unit,
@@ -189,6 +192,62 @@ fun DashboardScreen(
                     onSectorSelected = onSectorSelected,
                     modifier = Modifier.fillMaxWidth()
                 )
+            }
+
+            // Profile Switcher (Home / Work) if they have a work profile configured, or an "Add Work Profile" button
+            item(key = "profile_switcher") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    if (hasWorkProfile) {
+                        Surface(
+                            shape = RoundedCornerShape(24.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                        ) {
+                            Row(modifier = Modifier.padding(4.dp)) {
+                                Button(
+                                    onClick = { onSwitchProfile("home") },
+                                    shape = RoundedCornerShape(20.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (activeProfile == "home") MaterialTheme.colorScheme.primary else Color.Transparent,
+                                        contentColor = if (activeProfile == "home") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                                    modifier = Modifier.height(36.dp)
+                                ) {
+                                    Text("🏠 Casa", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                                Button(
+                                    onClick = { onSwitchProfile("work") },
+                                    shape = RoundedCornerShape(20.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (activeProfile == "work") MaterialTheme.colorScheme.primary else Color.Transparent,
+                                        contentColor = if (activeProfile == "work") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                                    modifier = Modifier.height(36.dp)
+                                ) {
+                                    Text("💼 Trabajo", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { 
+                                // To configure work profile, we switch to "work" and open address dialog
+                                onSwitchProfile("work")
+                                onChangeAddressClicked() 
+                            },
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.height(36.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
+                        ) {
+                            Text("💼 Agregar Ubicación de Trabajo", fontSize = 13.sp)
+                        }
+                    }
+                }
             }
 
             // 2. Horario de Hoy (Includes Sector Info and Live Status)

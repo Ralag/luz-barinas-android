@@ -15,8 +15,8 @@ android {
     applicationId = "com.aistudio.luzbarinas.wvykrp"
     minSdk = 24
     targetSdk = 36
-    versionCode = 4
-    versionName = "1.2"
+    versionCode = 5
+    versionName = "1.3"
     
     // AdMob Production ID
     manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-7639154379634043~2576948404"
@@ -31,6 +31,8 @@ android {
       storePassword = System.getenv("STORE_PASSWORD") ?: "password"
       keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
       keyPassword = System.getenv("KEY_PASSWORD") ?: "password"
+      enableV1Signing = true
+      enableV2Signing = true
     }
   }
 
@@ -43,6 +45,7 @@ android {
       signingConfig = signingConfigs.getByName("release")
     }
     debug {
+      signingConfig = signingConfigs.getByName("release")
     }
   }
   compileOptions {
@@ -73,7 +76,7 @@ androidComponents {
         val version = android.defaultConfig.versionName
         variant.outputs.forEach { output ->
             val outputImpl = output as com.android.build.api.variant.impl.VariantOutputImpl
-            outputImpl.outputFileName.set("PAC-BARINAS-v\${version}-\${variant.name}.apk")
+            outputImpl.outputFileName.set("PAC-BARINAS-v$version-${variant.name}.apk")
         }
     }
 }

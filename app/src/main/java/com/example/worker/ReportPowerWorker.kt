@@ -52,30 +52,27 @@ class ReportPowerWorker(
 
         // Process all unsynced reports in Room
         val unsyncedList = pendingDao.getUnsyncedReports()
+        val cloudSync = com.example.data.repository.CloudSyncRepository(applicationContext, database)
         var allSucceeded = true
 
         for (report in unsyncedList) {
             try {
-                val request = TelemetryReportRequest(
+                val success = cloudSync.uploadCitizenReport(
                     sectorId = report.sectorId,
+                    sectorName = report.sectorName,
                     hasPower = report.hasPower,
-                    timestamp = report.reportedAtMillis,
                     reportType = report.reportType,
-                    voltageReading = report.voltageObserved
+                    voltage = report.voltageObserved,
+                    observation = report.observation
                 )
 
-                // Try to send via Retrofit
-                val response = ApiClient.api.submitPowerReport(request)
-                if (response.isSuccessful && response.body()?.success == true) {
+                if (success) {
                     pendingDao.markAsSynced(report.id)
                 } else {
-                    // In Barinas offline circumstances, server might return 404 or connection reset
-                    // Keep in Room for next retry
                     pendingDao.updateReport(report.copy(retryCount = report.retryCount + 1))
                     allSucceeded = false
                 }
             } catch (e: Exception) {
-                // Network unreachable or timeout (common during blackout)
                 pendingDao.updateReport(report.copy(retryCount = report.retryCount + 1))
                 allSucceeded = false
             }

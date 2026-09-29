@@ -299,15 +299,24 @@ class CloudSyncRepository(
         val sectorDao = database.sectorDao()
         val existing = sectorDao.getSectorById(s.id)
         if (existing != null) {
-            sectorDao.updateSector(
-                existing.copy(
-                    status = s.status,
-                    voltage = s.voltage.toFloat(),
-                    confirmedReportsCount = s.confirmedReportsCount,
-                    withoutPowerPercentage = s.withoutPowerPercentage,
-                    lastUpdatedMillis = s.lastUpdatedMillis
+            val isChanged = existing.status != s.status ||
+                    kotlin.math.abs(existing.voltage - s.voltage.toFloat()) > 0.1f ||
+                    existing.confirmedReportsCount != s.confirmedReportsCount ||
+                    existing.withoutPowerPercentage != s.withoutPowerPercentage ||
+                    (s.rotationBlock != null && existing.rotationBlock != s.rotationBlock)
+
+            if (isChanged) {
+                sectorDao.updateSector(
+                    existing.copy(
+                        status = s.status,
+                        voltage = s.voltage.toFloat(),
+                        confirmedReportsCount = s.confirmedReportsCount,
+                        withoutPowerPercentage = s.withoutPowerPercentage,
+                        lastUpdatedMillis = s.lastUpdatedMillis,
+                        rotationBlock = s.rotationBlock ?: existing.rotationBlock
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -342,6 +351,25 @@ class CloudSyncRepository(
         } catch (e: Exception) {
             Log.e(TAG, "Failed to upload citizen report to Supabase", e)
             false
+        }
+    }
+
+    suspend fun fetchWeeklyCitizenReports(sectorId: String? = null): List<SupabaseCitizenReport> = withContext(Dispatchers.IO) {
+        try {
+            val sevenDaysAgo = System.currentTimeMillis() - (7L * 24 * 60 * 60 * 1000)
+            supabase.postgrest["citizen_reports"]
+                .select {
+                    filter {
+                        gte("timestamp", sevenDaysAgo)
+                        if (sectorId != null) {
+                            eq("sectorId", sectorId)
+                        }
+                    }
+                }
+                .decodeList<SupabaseCitizenReport>()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch weekly citizen reports", e)
+            emptyList()
         }
     }
 

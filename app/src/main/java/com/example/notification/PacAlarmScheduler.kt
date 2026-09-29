@@ -16,6 +16,7 @@ object PacAlarmScheduler {
     private const val TAG = "PacAlarmScheduler"
     private const val REQUEST_CODE_PRE_ALERT = 5001
     private const val REQUEST_CODE_RESTORE_ALERT = 5002
+    private const val REQUEST_CODE_VALIDATION_ALERT = 5003
 
     fun scheduleNextAlarm(context: Context) {
         val prefs = context.getSharedPreferences("luz_barinas_user_prefs", Context.MODE_PRIVATE)
@@ -80,6 +81,43 @@ object PacAlarmScheduler {
             }
         }
 
+        // Schedule exact start time validation alert
+        if (nextWindow.startMillis > now) {
+            val userSectorId = prefs.getString("saved_sector_id", null)
+                ?: prefs.getString("selected_sector_id", "sec_a_alto_barinas_1")
+                ?: "sec_a_alto_barinas_1"
+
+            val validationIntent = Intent(context, PacAlarmReceiver::class.java).apply {
+                action = PacAlarmReceiver.ACTION_PAC_VALIDATION_ALERT
+                putExtra(PacAlarmReceiver.EXTRA_SECTOR_ID, userSectorId)
+                putExtra(PacAlarmReceiver.EXTRA_SECTOR_NAME, userSectorName)
+            }
+            val validationPendingIntent = PendingIntent.getBroadcast(
+                context,
+                REQUEST_CODE_VALIDATION_ALERT,
+                validationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        nextWindow.startMillis,
+                        validationPendingIntent
+                    )
+                } else {
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        nextWindow.startMillis,
+                        validationPendingIntent
+                    )
+                }
+            } catch (e: SecurityException) {
+                Log.w(TAG, "Cannot schedule validation alarm: ${e.message}")
+            }
+        }
+
         // Schedule restore alert if enabled
         if (settings.isRestoreAlarmEnabled && nextWindow.endMillis > now) {
             val restoreIntent = Intent(context, PacAlarmReceiver::class.java).apply {
@@ -132,6 +170,16 @@ object PacAlarmScheduler {
             PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
         )
         p2?.let { alarmManager.cancel(it) }
+
+        val valIntent = Intent(context, PacAlarmReceiver::class.java).apply {
+            action = PacAlarmReceiver.ACTION_PAC_VALIDATION_ALERT
+        }
+        val p3 = PendingIntent.getBroadcast(
+            context, REQUEST_CODE_VALIDATION_ALERT, valIntent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        p3?.let { alarmManager.cancel(it) }
+
         Log.i(TAG, "All PAC alarms cancelled")
     }
 }

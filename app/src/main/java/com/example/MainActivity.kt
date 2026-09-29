@@ -15,16 +15,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -103,9 +107,25 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            
+            val isDarkTheme = when (uiState.themeMode) {
+                "dark" -> true
+                "light" -> false
+                else -> androidx.compose.foundation.isSystemInDarkTheme()
+            }
 
-            MyApplicationTheme(darkTheme = uiState.isDarkMode) {
-                MainAppScreen(viewModel = viewModel)
+            MyApplicationTheme(
+                darkTheme = isDarkTheme,
+                dynamicColor = uiState.colorSchemeName == "dynamic"
+            ) {
+                androidx.compose.runtime.CompositionLocalProvider(
+                    androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(
+                        density = androidx.compose.ui.platform.LocalDensity.current.density * uiState.visualScale,
+                        fontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale * uiState.visualScale
+                    )
+                ) {
+                    MainAppScreen(viewModel = viewModel)
+                }
             }
         }
     }
@@ -145,6 +165,8 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
 
     // Alert & Alarm Settings State
     var isSettingsOpen by remember { mutableStateOf(false) }
+    var showSettingsScreen by remember { mutableStateOf(false) }
+    var showThemeScreen by remember { mutableStateOf(false) }
 
     val currentBlock = remember(uiState.selectedSector) {
         uiState.selectedSector?.rotationBlock?.uppercase()?.replace("BLOQUE", "")?.trim() ?: "A"
@@ -161,6 +183,18 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         userBlock = currentBlock,
         userSectorName = uiState.userAddress ?: "Barinas",
         onDismiss = { isSettingsOpen = false }
+    )
+
+    // Theme Settings Dialog
+    com.example.ui.components.ThemeSettingsDialog(
+        isOpen = showThemeScreen,
+        currentThemeMode = uiState.themeMode,
+        currentColorScheme = uiState.colorSchemeName,
+        currentVisualScale = uiState.visualScale,
+        onDismiss = { showThemeScreen = false },
+        onUpdateTheme = { mode, scheme, scale ->
+            viewModel.updateTheme(mode, scheme, scale)
+        }
     )
 
     // Permissions Onboarding Flow
@@ -210,7 +244,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
             versionCode = BuildConfig.VERSION_CODE,
             versionName = BuildConfig.VERSION_NAME,
             releaseNotes = "Estás utilizando la versión actual.\nSi deseas forzar una actualización manual o verificar detalles técnicos, presiona Descargar e Instalar.",
-            downloadUrl = "https://github.com/Ralag/luz-barinas-android/releases",
+            downloadUrl = "https://pacbarinas.web.app/download", // Ecosistema Web
             isMandatory = false
         )
         UpdatePromptDialog(
@@ -228,24 +262,56 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
     }
 
     val isAlarmActive by PacAlarmPlayer.isPlayingFlow.collectAsStateWithLifecycle(initialValue = false)
-    var showSettingsScreen by remember { mutableStateOf(false) }
+
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isLargeScreen = configuration.screenWidthDp > 600
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        floatingActionButton = {
-            if (isAlarmActive) {
-                androidx.compose.material3.ExtendedFloatingActionButton(
-                    onClick = { PacAlarmPlayer.stopAlarm(context) },
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError,
-                    icon = { Icon(Icons.Default.Close, "Apagar") },
-                    text = { Text("APAGAR ALARMA") }
-                )
+        Row(modifier = Modifier.fillMaxSize()) {
+            if (isLargeScreen) {
+                androidx.compose.material3.NavigationRail(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.testTag("main_nav_rail")
+                ) {
+                    Spacer(modifier = Modifier.height(32.dp))
+                    androidx.compose.material3.NavigationRailItem(
+                        selected = uiState.currentTab == 0,
+                        onClick = { viewModel.setTab(0) },
+                        icon = { Icon(Icons.Outlined.Bolt, contentDescription = "Hoy") },
+                        label = { Text("Hoy") }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    androidx.compose.material3.NavigationRailItem(
+                        selected = uiState.currentTab == 1,
+                        onClick = { viewModel.setTab(1) },
+                        icon = { Icon(Icons.Outlined.CalendarMonth, contentDescription = "Horarios") },
+                        label = { Text("Horarios") }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    androidx.compose.material3.NavigationRailItem(
+                        selected = uiState.currentTab == 2,
+                        onClick = { viewModel.setTab(2) },
+                        icon = { Icon(Icons.Outlined.Map, contentDescription = "Mapa") },
+                        label = { Text("Mapa") }
+                    )
+                }
             }
-        },
+
+            Scaffold(
+                modifier = Modifier.fillMaxSize().weight(1f),
+            containerColor = MaterialTheme.colorScheme.background,
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            floatingActionButton = {
+                if (isAlarmActive) {
+                    androidx.compose.material3.ExtendedFloatingActionButton(
+                        onClick = { PacAlarmPlayer.stopAlarm(context) },
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError,
+                        icon = { Icon(Icons.Default.Close, "Apagar") },
+                        text = { Text("APAGAR ALARMA") }
+                    )
+                }
+            },
         topBar = {
             TopAppBar(
                 title = {
@@ -299,6 +365,19 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         }
                     }
 
+                    // Acceso a Temas
+                    IconButton(
+                        onClick = { showThemeScreen = true },
+                        modifier = Modifier.testTag("action_theme_settings")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = "Personalizar Tema",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
                     // Acceso a Configuración completa (Ruedita)
                     IconButton(
                         onClick = { showSettingsScreen = true },
@@ -319,13 +398,14 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
             )
         },
         bottomBar = {
-            Column {
-                AdaptiveBannerAd()
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 8.dp,
-                    modifier = Modifier.testTag("main_bottom_nav")
-                ) {
+            if (!isLargeScreen) {
+                Column {
+                    AdaptiveBannerAd()
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 8.dp,
+                        modifier = Modifier.testTag("main_bottom_nav")
+                    ) {
                     // Tab 0: Hoy (Estado actual, próximo corte y reporte rápido)
                     NavigationBarItem(
                         selected = uiState.currentTab == 0,
@@ -368,8 +448,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         )
                     )
 
-                    /*
-                    // Tab 2: Mapa de Circuitos (Deshabilitado temporalmente)
+                    // Tab 2: Mapa de Circuitos (Ahora Mapa de Calor)
                     NavigationBarItem(
                         selected = uiState.currentTab == 2,
                         onClick = { viewModel.setTab(2) },
@@ -389,10 +468,10 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                             unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
-                    */
-                }
-            }
-        }
+                    } // close NavigationBar
+                } // close Column
+            } // close if
+        } // close bottomBar
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -412,6 +491,9 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         prediction = uiState.prediction,
                         unsyncedCount = uiState.unsyncedReportsCount,
                         activeNotice = uiState.activeBroadcastNotice,
+                        activeProfile = uiState.activeProfile,
+                        hasWorkProfile = uiState.hasWorkProfile,
+                        onSwitchProfile = { viewModel.switchProfile(it) },
                         onDismissNotice = { viewModel.dismissBroadcastNotice() },
                         onSectorSelected = { viewModel.selectSector(it) },
                         onReportStatus = { hasPower, reportType, voltage, observation ->
@@ -443,30 +525,28 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                 }
             }
         }
+    } // Close Scaffold
+    } // Close Row
+
+    androidx.compose.animation.AnimatedVisibility(
+        visible = showSettingsScreen,
+        enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { it },
+        exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically { it }
+    ) {
+        SettingsScreen(
+            onBack = { showSettingsScreen = false },
+            onToggleDarkMode = { viewModel.toggleDarkMode() },
+            isDarkMode = uiState.isDarkMode,
+            onChangeLocation = { showAddressDialog = true },
+            onRestartOnboarding = { 
+                viewModel.setOnboardingOpen(true)
+                showSettingsScreen = false 
+            },
+            onOpenAlarmSettings = { isSettingsOpen = true },
+            onCheckUpdate = { forceShowUpdateDialog = true },
+            onOpenDonations = { showDonationsDialog = true },
+            modifier = Modifier.fillMaxSize()
+        )
     }
-
-        androidx.compose.animation.AnimatedVisibility(
-            visible = showSettingsScreen,
-            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { it },
-            exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically { it }
-        ) {
-            SettingsScreen(
-                onBack = { showSettingsScreen = false },
-                onToggleDarkMode = { viewModel.toggleDarkMode() },
-                isDarkMode = uiState.isDarkMode,
-                onChangeLocation = { showAddressDialog = true },
-                onRestartOnboarding = { 
-                    viewModel.setOnboardingOpen(true)
-                    showSettingsScreen = false 
-                },
-                onOpenAlarmSettings = { isSettingsOpen = true },
-                onCheckUpdate = { forceShowUpdateDialog = true },
-                onOpenDonations = { showDonationsDialog = true },
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-}
-
-
-
+    } // Close outer Box
+} // Close MainAppScreen

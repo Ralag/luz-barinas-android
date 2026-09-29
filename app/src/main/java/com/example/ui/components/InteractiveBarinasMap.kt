@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -335,7 +336,7 @@ fun InteractiveBarinasMap(
             }
 
             // =========================================================================
-            // 4. NODOS DE SECTORES (Limpio, Sin solapamientos masivos)
+            // 4. MAPA DE CALOR Y NODOS (Densidad ciudadana)
             // =========================================================================
             for (item in precomputedSectors) {
                 val secX = item.centerNormX * drawScaleX + baseOffsetX
@@ -349,10 +350,31 @@ fun InteractiveBarinasMap(
                     ServiceStatus.IRREGULAR_OUTAGE -> StatusIrregularPurple
                 }
 
+                // HEAT MAP LOGIC
+                // Density of reports determines the size of the heat blur
+                // Power status determines the color
+                val reports = item.sector.confirmedReportsCount.coerceAtLeast(1)
+                val heatRadius = (15f + (reports * 2f)).coerceAtMost(60f) * scale
+
+                // Draw heat blur
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            pinColor.copy(alpha = 0.4f),
+                            pinColor.copy(alpha = 0.15f),
+                            Color.Transparent
+                        ),
+                        center = pinOffset,
+                        radius = heatRadius
+                    ),
+                    radius = heatRadius,
+                    center = pinOffset
+                )
+
                 if (isSelected) {
                     // Highlight ring for selected sector
                     drawCircle(
-                        color = pinColor.copy(alpha = 0.45f),
+                        color = pinColor.copy(alpha = 0.8f),
                         radius = 24f,
                         center = pinOffset
                     )
@@ -363,17 +385,12 @@ fun InteractiveBarinasMap(
                         style = Stroke(width = 3f)
                     )
                     drawCircle(
-                        color = pinColor,
+                        color = android.graphics.Color.WHITE.let { Color(it) },
                         radius = 8f,
                         center = pinOffset
                     )
                 } else {
-                    // Subtle, crisp electrical node
-                    drawCircle(
-                        color = pinColor.copy(alpha = 0.25f),
-                        radius = 8f,
-                        center = pinOffset
-                    )
+                    // Subtle, crisp electrical node in the center of the heat
                     drawCircle(
                         color = pinColor,
                         radius = 4.5f,

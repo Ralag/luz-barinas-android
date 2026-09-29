@@ -20,6 +20,7 @@ class PacAlarmReceiver : BroadcastReceiver() {
         when (action) {
             ACTION_PAC_PRE_ALERT -> handlePreOutageAlert(context, intent)
             ACTION_PAC_RESTORE_ALERT -> handleRestoreAlert(context, intent)
+            ACTION_PAC_VALIDATION_ALERT -> handleValidationAlert(context, intent)
             ACTION_STOP_ALARM -> handleStopAlarm(context)
             Intent.ACTION_BOOT_COMPLETED -> handleBoot(context)
         }
@@ -174,12 +175,61 @@ class PacAlarmReceiver : BroadcastReceiver() {
         }
     }
 
+    private fun handleValidationAlert(context: Context, intent: Intent) {
+        val sectorId = intent.getStringExtra(EXTRA_SECTOR_ID) ?: "sec_a_alto_barinas_1"
+        val sectorName = intent.getStringExtra(EXTRA_SECTOR_NAME) ?: "Tu sector"
+
+        NotificationHelper.createNotificationChannel(context)
+
+        val powerOnIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+            action = NotificationActionReceiver.ACTION_POWER_ON
+            putExtra(NotificationActionReceiver.EXTRA_SECTOR_ID, sectorId)
+            putExtra(NotificationActionReceiver.EXTRA_SECTOR_NAME, sectorName)
+            putExtra(NotificationActionReceiver.EXTRA_HAS_POWER, true)
+        }
+        val powerOnPending = PendingIntent.getBroadcast(
+            context, 201, powerOnIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val powerOffIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+            action = NotificationActionReceiver.ACTION_POWER_OFF
+            putExtra(NotificationActionReceiver.EXTRA_SECTOR_ID, sectorId)
+            putExtra(NotificationActionReceiver.EXTRA_SECTOR_NAME, sectorName)
+            putExtra(NotificationActionReceiver.EXTRA_HAS_POWER, false)
+        }
+        val powerOffPending = PendingIntent.getBroadcast(
+            context, 202, powerOffIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID_OUTAGE)
+            .setSmallIcon(R.drawable.ic_notification_bolt)
+            .setContentTitle("⏱️ El bloque PAC de tu sector ha comenzado")
+            .setContentText("¿Se fue la luz en $sectorName?")
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .addAction(R.drawable.ic_power_on, "💡 Sí hay luz", powerOnPending)
+            .addAction(R.drawable.ic_power_off, "🔌 No hay luz", powerOffPending)
+            .setVibrate(longArrayOf(0, 300, 200, 300))
+            .setAutoCancel(true)
+
+        try {
+            NotificationManagerCompat.from(context).notify(NotificationHelper.NOTIFICATION_ID_ALERT, builder.build())
+        } catch (e: SecurityException) {
+            Log.w("PacAlarmReceiver", "Permission POST_NOTIFICATIONS missing")
+        }
+
+        PacAlarmScheduler.scheduleNextAlarm(context)
+    }
+
     companion object {
         const val ACTION_PAC_PRE_ALERT = "com.example.pacbarinas.ACTION_PAC_PRE_ALERT"
         const val ACTION_PAC_RESTORE_ALERT = "com.example.pacbarinas.ACTION_PAC_RESTORE_ALERT"
+        const val ACTION_PAC_VALIDATION_ALERT = "com.example.pacbarinas.ACTION_PAC_VALIDATION_ALERT"
         const val ACTION_STOP_ALARM = "com.example.pacbarinas.ACTION_STOP_ALARM"
 
         const val EXTRA_BLOCK = "extra_block"
+        const val EXTRA_SECTOR_ID = "extra_sector_id"
         const val EXTRA_SECTOR_NAME = "extra_sector_name"
         const val EXTRA_MINUTES_UNTIL = "extra_minutes_until"
         const val EXTRA_TIME_LABEL = "extra_time_label"

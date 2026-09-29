@@ -538,8 +538,49 @@ object PacScheduleData {
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
     )
 
-    // Note: getMonthApproximation and getMonthlyWeeks have been migrated to the Vercel Serverless Functions backend 
-    // to improve mobile performance.
+    fun getMonthlyWeeks(monthName: String, totalDays: Int): List<PacWeekPlan> {
+        val rows = activeMatrix.size.coerceAtLeast(1)
+        val upperMonth = monthName.uppercase()
+        val currentMatrix = activeMatrix.map { it.toList() }
+        
+        val weeks = mutableListOf<PacWeekPlan>()
+        // Week 1
+        weeks.add(
+            PacWeekPlan(
+                weekNumber = 1,
+                dateRangeLabel = "DEL 01 AL 07 DE $upperMonth",
+                matrix = currentMatrix
+            )
+        )
+        // Week 2
+        val week2 = (0 until rows).map { r -> activeMatrix[(r + 1) % rows].toList() }
+        weeks.add(
+            PacWeekPlan(
+                weekNumber = 2,
+                dateRangeLabel = "DEL 08 AL 14 DE $upperMonth",
+                matrix = week2
+            )
+        )
+        // Week 3
+        val week3 = (0 until rows).map { r -> activeMatrix[(r + 2) % rows].toList() }
+        weeks.add(
+            PacWeekPlan(
+                weekNumber = 3,
+                dateRangeLabel = "DEL 15 AL 21 DE $upperMonth",
+                matrix = week3
+            )
+        )
+        // Week 4
+        val week4 = (0 until rows).map { r -> activeMatrix[(r + 3) % rows].toList() }
+        weeks.add(
+            PacWeekPlan(
+                weekNumber = 4,
+                dateRangeLabel = "DEL 22 AL $totalDays DE $upperMonth",
+                matrix = week4
+            )
+        )
+        return weeks
+    }
 
 
     fun getDayIndex(calendarDayOfWeek: Int): Int {

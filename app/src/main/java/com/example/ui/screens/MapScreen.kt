@@ -72,13 +72,13 @@ fun MapScreen(
         // Map Title & Description
         Column {
             Text(
-                text = "Mapa de Red Eléctrica",
+                text = "Mapa de Calor y Predicción",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "Topología de circuitos y subestaciones de Barinas",
+                text = "Densidad de reportes y estado real del servicio en Barinas",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

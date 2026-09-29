@@ -51,14 +51,19 @@ data class LuzBarinasUiState(
     val activeBroadcastNotice: BroadcastNotice? = null,
     val updateAvailable: AppUpdateInfo? = null,
     val donationUrl: String? = null,
-    val donationConfig: com.example.data.model.DonationConfig? = null
+    val donationConfig: com.example.data.model.DonationConfig? = null,
+    val activeProfile: String = "home",
+    val hasWorkProfile: Boolean = false,
+    val themeMode: String = "system", // "light", "dark", "system"
+    val colorSchemeName: String = "default", // "default", "dynamic", "nature"
+    val visualScale: Float = 1.0f
 )
 
 data class AppUpdateInfo(
     val versionCode: Int,
     val versionName: String,
     val releaseNotes: String,
-    val downloadUrl: String,
+    val downloadUrl: String = "https://pacbarinas.web.app", // Preparado para Web Ecosystem
     val isMandatory: Boolean
 )
 
@@ -71,10 +76,16 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         LuzBarinasUiState(
             isLoading = true,
             userAddress = userPrefs.getString("saved_address", null),
-            isOnboardingOpen = !userPrefs.getBoolean("onboarding_done", false)
+            isOnboardingOpen = !userPrefs.getBoolean("onboarding_done", false),
+            activeProfile = userPrefs.getString("active_profile", "home") ?: "home",
+            hasWorkProfile = userPrefs.getString("profile_work_sector_id", null) != null,
+            themeMode = userPrefs.getString("theme_mode", "system") ?: "system",
+            colorSchemeName = userPrefs.getString("color_scheme_name", "default") ?: "default",
+            visualScale = userPrefs.getFloat("visual_scale", 1.0f)
         )
     )
     val uiState: StateFlow<LuzBarinasUiState> = _uiState.asStateFlow()
+    private var currentListenedSectorId: String? = null
 
     init {
         PacSchedulePrefs.loadSchedule(getApplication())
@@ -111,10 +122,13 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
                     )
                 }
 
-                // Refresh prediction whenever sectors change
+                // Refresh prediction whenever selected sector changes
                 _uiState.value.selectedSector?.let { sector ->
-                    refreshPrediction(sector.id)
-                    repository.cloudSync.listenToSector(sector.id)
+                    if (sector.id != currentListenedSectorId) {
+                        currentListenedSectorId = sector.id
+                        refreshPrediction(sector.id)
+                        repository.cloudSync.listenToSector(sector.id)
+                    }
                 }
             }
         }
@@ -166,6 +180,8 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun selectSector(sector: Sector) {
         val cleanMatch = Regex("[ABCD]").find(sector.rotationBlock.uppercase())
         val cleanBlock = cleanMatch?.value ?: "A"
+        val profile = _uiState.value.activeProfile
+
         userPrefs.edit()
             .putString("saved_sector_id", sector.id)
             .putString("selected_sector_id", sector.id)
@@ -174,11 +190,37 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             .putString("saved_block", sector.rotationBlock)
             .putString("saved_sector_block", cleanBlock)
             .putString("selected_sector_block", cleanBlock)
+            .putString("profile_${profile}_sector_id", sector.id)
+            .putString("profile_${profile}_address", sector.name)
             .apply()
-        _uiState.update { it.copy(selectedSector = sector, userAddress = sector.name) }
+
+        _uiState.update { 
+            it.copy(
+                selectedSector = sector, 
+                userAddress = sector.name,
+                hasWorkProfile = userPrefs.getString("profile_work_sector_id", null) != null
+            ) 
+        }
+        currentListenedSectorId = sector.id
         refreshPrediction(sector.id)
         repository.cloudSync.listenToSector(sector.id)
         com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
+    }
+
+    fun switchProfile(profile: String) {
+        if (profile == _uiState.value.activeProfile) return
+
+        userPrefs.edit().putString("active_profile", profile).apply()
+        _uiState.update { it.copy(activeProfile = profile) }
+
+        val newSectorId = userPrefs.getString("profile_${profile}_sector_id", null)
+        if (newSectorId != null) {
+            val sector = _uiState.value.sectors.find { it.id == newSectorId }
+            if (sector != null) {
+                // Call selectSector to load it and set listeners
+                selectSector(sector)
+            }
+        }
     }
 
     fun selectSectorByName(name: String) {
@@ -199,7 +241,29 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun toggleDarkMode() {
-        _uiState.update { it.copy(isDarkMode = !it.isDarkMode) }
+        // Legacy toggle, redirect to updateTheme
+        val nextMode = if (_uiState.value.themeMode == "dark") "light" else "dark"
+        updateTheme(themeMode = nextMode)
+    }
+
+    fun updateTheme(themeMode: String? = null, colorSchemeName: String? = null, visualScale: Float? = null) {
+        val editor = userPrefs.edit()
+        var updatedState = _uiState.value
+        
+        if (themeMode != null) {
+            editor.putString("theme_mode", themeMode)
+            updatedState = updatedState.copy(themeMode = themeMode, isDarkMode = themeMode == "dark")
+        }
+        if (colorSchemeName != null) {
+            editor.putString("color_scheme_name", colorSchemeName)
+            updatedState = updatedState.copy(colorSchemeName = colorSchemeName)
+        }
+        if (visualScale != null) {
+            editor.putFloat("visual_scale", visualScale)
+            updatedState = updatedState.copy(visualScale = visualScale)
+        }
+        editor.apply()
+        _uiState.value = updatedState
     }
 
     fun reportPowerStatus(

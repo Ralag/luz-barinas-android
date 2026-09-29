@@ -213,9 +213,12 @@ class EnergyRepository(
         val historyEntities = outageDao.getRecentOutagesBySector(sectorId)
         val history = historyEntities.map { it.toDomain() }
 
+        val weeklyReports = cloudSync.fetchWeeklyCitizenReports(sectorId)
+
         OutagePredictionEngine.calculateNextOutageWindow(
             sector = sector,
             history = history,
+            weeklyReports = weeklyReports,
             currentTimeMillis = System.currentTimeMillis()
         )
     }
@@ -309,25 +312,9 @@ class EnergyRepository(
                         pendingDao.markAsSynced(latest.id)
                     }
                 } else {
-                    // Fallback to REST API
-                    val request = TelemetryReportRequest(
-                        sectorId = sectorId,
-                        hasPower = hasPower,
-                        timestamp = System.currentTimeMillis(),
-                        reportType = reportType,
-                        voltageReading = voltage,
-                        observation = observation
-                    )
-                    val response = ApiClient.api.submitPowerReport(request)
-                    if (response.isSuccessful && response.body()?.success == true) {
-                        val latest = pendingDao.getUnsyncedReports().lastOrNull()
-                        if (latest != null) {
-                            pendingDao.markAsSynced(latest.id)
-                        }
-                    }
                 }
             } catch (e: Exception) {
-                // Keep offline in Room; WorkManager and Firestore handle it
+                // Keep offline in Room; WorkManager handles sync
             }
 
             Result.success(Unit)
@@ -341,16 +328,15 @@ class EnergyRepository(
         var count = 0
         for (item in unsynced) {
             try {
-                val response = ApiClient.api.submitPowerReport(
-                    TelemetryReportRequest(
-                        sectorId = item.sectorId,
-                        hasPower = item.hasPower,
-                        timestamp = item.reportedAtMillis,
-                        reportType = item.reportType,
-                        voltageReading = item.voltageObserved
-                    )
+                val success = cloudSync.uploadCitizenReport(
+                    sectorId = item.sectorId,
+                    sectorName = item.sectorName,
+                    hasPower = item.hasPower,
+                    reportType = item.reportType,
+                    voltage = item.voltageObserved,
+                    observation = item.observation
                 )
-                if (response.isSuccessful && response.body()?.success == true) {
+                if (success) {
                     pendingDao.markAsSynced(item.id)
                     count++
                 }

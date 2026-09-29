@@ -131,17 +131,8 @@ fun PacScheduleView(
         tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
-    val monthlyWeeks: List<PacWeekPlan> by produceState(initialValue = emptyList(), key1 = selectedMonthName, key2 = selectedMonthDays, key3 = PacScheduleData.scheduleVersion) {
-        value = try {
-            val response = com.example.data.remote.ApiClient.api.getMonthlyWeeks(selectedMonthName, selectedMonthDays)
-            if (response.isSuccessful) {
-                response.body()?.weeks ?: emptyList()
-            } else {
-                emptyList()
-            }
-        } catch (_: Exception) {
-            emptyList()
-        }
+    val monthlyWeeks: List<PacWeekPlan> = remember(selectedMonthName, selectedMonthDays, PacScheduleData.scheduleVersion) {
+        PacScheduleData.getMonthlyWeeks(selectedMonthName, selectedMonthDays)
     }
 
     LazyColumn(

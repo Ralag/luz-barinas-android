@@ -32,6 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_2_3 = object : androidx.room.migration.Migration(2, 3) {
             override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE sectors ADD COLUMN isCommunity INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE pending_reports ADD COLUMN observation TEXT DEFAULT NULL")
             }
         }
 
