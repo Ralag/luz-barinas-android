@@ -178,8 +178,8 @@ fun InteractiveBarinasMap(
         }
     }
 
-    val mapBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f)
-    val mapBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.60f)
+    val mapBgColor = Color(0xFF191A1A) // CartoDB Dark Matter base
+    val mapBorderColor = Color(0xFF2C2C2C)
 
     val riverPath = remember {
         Path().apply {
@@ -196,8 +196,8 @@ fun InteractiveBarinasMap(
         }
     }
 
-    val riverGlowColor = remember { Color(0xFF0288D1).copy(alpha = 0.22f) }
-    val riverBodyColor = remember { Color(0xFF29B6F6).copy(alpha = 0.65f) }
+    val riverGlowColor = remember { Color(0xFF0288D1).copy(alpha = 0.15f) }
+    val riverBodyColor = remember { Color(0xFF29B6F6).copy(alpha = 0.45f) }
     val roadColor = remember(isDark) { 
         if (isDark) Color(0xFF546E7A).copy(alpha = 0.35f) else Color(0xFF90A4AE).copy(alpha = 0.45f)
     }
@@ -365,7 +365,7 @@ fun InteractiveBarinasMap(
                 val pinColor = when (item.sector.status) {
                     ServiceStatus.NORMAL -> StatusNormalGreen
                     ServiceStatus.SCHEDULED_OUTAGE -> StatusScheduledRed
-                    ServiceStatus.IRREGULAR_OUTAGE -> Color(0xFFF59E0B)
+                    ServiceStatus.IRREGULAR_OUTAGE -> StatusIrregularPurple
                 }
 
                 // HEAT MAP & LIVE TELEMETRY LOGIC
@@ -480,21 +480,21 @@ fun InteractiveBarinasMap(
         ) {
             Card(
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF222222).copy(alpha = 0.90f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF333333))
             ) {
                 Column {
                     IconButton(
                         onClick = { scale = (scale * 1.3f).coerceAtMost(3.5f) },
                         modifier = Modifier.size(36.dp)
                     ) {
-                        Icon(Icons.Outlined.Add, contentDescription = "Acercar", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Outlined.Add, contentDescription = "Acercar", tint = Color.White, modifier = Modifier.size(18.dp))
                     }
                     IconButton(
                         onClick = { scale = (scale / 1.3f).coerceAtLeast(0.8f) },
                         modifier = Modifier.size(36.dp)
                     ) {
-                        Icon(Icons.Outlined.Remove, contentDescription = "Alejar", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Outlined.Remove, contentDescription = "Alejar", tint = Color.White, modifier = Modifier.size(18.dp))
                     }
                     IconButton(
                         onClick = {
@@ -518,8 +518,8 @@ fun InteractiveBarinasMap(
                 .align(Alignment.BottomStart)
                 .padding(10.dp),
             shape = RoundedCornerShape(10.dp),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
-            border = androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+            color = Color(0xFF222222).copy(alpha = 0.88f),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF333333))
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -528,7 +528,7 @@ fun InteractiveBarinasMap(
             ) {
                 LegendDot(StatusNormalGreen, "Con Luz")
                 LegendDot(StatusScheduledRed, "Corte PAC")
-                LegendDot(Color(0xFFF59E0B), "Avería / Falla")
+                LegendDot(StatusIrregularPurple, "Avería / Falla")
             }
         }
     }
@@ -543,6 +543,6 @@ private fun LegendDot(color: Color, label: String) {
                 .background(color, CircleShape)
         )
         Spacer(modifier = Modifier.width(4.dp))
-        Text(text = label, fontSize = 10.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = label, fontSize = 10.sp, fontWeight = FontWeight.Medium, color = Color.White)
     }
 }

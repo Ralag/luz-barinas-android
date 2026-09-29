@@ -408,7 +408,8 @@ fun DashboardScreen(
                                         text = if (hasPowerNow) {
                                             val predDetail = prediction?.algorithmDetail
                                             if (prediction != null && prediction.hoursUntilWindow > 0.1f && predDetail != null && !predDetail.contains("Corte activo", ignoreCase = true) && !predDetail.contains("Corte en curso", ignoreCase = true)) {
-                                                "Próximo corte: ${predDetail.substringAfter(": ")}"
+                                                val suffix = if (predDetail.contains(":")) predDetail.substringAfter(": ").trim() else (if (nextCutSlotIdx != -1) PacScheduleData.SLOTS[nextCutSlotIdx].timeLabel else "Horario en ajuste")
+                                                "Próximo corte: $suffix"
                                             } else if (nextCutSlotIdx != -1) {
                                                 "Próximo corte estimado: ${PacScheduleData.SLOTS[nextCutSlotIdx].timeLabel}"
                                             } else {
@@ -917,4 +918,5 @@ fun BroadcastNoticeBanner(
         }
     }
 }
+
 

@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.example.BuildConfig
 
 enum class LegalPage {
-    PRIVACY, TERMS, DEVELOPER, REFUND, SYSTEM_DOC
+    PRIVACY, TERMS, DEVELOPER, REFUND, SYSTEM_DOC, TRANSPARENCIA
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,6 +57,7 @@ fun SettingsScreen(
                 LegalPage.DEVELOPER -> "Datos del Desarrollador"
                 LegalPage.REFUND -> "Política de Reembolsos"
                 LegalPage.SYSTEM_DOC -> "Documentación del Sistema"
+                LegalPage.TRANSPARENCIA -> "Transparencia y Datos"
             }
             LegalScreen(title = title, onBack = { currentLegalPage = null }) {
                 when (legalPage) {
@@ -65,6 +66,7 @@ fun SettingsScreen(
                     LegalPage.DEVELOPER -> DeveloperInfoContent()
                     LegalPage.REFUND -> RefundPolicyContent()
                     LegalPage.SYSTEM_DOC -> SystemDocumentationContent()
+                    LegalPage.TRANSPARENCIA -> TransparenciaContent()
                 }
             }
         } else {
@@ -278,14 +280,14 @@ fun SettingsScreen(
                                 icon = Icons.Outlined.IntegrationInstructions,
                                 title = "Integraciones Activas",
                                 subtitle = "AdMob (Anuncios), Supabase (Base de Datos y Tiempo Real)",
-                                onClick = { currentLegalPage = LegalPage.SYSTEM_DOC }
+                                onClick = { currentLegalPage = LegalPage.TRANSPARENCIA }
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                             SettingsItem(
                                 icon = Icons.Outlined.DataUsage,
                                 title = "Datos Recopilados",
                                 subtitle = "Sector seleccionado, reportes anónimos, preferencias",
-                                onClick = { currentLegalPage = LegalPage.PRIVACY }
+                                onClick = { currentLegalPage = LegalPage.TRANSPARENCIA }
                             )
                         }
                     }
