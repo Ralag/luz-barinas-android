@@ -10,6 +10,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Elimina forzosamente el permiso de cualquier librería que intente inyectarlo -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+
     <!-- Recommended for AdMob on Android 13+ (API 33+) -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
