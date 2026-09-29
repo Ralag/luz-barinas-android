@@ -244,7 +244,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
             versionCode = BuildConfig.VERSION_CODE,
             versionName = BuildConfig.VERSION_NAME,
             releaseNotes = "Estás utilizando la versión actual.\nSi deseas forzar una actualización manual o verificar detalles técnicos, presiona Descargar e Instalar.",
-            downloadUrl = "https://pacbarinas.web.app/download", // Ecosistema Web
+            downloadUrl = "https://pacbarinas.sites", // Ecosistema Web Oficial
             isMandatory = false
         )
         UpdatePromptDialog(

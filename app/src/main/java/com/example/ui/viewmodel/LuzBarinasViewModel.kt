@@ -63,7 +63,7 @@ data class AppUpdateInfo(
     val versionCode: Int,
     val versionName: String,
     val releaseNotes: String,
-    val downloadUrl: String = "https://pacbarinas.web.app", // Preparado para Web Ecosystem
+    val downloadUrl: String = "https://pacbarinas.sites", // Portal Web Oficial
     val isMandatory: Boolean
 )
 
