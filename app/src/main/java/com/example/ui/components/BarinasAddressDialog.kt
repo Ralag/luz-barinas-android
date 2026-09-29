@@ -102,12 +102,12 @@ fun BarinasAddressDialog(
             BarinasLocation(
                 id = sector.id,
                 name = sector.name,
-                type = if (sector.isCommunity) "Sector Comunitario 🤝" else "Catálogo Base",
+                type = if (sector.isCommunity) "Sector Comunitario 🤝" else "Sector Oficial 🏛️",
                 parroquia = "Barinas",
                 block = cleanBlock,
                 circuitCode = sector.circuitCode,
                 sectorEntityId = sector.id,
-                description = if (sector.isCommunity) "Incorporado por la comunidad" else "Sector de Barinas",
+                description = if (sector.isCommunity) "Incorporado por la comunidad" else "Sector oficial de Barinas",
                 keywords = listOf(sector.name.lowercase(), sector.circuitCode.lowercase(), "barinas"),
                 municipio = "Barinas"
             )
@@ -539,6 +539,21 @@ fun BarinasAddressDialog(
                                                         fontSize = 9.sp,
                                                         fontWeight = FontWeight.Bold,
                                                         color = Color(0xFFFFB300),
+                                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                                    )
+                                                }
+                                            } else {
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Surface(
+                                                    shape = RoundedCornerShape(6.dp),
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                                                ) {
+                                                    Text(
+                                                        text = "Oficial 🏛️",
+                                                        fontSize = 9.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.primary,
                                                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                                                     )
                                                 }

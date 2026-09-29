@@ -57,12 +57,21 @@ data class SupabaseSector(
     val parroquia: String? = null,
     val circuitCode: String? = null,
     val status: String,
-    val voltage: Double,
-    val confirmedReportsCount: Int,
-    val withoutPowerPercentage: Int,
+    val voltage: Double = 118.0,
+    val confirmedReportsCount: Int = 0,
+    val withoutPowerPercentage: Int = 0,
     val rotationBlock: String? = null,
-    val lastUpdatedMillis: Long
-)
+    val isCommunity: Boolean? = null,
+    val is_community: Boolean? = null,
+    val lastUpdatedMillis: Long = 0L
+) {
+    val resolvedIsCommunity: Boolean
+        get() = when {
+            isCommunity != null -> isCommunity
+            is_community != null -> is_community
+            else -> id.startsWith("sec_com_") || id.startsWith("sec_community_")
+        }
+}
 
 @Serializable
 data class SupabaseCitizenReport(
@@ -161,14 +170,17 @@ class CloudSyncRepository(
                 
                 val entitiesToUpdate = allSectors.map { s ->
                     val existing = sectorDao.getSectorById(s.id)
-                    val isCom = s.id.startsWith("sec_com_") || s.id.startsWith("sec_community_")
+                    val isCom = s.resolvedIsCommunity
                     if (existing != null) {
                         existing.copy(
+                            name = s.name ?: existing.name,
+                            circuitCode = s.circuitCode ?: existing.circuitCode,
                             status = s.status,
                             voltage = s.voltage.toFloat(),
                             confirmedReportsCount = s.confirmedReportsCount,
                             withoutPowerPercentage = s.withoutPowerPercentage,
-                            lastUpdatedMillis = s.lastUpdatedMillis,
+                            lastUpdatedMillis = if (s.lastUpdatedMillis > 0) s.lastUpdatedMillis else existing.lastUpdatedMillis,
+                            rotationBlock = s.rotationBlock ?: existing.rotationBlock,
                             isCommunity = isCom
                         )
                     } else {
@@ -181,7 +193,7 @@ class CloudSyncRepository(
                             voltage = s.voltage.toFloat(),
                             confirmedReportsCount = s.confirmedReportsCount,
                             withoutPowerPercentage = s.withoutPowerPercentage,
-                            lastUpdatedMillis = s.lastUpdatedMillis,
+                            lastUpdatedMillis = if (s.lastUpdatedMillis > 0) s.lastUpdatedMillis else System.currentTimeMillis(),
                             rotationBlock = s.rotationBlock ?: "Bloque C",
                             polygonPointsRaw = "8.625,-70.220;8.635,-70.208;8.620,-70.202;8.615,-70.215",
                             isCommunity = isCom
@@ -189,6 +201,25 @@ class CloudSyncRepository(
                     }
                 }
                 sectorDao.insertOrUpdateSectors(entitiesToUpdate)
+
+                // Realtime subscription for whole sectors table to propagate admin changes instantly
+                val sectorsTableChannel = supabase.realtime.channel("public-sectors-global")
+                sectorsTableChannel.postgresChangeFlow<PostgresAction>(schema = "public") {
+                    table = "sectors"
+                }.onEach { action ->
+                    when (action) {
+                        is PostgresAction.Insert -> {
+                            val updated = jsonFormat.decodeFromJsonElement<SupabaseSector>(action.record)
+                            updateLocalSector(updated)
+                        }
+                        is PostgresAction.Update -> {
+                            val updated = jsonFormat.decodeFromJsonElement<SupabaseSector>(action.record)
+                            updateLocalSector(updated)
+                        }
+                        else -> {}
+                    }
+                }.launchIn(scope)
+                sectorsTableChannel.subscribe()
 
                 // Check GitHub Releases for OTA Updates
                 val updateInfo = com.example.utils.AppUpdater.checkForUpdates()
@@ -298,25 +329,48 @@ class CloudSyncRepository(
     private suspend fun updateLocalSector(s: SupabaseSector) {
         val sectorDao = database.sectorDao()
         val existing = sectorDao.getSectorById(s.id)
+        val isCom = s.resolvedIsCommunity
         if (existing != null) {
             val isChanged = existing.status != s.status ||
                     kotlin.math.abs(existing.voltage - s.voltage.toFloat()) > 0.1f ||
                     existing.confirmedReportsCount != s.confirmedReportsCount ||
                     existing.withoutPowerPercentage != s.withoutPowerPercentage ||
-                    (s.rotationBlock != null && existing.rotationBlock != s.rotationBlock)
+                    (s.rotationBlock != null && existing.rotationBlock != s.rotationBlock) ||
+                    existing.isCommunity != isCom ||
+                    (s.name != null && existing.name != s.name) ||
+                    (s.circuitCode != null && existing.circuitCode != s.circuitCode)
 
             if (isChanged) {
                 sectorDao.updateSector(
                     existing.copy(
+                        name = s.name ?: existing.name,
+                        circuitCode = s.circuitCode ?: existing.circuitCode,
                         status = s.status,
                         voltage = s.voltage.toFloat(),
                         confirmedReportsCount = s.confirmedReportsCount,
                         withoutPowerPercentage = s.withoutPowerPercentage,
-                        lastUpdatedMillis = s.lastUpdatedMillis,
-                        rotationBlock = s.rotationBlock ?: existing.rotationBlock
+                        lastUpdatedMillis = if (s.lastUpdatedMillis > 0) s.lastUpdatedMillis else existing.lastUpdatedMillis,
+                        rotationBlock = s.rotationBlock ?: existing.rotationBlock,
+                        isCommunity = isCom
                     )
                 )
             }
+        } else {
+            sectorDao.insertOrUpdateSector(
+                com.example.data.local.entity.SectorEntity(
+                    id = s.id,
+                    name = s.name ?: s.id,
+                    circuitCode = s.circuitCode ?: "Circuito Urbano",
+                    status = s.status,
+                    voltage = s.voltage.toFloat(),
+                    confirmedReportsCount = s.confirmedReportsCount,
+                    withoutPowerPercentage = s.withoutPowerPercentage,
+                    lastUpdatedMillis = if (s.lastUpdatedMillis > 0) s.lastUpdatedMillis else System.currentTimeMillis(),
+                    rotationBlock = s.rotationBlock ?: "Bloque C",
+                    polygonPointsRaw = "8.625,-70.220;8.635,-70.208;8.620,-70.202;8.615,-70.215",
+                    isCommunity = isCom
+                )
+            )
         }
     }
 
