@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.ui.components.AdaptiveBannerAd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Info
@@ -167,7 +168,7 @@ fun PacScheduleView(
             }
         }
 
-        // Main Tab Switcher (Semanal, Mensual, Bloques)
+        // Main Tab Switcher (Cronograma PAC Unificado, Bloques y Circuitos)
         item {
             Surface(
                 shape = RoundedCornerShape(16.dp),
@@ -175,7 +176,7 @@ fun PacScheduleView(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(modifier = Modifier.padding(4.dp)) {
-                    // Tab 0: Semanal
+                    // Tab 0: Cronograma PAC Unificado
                     Surface(
                         shape = RoundedCornerShape(12.dp),
                         color = if (mainTab == 0) MaterialTheme.colorScheme.surface else Color.Transparent,
@@ -190,14 +191,14 @@ fun PacScheduleView(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                Icons.Outlined.ViewWeek,
-                                contentDescription = "Vista semanal",
+                                Icons.Outlined.CalendarMonth,
+                                contentDescription = "Cronograma unificado",
                                 modifier = Modifier.size(16.dp),
                                 tint = if (mainTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Semanal",
+                                text = "Cronograma PAC",
                                 fontWeight = if (mainTab == 0) FontWeight.Bold else FontWeight.Medium,
                                 fontSize = 13.sp,
                                 color = if (mainTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
@@ -205,7 +206,7 @@ fun PacScheduleView(
                         }
                     }
 
-                    // Tab 1: Mensual
+                    // Tab 1: Bloques y Circuitos
                     Surface(
                         shape = RoundedCornerShape(12.dp),
                         color = if (mainTab == 1) MaterialTheme.colorScheme.surface else Color.Transparent,
@@ -220,47 +221,17 @@ fun PacScheduleView(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                Icons.Outlined.CalendarMonth,
-                                contentDescription = "Vista mensual",
+                                Icons.Outlined.ViewAgenda,
+                                contentDescription = "Vista por bloques",
                                 modifier = Modifier.size(16.dp),
                                 tint = if (mainTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Mensual",
+                                text = "Bloques y Circuitos",
                                 fontWeight = if (mainTab == 1) FontWeight.Bold else FontWeight.Medium,
                                 fontSize = 13.sp,
                                 color = if (mainTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    // Tab 2: Bloques
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (mainTab == 2) MaterialTheme.colorScheme.surface else Color.Transparent,
-                        shadowElevation = if (mainTab == 2) 2.dp else 0.dp,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { mainTab = 2 }
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(vertical = 10.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Outlined.ViewAgenda,
-                                contentDescription = "Vista por bloques",
-                                modifier = Modifier.size(16.dp),
-                                tint = if (mainTab == 2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Bloques",
-                                fontWeight = if (mainTab == 2) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 13.sp,
-                                color = if (mainTab == 2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -459,8 +430,44 @@ fun PacScheduleView(
                                     }
                                 }
                             }
-                        }
-                        1 -> {
+
+                            // Strategic Ad Banner between Current Week and Continuous Monthly Projection
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    AdaptiveBannerAd()
+                                }
+                            }
+
+                            // Continuous Monthly Projection Section
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Proyección Mensual Continua",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "Rotación semanal secuencial Corpoelec (4 semanas)",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
@@ -531,24 +538,8 @@ fun PacScheduleView(
                                     userBlock = userBlock
                                 )
                             }
-
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "— ASIGNACIÓN DE CIRCUITOS POR BLOQUE —",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-
-                            PacBlockSectorsGrid(onSectorClicked = onSectorClicked)
                         }
-                        2 -> {
+                        1 -> {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),

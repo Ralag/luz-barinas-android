@@ -96,8 +96,26 @@ fun InteractiveBarinasMap(
     val textColor = if (isDark) android.graphics.Color.WHITE else android.graphics.Color.DKGRAY
     val primaryColor = MaterialTheme.colorScheme.primary
 
-    // Remove pulseAlpha to prevent 60fps continuous redrawing.
-    // We will use a static highlight for the selected sector instead.
+    // Dynamic pulse animation for live telemetry and citizen reporting reactivity
+    val infiniteTransition = rememberInfiniteTransition(label = "telemetry_pulse")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.35f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse_scale"
+    )
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 0.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse_alpha"
+    )
 
     // Precompute normalized positions outside the draw loop
     val precomputedSectors = remember(sectors) {
@@ -347,50 +365,69 @@ fun InteractiveBarinasMap(
                 val pinColor = when (item.sector.status) {
                     ServiceStatus.NORMAL -> StatusNormalGreen
                     ServiceStatus.SCHEDULED_OUTAGE -> StatusScheduledRed
-                    ServiceStatus.IRREGULAR_OUTAGE -> StatusIrregularPurple
+                    ServiceStatus.IRREGULAR_OUTAGE -> Color(0xFFF59E0B)
                 }
 
-                // HEAT MAP LOGIC
-                // Density of reports determines the size of the heat blur
-                // Power status determines the color
-                val reports = item.sector.confirmedReportsCount.coerceAtLeast(1)
-                val heatRadius = (15f + (reports * 2f)).coerceAtMost(60f) * scale
+                // HEAT MAP & LIVE TELEMETRY LOGIC
+                // Density of citizen reports and outage status determine heat radius and animation
+                val reports = item.sector.confirmedReportsCount.coerceAtLeast(0)
+                val isOutage = item.sector.status != ServiceStatus.NORMAL
+                val hasReports = reports > 0
 
-                // Draw heat blur
+                val baseHeatRadius = (16f + (reports * 3f)).coerceAtMost(65f) * scale
+                val currentHeatRadius = if (isOutage || hasReports) baseHeatRadius * pulseScale else baseHeatRadius
+                val currentHeatAlpha = if (isOutage || hasReports) pulseAlpha else 0.35f
+
+                // Draw heat blur responding to citizen reports
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            pinColor.copy(alpha = 0.4f),
-                            pinColor.copy(alpha = 0.15f),
+                            pinColor.copy(alpha = currentHeatAlpha),
+                            pinColor.copy(alpha = currentHeatAlpha * 0.35f),
                             Color.Transparent
                         ),
                         center = pinOffset,
-                        radius = heatRadius
+                        radius = currentHeatRadius
                     ),
-                    radius = heatRadius,
+                    radius = currentHeatRadius,
                     center = pinOffset
                 )
 
-                if (isSelected) {
-                    // Highlight ring for selected sector
+                // Outer pulsing telemetry ring when outage or reports are active
+                if (isOutage || hasReports) {
                     drawCircle(
-                        color = pinColor.copy(alpha = 0.8f),
-                        radius = 24f,
+                        color = pinColor.copy(alpha = pulseAlpha * 0.8f),
+                        radius = (currentHeatRadius * 0.65f),
+                        center = pinOffset,
+                        style = Stroke(width = 1.5f * density)
+                    )
+                }
+
+                if (isSelected) {
+                    // Highlight rings for selected sector
+                    drawCircle(
+                        color = pinColor.copy(alpha = 0.85f),
+                        radius = 26f,
                         center = pinOffset
                     )
                     drawCircle(
                         color = primaryColor,
-                        radius = 14f,
+                        radius = 16f,
                         center = pinOffset,
                         style = Stroke(width = 3f)
                     )
                     drawCircle(
                         color = android.graphics.Color.WHITE.let { Color(it) },
-                        radius = 8f,
+                        radius = 9f,
                         center = pinOffset
                     )
                 } else {
-                    // Subtle, crisp electrical node in the center of the heat
+                    // Crisp electrical node in the center with subtle white/black border
+                    drawCircle(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        radius = 5.5f,
+                        center = pinOffset
+                    )
                     drawCircle(
                         color = pinColor,
                         radius = 4.5f,
@@ -400,7 +437,12 @@ fun InteractiveBarinasMap(
 
                 // Render label ONLY when selected to eliminate text rendering bottlenecks
                 if (isSelected) {
-                    val labelText = "📍 ${item.shortName}"
+                    val statusEmoji = when (item.sector.status) {
+                        ServiceStatus.NORMAL -> "🟢"
+                        ServiceStatus.SCHEDULED_OUTAGE -> "🔴"
+                        ServiceStatus.IRREGULAR_OUTAGE -> "⚡"
+                    }
+                    val labelText = "$statusEmoji ${item.shortName}"
                     textPaint.textSize = selectedLabelSize
                     textPaint.color = android.graphics.Color.WHITE
 
@@ -486,7 +528,7 @@ fun InteractiveBarinasMap(
             ) {
                 LegendDot(StatusNormalGreen, "Con Luz")
                 LegendDot(StatusScheduledRed, "Corte PAC")
-                LegendDot(StatusIrregularPurple, "Avería")
+                LegendDot(Color(0xFFF59E0B), "Avería / Falla")
             }
         }
     }

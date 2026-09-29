@@ -606,7 +606,10 @@ object PacScheduleData {
     }
 
     fun getBlockForDate(slotIdx: Int, dayIdx: Int, dayOfMonth: Int = -1): String {
-        return activeMatrix.getOrNull(slotIdx)?.getOrNull(dayIdx) ?: "-"
+        val totalSlots = activeMatrix.size.coerceAtLeast(1)
+        val weekOffset = if (dayOfMonth > 0) getWeekOffsetForDayOfMonth(dayOfMonth) else 0
+        val rotatedRow = (slotIdx + weekOffset) % totalSlots
+        return activeMatrix.getOrNull(rotatedRow)?.getOrNull(dayIdx) ?: "-"
     }
 
     fun getCurrentSlotIndex(hourOfDay: Int, minuteOfHour: Int = 0): Int {
@@ -637,8 +640,9 @@ object PacScheduleData {
             timeInMillis = currentTimeMillis
         }
         val dayIdx = getDayIndex(cal.get(Calendar.DAY_OF_WEEK))
-        val slotIdx = getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY))
-        return activeMatrix.getOrNull(slotIdx)?.getOrNull(dayIdx) ?: "-"
+        val slotIdx = getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
+        val dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
+        return getBlockForDate(slotIdx, dayIdx, dayOfMonth)
     }
 
     fun findNextWindowForBlock(
@@ -658,7 +662,7 @@ object PacScheduleData {
             }
             val dayIdx = getDayIndex(testCal.get(Calendar.DAY_OF_WEEK))
             val dayOfMonth = testCal.get(Calendar.DAY_OF_MONTH)
-            val weekShift = dayOffset / 7
+            val weekShift = getWeekOffsetForDayOfMonth(dayOfMonth)
             val totalSlots = activeMatrix.size.coerceAtLeast(1)
 
             for (slotIdx in activeSlots.indices) {

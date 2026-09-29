@@ -1030,7 +1030,6 @@ fun AdminScreen(
         val slot = pacSlots.getOrElse(slotIdx) { PacScheduleData.SLOTS[0] }
         val day = PacScheduleData.DAYS[dayIdx]
         val currentBlock = matrix.getOrNull(slotIdx)?.getOrNull(dayIdx) ?: "A"
-        val dayAudit = PacScheduleData.getDayTurnAudit(dayIdx)
 
         val blockColor = when (currentBlock) {
             "A" -> BlockAColor
@@ -1167,12 +1166,6 @@ fun AdminScreen(
                             fontSize = 11.sp
                         )
                     }
-
-                    Text(
-                        text = "Auditoría de hoy: ${dayAudit.detectedScheme} (A:${dayAudit.cutsPerBlock["A"] ?: 0} B:${dayAudit.cutsPerBlock["B"] ?: 0} C:${dayAudit.cutsPerBlock["C"] ?: 0} D:${dayAudit.cutsPerBlock["D"] ?: 0})",
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             },
             confirmButton = {},

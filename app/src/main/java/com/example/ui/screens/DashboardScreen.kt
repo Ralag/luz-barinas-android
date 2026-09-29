@@ -157,10 +157,6 @@ fun DashboardScreen(
         found
     }
 
-    val dayAudit = remember(currentDayIdx, PacScheduleData.scheduleVersion) {
-        PacScheduleData.getDayTurnAudit(currentDayIdx)
-    }
-
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
@@ -410,15 +406,16 @@ fun DashboardScreen(
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = if (hasPowerNow) {
-                                            if (prediction != null && prediction.hoursUntilWindow > 0f) {
-                                                "Próximo corte: ${prediction.algorithmDetail.substringAfter(": ")}"
+                                            val predDetail = prediction?.algorithmDetail
+                                            if (prediction != null && prediction.hoursUntilWindow > 0.1f && predDetail != null && !predDetail.contains("Corte activo", ignoreCase = true) && !predDetail.contains("Corte en curso", ignoreCase = true)) {
+                                                "Próximo corte: ${predDetail.substringAfter(": ")}"
                                             } else if (nextCutSlotIdx != -1) {
                                                 "Próximo corte estimado: ${PacScheduleData.SLOTS[nextCutSlotIdx].timeLabel}"
                                             } else {
                                                 "Sin cortes programados en este turno"
                                             }
                                         } else {
-                                            "Turno actual: ${PacScheduleData.SLOTS[currentSlotIdx].timeLabel} (4 hrs)"
+                                            "Corte en curso: Turno ${PacScheduleData.SLOTS[currentSlotIdx].timeLabel} (4 hrs)"
                                         },
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium,

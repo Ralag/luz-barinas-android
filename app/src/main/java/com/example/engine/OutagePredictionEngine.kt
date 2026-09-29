@@ -132,14 +132,14 @@ object OutagePredictionEngine {
                 candidateCal.set(Calendar.HOUR_OF_DAY, tomorrowSlot)
             }
             adjustedStartMillis = candidateCal.timeInMillis
-            algorithmDetail = "PAC Rotación (\$cleanBlock)"
+            algorithmDetail = "PAC Rotación ($cleanBlock)"
             confidence = 78
         } else if (algorithmDetail.startsWith("Teórico") && theoreticalPacWindow != null) {
             confidence = if (sectorRecords.size >= 2) 94 else 88
             algorithmDetail = if (theoreticalPacWindow.isCurrentlyActive) {
-                "PAC \${sector.rotationBlock}: Corte activo (\${theoreticalPacWindow.timeLabel})"
+                "PAC ${sector.rotationBlock}: Corte en curso (${theoreticalPacWindow.timeLabel})"
             } else {
-                "PAC \${sector.rotationBlock}: \${theoreticalPacWindow.dayName} \${theoreticalPacWindow.timeLabel}"
+                "PAC ${sector.rotationBlock}: ${theoreticalPacWindow.dayName} • ${theoreticalPacWindow.timeLabel}"
             }
         }
 

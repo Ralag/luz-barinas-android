@@ -211,14 +211,26 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         if (profile == _uiState.value.activeProfile) return
 
         userPrefs.edit().putString("active_profile", profile).apply()
-        _uiState.update { it.copy(activeProfile = profile) }
 
-        val newSectorId = userPrefs.getString("profile_${profile}_sector_id", null)
-        if (newSectorId != null) {
-            val sector = _uiState.value.sectors.find { it.id == newSectorId }
-            if (sector != null) {
-                // Call selectSector to load it and set listeners
-                selectSector(sector)
+        val savedSectorId = userPrefs.getString("profile_${profile}_sector_id", null)
+        val savedAddress = userPrefs.getString("profile_${profile}_address", null)
+        val sector = _uiState.value.sectors.find { it.id == savedSectorId }
+
+        _uiState.update { 
+            it.copy(
+                activeProfile = profile,
+                selectedSector = sector ?: it.selectedSector,
+                userAddress = savedAddress ?: it.userAddress
+            ) 
+        }
+
+        if (sector != null) {
+            selectSector(sector)
+        } else {
+            _uiState.update { 
+                it.copy(
+                    userMessage = if (profile == "work") "🏢 Toca 'Cambiar' para configurar tu ubicación de Trabajo." else "🏠 Ubicación de Casa seleccionada."
+                ) 
             }
         }
     }
@@ -502,6 +514,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             ?: _uiState.value.sectors.find { it.rotationBlock.contains(cleanBlock, ignoreCase = true) }
             ?: _uiState.value.selectedSector
 
+        val profile = _uiState.value.activeProfile
         val resolvedSectorId = matchingSector?.id ?: location.sectorEntityId
         userPrefs.edit()
             .putString("saved_address", location.name)
@@ -511,6 +524,9 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             .putString("selected_sector_block", cleanBlock)
             .putString("saved_sector_id", resolvedSectorId)
             .putString("selected_sector_id", resolvedSectorId)
+            .putString("profile_${profile}_sector_id", resolvedSectorId)
+            .putString("profile_${profile}_address", location.name)
+            .putString("profile_${profile}_block", cleanBlock)
             .putBoolean("onboarding_done", true)
             .apply()
 
@@ -519,7 +535,8 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
                 userAddress = location.name,
                 isOnboardingOpen = false,
                 selectedSector = matchingSector ?: current.selectedSector,
-                userMessage = "📍 Ubicación fijada en ${location.name} • Bloque ${cleanBlock}."
+                hasWorkProfile = userPrefs.getString("profile_work_sector_id", null) != null,
+                userMessage = "📍 Ubicación (${if (profile == "work") "Trabajo" else "Casa"}) fijada en ${location.name} • Bloque ${cleanBlock}."
             )
         }
 
