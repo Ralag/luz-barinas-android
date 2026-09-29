@@ -12,14 +12,14 @@ android {
   compileSdk = 36
 
   defaultConfig {
-    applicationId = "com.aistudio.luzbarinas.wvykrp"
+    applicationId = "com.ralag.pacbarinas"
     minSdk = 24
     targetSdk = 36
     versionCode = 5
     versionName = "1.3"
     
     // AdMob Production ID
-    manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-7639154379634043~2576948404"
+    manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-7639154379634043~9373028299"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

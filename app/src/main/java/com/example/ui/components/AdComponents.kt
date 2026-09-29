@@ -29,9 +29,9 @@ fun getBannerAdUnitId(): String {
     return try {
         val field = com.example.BuildConfig::class.java.getField("ADMOB_BANNER_UNIT_ID")
         val id = field.get(null) as? String
-        if (!id.isNullOrBlank() && !id.contains("xxxx")) id else "ca-app-pub-7639154379634043/8172800723"
+        if (!id.isNullOrBlank() && !id.contains("xxxx")) id else "ca-app-pub-7639154379634043/2005674160"
     } catch (e: Exception) {
-        "ca-app-pub-7639154379634043/8172800723"
+        "ca-app-pub-7639154379634043/2005674160"
     }
 }
 
@@ -78,8 +78,8 @@ object InterstitialAdManager {
     private var lastShownTime = 0L
     private const val MIN_INTERVAL_MS = 5 * 60 * 1000L // 5 minutes between interstitials
 
-    // Use test ID for development; replace with production ID later
-    private const val AD_UNIT_ID = "ca-app-pub-7639154379634043/1963218233"
+    // Interstitial Production ID from AdMob
+    private const val AD_UNIT_ID = "ca-app-pub-7639154379634043/7853072225"
 
     fun preload(context: Context) {
         val adRequest = AdRequest.Builder().build()
@@ -128,8 +128,8 @@ object AppOpenAdManager {
     private var isShowingAd = false
     private var hasShownOnce = false
 
-    // Use test ID for development; replace with production ID later
-    private const val AD_UNIT_ID = "ca-app-pub-7639154379634043/8337054893"
+    // App Open Production ID from AdMob
+    private const val AD_UNIT_ID = "ca-app-pub-7639154379634043/3577027707"
 
     fun loadAd(context: Context) {
         if (appOpenAd != null || hasShownOnce) return

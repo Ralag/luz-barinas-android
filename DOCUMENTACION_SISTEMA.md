@@ -442,7 +442,7 @@ Canales Realtime utilizados:
 
 | Campo | Valor |
 |---|---|
-| **Application ID** | `com.aistudio.luzbarinas.wvykrp` |
+| **Application ID** | `com.ralag.pacbarinas` |
 | **Namespace** | `com.example` |
 | **Min SDK** | 24 (Android 7.0) |
 | **Target SDK** | 36 (Android 16) |
@@ -760,10 +760,10 @@ También se puede publicar una actualización desde `app_config` con clave `"ver
 
 | Tipo | ID |
 |---|---|
-| **App ID** | `ca-app-pub-7639154379634043~2576948404` |
-| **Banner** | `ca-app-pub-7639154379634043/8172800723` |
-| **Interstitial** | `ca-app-pub-7639154379634043/1963218233` |
-| **App Open** | `ca-app-pub-7639154379634043/8337054893` |
+| **App ID** | `ca-app-pub-7639154379634043~9373028299` |
+| **Banner** | `ca-app-pub-7639154379634043/2005674160` |
+| **Interstitial** | `ca-app-pub-7639154379634043/7853072225` |
+| **App Open** | `ca-app-pub-7639154379634043/3577027707` |
 
 ### Implementación
 
