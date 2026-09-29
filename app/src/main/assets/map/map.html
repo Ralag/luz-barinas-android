@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PAC Barinas - Mapa de Calor y Telemetría</title>
+  <link rel="stylesheet" href="leaflet.css" />
+  <script src="leaflet.js"></script>
+  <script src="leaflet-heat.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #09090b;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #fff;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+      background: #09090b;
+    }
+    .leaflet-container {
+      background: #09090b !important;
+      font-family: inherit !important;
+    }
+
+    /* Popups estilo Dark Glassmorphism idénticos al panel web */
+    .leaflet-popup-content-wrapper {
+      background: rgba(18, 20, 26, 0.95) !important;
+      backdrop-filter: blur(16px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 16px !important;
+      color: #fff !important;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.8) !important;
+      padding: 0 !important;
+    }
+    .leaflet-popup-content {
+      margin: 12px 14px !important;
+      line-height: 1.4 !important;
+      font-size: 12px !important;
+    }
+    .leaflet-popup-tip {
+      background: rgba(18, 20, 26, 0.95) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+
+    /* Pines Neón con resplandor por bloque */
+    .custom-leaflet-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pin-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+    }
+    .marker-pin {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: #000;
+      border: 2px solid #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 2;
+    }
+    .marker-pin:active {
+      transform: scale(1.3);
+    }
+    .pin-a { background: #38bdf8; box-shadow: 0 0 12px #38bdf8a0; }
+    .pin-b { background: #f59e0b; box-shadow: 0 0 12px #f59e0ba0; }
+    .pin-c { background: #10b981; box-shadow: 0 0 12px #10b981a0; }
+    .pin-d { background: #f43f5e; box-shadow: 0 0 12px #f43f5ea0; }
+    .pin-selected {
+      border: 3px solid #ffffff !important;
+      transform: scale(1.25);
+      box-shadow: 0 0 20px #ffffff !important;
+      z-index: 10 !important;
+    }
+
+    /* Anillo de pulsación para cortes activos y fallas irregulares */
+    @keyframes pulseRing {
+      0% { transform: scale(0.85); opacity: 0.9; }
+      50% { transform: scale(1.7); opacity: 0.15; }
+      100% { transform: scale(0.85); opacity: 0.9; }
+    }
+    .pulse-effect {
+      position: absolute;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      animation: pulseRing 1.8s infinite ease-in-out;
+    }
+    .pulse-outage {
+      border: 2px solid #ef4444;
+      background: rgba(239, 68, 68, 0.25);
+    }
+    .pulse-irregular {
+      border: 2px solid #a855f7;
+      background: rgba(168, 85, 247, 0.25);
+    }
+
+    /* Controles flotantes en la UI del mapa */
+    .map-controls-top-right {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .glass-btn {
+      background: rgba(24, 24, 27, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: all 0.2s ease;
+    }
+    .glass-btn:active {
+      transform: scale(0.95);
+      background: rgba(40, 40, 45, 0.95);
+    }
+    .glass-btn.active {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: rgba(56, 189, 248, 0.6);
+      color: #38bdf8;
+    }
+
+    .map-legend-bottom {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      z-index: 1000;
+      background: rgba(24, 24, 27, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 6px 10px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .legend-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Controles flotantes superiores -->
+  <div class="map-controls-top-right">
+    <button id="btnHeatmap" class="glass-btn" onclick="toggleHeatmap()">
+      <span>🔥</span> <span id="heatmapText">Modo Calor</span>
+    </button>
+    <button id="btnBasemap" class="glass-btn" onclick="toggleBasemap()">
+      <span>🛰️</span> <span id="basemapText">Satélite HD</span>
+    </button>
+    <button class="glass-btn" onclick="recenterBarinas()">
+      <span>🎯</span> <span>Centrar</span>
+    </button>
+  </div>
+
+  <!-- Leyenda flotante inferior -->
+  <div class="map-legend-bottom">
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div><span>Con Luz</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444;"></div><span>Corte PAC</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a855f7;"></div><span>Avería</span></div>
+  </div>
+
+  <script>
+    let map = null;
+    let markersLayer = null;
+    let heatLayer = null;
+    let baseLayer = null;
+    let labelsLayer = null;
+    let isSatellite = false;
+    let isHeatmapActive = false;
+    let currentSectors = [];
+    let currentSelectedId = null;
+
+    // Coordenadas geográficas maestras de Barinas idénticas a app.js
+    const BARINAS_MUNICIPALITY_COORDS = {
+      "Barinas": [8.6226, -70.2075],
+      "Bolívar": [8.7561, -70.4078],
+      "Antonio José de Sucre": [8.2327, -70.7389],
+      "Pedraza": [8.3370, -70.5847],
+      "Alberto Arvelo Torrealba": [8.7616, -69.9322],
+      "Cruz Paredes": [8.8105, -70.0768],
+      "Ezequiel Zamora": [7.8028, -71.1711],
+      "Obispos": [8.5912, -70.0728],
+      "Rojas": [8.3242, -69.6192],
+      "Sosa": [8.0645, -69.1764],
+      "Andrés Eloy Blanco": [7.5097, -71.2986],
+      "Arismendi": [8.4870, -68.3411]
+    };
+
+    const KNOWN_SECTOR_COORDS = {
+      "alto barinas norte": [8.6180, -70.2350],
+      "alto barinas sur": [8.6050, -70.2450],
+      "alto barinas": [8.6120, -70.2380],
+      "centro": [8.6275, -70.2050],
+      "barinas centro": [8.6275, -70.2050],
+      "la rosaleda": [8.6320, -70.2280],
+      "campo movil": [8.6140, -70.2220],
+      "los profesionales": [8.6290, -70.2410],
+      "don samuel": [8.6410, -70.2150],
+      "la soledad": [8.6480, -70.2080],
+      "mijangos": [8.6190, -70.2010],
+      "mijagua": [8.6190, -70.2010],
+      "ciudad tavacare": [8.5720, -70.2850],
+      "palacio fajardo": [8.6110, -70.1980],
+      "la caramuca": [8.5310, -70.1820],
+      "el corozo": [8.5020, -70.1710],
+      "quebrada seca": [8.7120, -70.2810],
+      "san silvestre": [8.2710, -70.0120],
+      "santa ines": [8.1820, -69.9110],
+      "barinitas": [8.7561, -70.4078],
+      "socopo": [8.2327, -70.7389],
+      "ciudad bolivia": [8.3370, -70.5847],
+      "sabaneta": [8.7616, -69.9322],
+      "barrancas": [8.8105, -70.0768],
+      "santa barbara": [7.8028, -71.1711]
+    };
+
+    function initMap() {
+      map = L.map('map', {
+        center: [8.6226, -70.2075],
+        zoom: 12,
+        zoomControl: false,
+        attributionControl: false
+      });
+
+      setBasemap(false);
+
+      markersLayer = L.layerGroup().addTo(map);
+
+      // Notify Android that map is ready
+      if (window.AndroidBridge && window.AndroidBridge.onMapReady) {
+        window.AndroidBridge.onMapReady();
+      }
+    }
+
+    function setBasemap(satellite) {
+      isSatellite = satellite;
+      if (baseLayer) map.removeLayer(baseLayer);
+      if (labelsLayer) map.removeLayer(labelsLayer);
+
+      if (isSatellite) {
+        baseLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+          maxZoom: 19
+        }).addTo(map);
+        labelsLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
+          maxZoom: 19
+        }).addTo(map);
+        document.getElementById('basemapText').textContent = "Oscuro";
+      } else {
+        // Esri Dark Gray Canvas Base (Zero watermarks, ultra clean neons)
+        baseLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+          maxZoom: 16
+        }).addTo(map);
+        labelsLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+          maxZoom: 16
+        }).addTo(map);
+        document.getElementById('basemapText').textContent = "Satélite HD";
+      }
+
+      if (markersLayer) markersLayer.bringToFront();
+    }
+
+    function toggleBasemap() {
+      setBasemap(!isSatellite);
+    }
+
+    function toggleHeatmap() {
+      isHeatmapActive = !isHeatmapActive;
+      const btn = document.getElementById('btnHeatmap');
+      if (isHeatmapActive) {
+        btn.classList.add('active');
+        document.getElementById('heatmapText').textContent = "Pines Neón";
+      } else {
+        btn.classList.remove('active');
+        document.getElementById('heatmapText').textContent = "Modo Calor";
+      }
+      renderLayers();
+    }
+
+    function recenterBarinas() {
+      if (map) {
+        map.flyTo([8.6226, -70.2075], 12, { duration: 1.0 });
+      }
+    }
+
+    function getCoords(sector) {
+      if (sector.lat && sector.lon && !isNaN(Number(sector.lat)) && !isNaN(Number(sector.lon))) {
+        return [Number(sector.lat), Number(sector.lon)];
+      }
+      const cleanName = (sector.name || "").toLowerCase().trim();
+      for (const [key, coords] of Object.entries(KNOWN_SECTOR_COORDS)) {
+        if (cleanName.includes(key)) {
+          return coords;
+        }
+      }
+      const mun = sector.municipio || "Barinas";
+      const base = BARINAS_MUNICIPALITY_COORDS[mun] || BARINAS_MUNICIPALITY_COORDS["Barinas"];
+
+      // Jitter determinista para que sectores en la misma zona no se solapen
+      let hash = 0;
+      const str = (sector.id || sector.name || "sec");
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      const jitterLat = ((Math.abs(hash) % 1000) / 1000 - 0.5) * 0.038;
+      const jitterLon = (((Math.abs(hash * 31)) % 1000) / 1000 - 0.5) * 0.038;
+      return [base[0] + jitterLat, base[1] + jitterLon];
+    }
+
+    function renderLayers() {
+      if (!map) return;
+      markersLayer.clearLayers();
+      if (heatLayer) {
+        map.removeLayer(heatLayer);
+        heatLayer = null;
+      }
+
+      if (isHeatmapActive && typeof L.heatLayer === "function") {
+        const heatPoints = currentSectors.map(s => {
+          const coords = getCoords(s);
+          const isOutage = s.status === "SCHEDULED_OUTAGE" || s.status === "IRREGULAR_OUTAGE" || s.status === "FALLA_IRREGULAR";
+          const weight = isOutage ? 1.0 : 0.25;
+          return [coords[0], coords[1], weight];
+        });
+
+        heatLayer = L.heatLayer(heatPoints, {
+          radius: 30,
+          blur: 18,
+          maxZoom: 15,
+          gradient: { 0.2: '#38bdf8', 0.5: '#f59e0b', 0.8: '#f43f5e', 1.0: '#ef4444' }
+        }).addTo(map);
+        return;
+      }
+
+      // Render Pines Neón interactivos
+      currentSectors.forEach(sector => {
+        const coords = getCoords(sector);
+        const rawBlock = (sector.rotationBlock || 'C').toUpperCase().replace('BLOQUE', '').trim();
+        const block = ['A', 'B', 'C', 'D'].includes(rawBlock) ? rawBlock : 'A';
+        const isSelected = sector.id === currentSelectedId;
+        const isOutage = sector.status === "SCHEDULED_OUTAGE";
+        const isIrregular = sector.status === "IRREGULAR_OUTAGE" || sector.status === "FALLA_IRREGULAR";
+        const isNormal = !isOutage && !isIrregular;
+
+        let pulseHtml = '';
+        if (isOutage) {
+          pulseHtml = '<div class="pulse-effect pulse-outage"></div>';
+        } else if (isIrregular) {
+          pulseHtml = '<div class="pulse-effect pulse-irregular"></div>';
+        }
+
+        const markerHtml = `
+          <div class="pin-container">
+            ${pulseHtml}
+            <div class="marker-pin pin-${block.toLowerCase()} ${isSelected ? 'pin-selected' : ''}">
+              ${block}
+            </div>
+          </div>
+        `;
+
+        const icon = L.divIcon({
+          className: 'custom-leaflet-marker',
+          html: markerHtml,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16]
+        });
+
+        const statusLabel = isNormal ? '🟢 Con Luz' : (isOutage ? '🔴 Corte PAC' : '⚡ Falla Irregular');
+        const statusColor = isNormal ? '#10b981' : (isOutage ? '#ef4444' : '#a855f7');
+        const badgeCommunity = sector.isCommunity 
+          ? '<span style="background:rgba(245,158,11,0.2);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;">🤝 Comunitario</span>'
+          : '<span style="background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:600;">🏛️ Oficial</span>';
+
+        const popupContent = `
+          <div style="min-width:180px;">
+            <div style="font-size:10px;color:#94a3b8;font-weight:bold;margin-bottom:2px;">
+              ${sector.circuitCode || 'Circuito Urbano'} • ${sector.parroquia || 'Barinas'}
+            </div>
+            <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+              <span>${sector.name}</span>
+              ${badgeCommunity}
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px;background:rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px;font-size:11px;">
+              <span style="color:${statusColor};font-weight:bold;">${statusLabel}</span>
+              <span style="color:#cbd5e1;font-family:monospace;">${Number(sector.voltage || 118).toFixed(1)}V</span>
+            </div>
+            <button onclick="handleSectorClick('${sector.id}')" style="width:100%;padding:6px;background:#0284c7;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:bold;cursor:pointer;">
+              📍 Fijar como mi ubicación
+            </button>
+          </div>
+        `;
+
+        const marker = L.marker(coords, { icon: icon }).addTo(markersLayer);
+        marker.bindPopup(popupContent);
+
+        marker.on('click', () => {
+          handleSectorClick(sector.id);
+        });
+
+        if (isSelected) {
+          setTimeout(() => marker.openPopup(), 100);
+        }
+      });
+    }
+
+    function handleSectorClick(sectorId) {
+      currentSelectedId = sectorId;
+      if (window.AndroidBridge && window.AndroidBridge.onSectorClicked) {
+        window.AndroidBridge.onSectorClicked(sectorId);
+      }
+    }
+
+    // Método expuesto a Android para sincronizar reactivamente los sectores y la selección
+    window.updateMapData = function(sectorsJson, selectedId) {
+      try {
+        currentSectors = typeof sectorsJson === 'string' ? JSON.parse(sectorsJson) : sectorsJson;
+        currentSelectedId = selectedId || null;
+        renderLayers();
+
+        if (currentSelectedId) {
+          const selected = currentSectors.find(s => s.id === currentSelectedId);
+          if (selected) {
+            const coords = getCoords(selected);
+            map.flyTo(coords, Math.max(map.getZoom(), 13), { duration: 0.8 });
+          }
+        }
+      } catch (e) {
+        console.error("Error updating map data from Android:", e);
+      }
+    };
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>
