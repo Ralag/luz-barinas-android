@@ -71,7 +71,7 @@ fun PrivacyPolicyContent() {
     Spacer(modifier = Modifier.height(12.dp))
     
     Text("5. Servicios de Terceros e Infraestructura", fontWeight = FontWeight.Bold)
-    Text("Para proveer una infraestructura confiable y resiliente, PAC Barinas interactúa con los siguientes proveedores de servicios en la nube:\n\n• Supabase Inc.: Hospedaje de base de datos PostgreSQL y WebSockets en tiempo real para la sincronización de matrices y reportes.\n• GitHub Inc.: Alojamiento del código fuente abierto del proyecto y repositorio de instaladores oficiales (APK releases).\n• Vercel Inc. & Dominio pacbarinas.sites: Alojamiento de la infraestructura web oficial y funciones serverless.\n• Google AdMob: Red publicitaria implementada para financiar los costos de mantenimiento de los servidores y dominios. Puede recopilar identificadores de publicidad no vinculados a datos sensibles de acuerdo con sus propias directrices.")
+    Text("Para proveer una infraestructura confiable y resiliente, PAC Barinas interactúa con los siguientes proveedores de servicios en la nube:\n\n• Supabase Inc.: Hospedaje de base de datos PostgreSQL y WebSockets en tiempo real para la sincronización de matrices y reportes.\n• GitHub Inc.: Alojamiento del código fuente abierto del proyecto y repositorio de instaladores oficiales (APK releases).\n• Vercel Inc. & Dominio pacbarinas.site: Alojamiento de la infraestructura web oficial y funciones serverless.\n• Google AdMob: Red publicitaria implementada para financiar los costos de mantenimiento de los servidores y dominios. Puede recopilar identificadores de publicidad no vinculados a datos sensibles de acuerdo con sus propias directrices.")
     Spacer(modifier = Modifier.height(12.dp))
     
     Text("6. Control del Usuario y Eliminación de Datos", fontWeight = FontWeight.Bold)
@@ -129,7 +129,7 @@ fun TransparenciaContent() {
     Spacer(modifier = Modifier.height(8.dp))
     Text("• Supabase: Actúa como nuestro backend en tiempo real (PostgreSQL y WebSockets). Gestiona la sincronización de la matriz PAC, el feed ciudadano y la telemetría del mapa de calor.")
     Text("• GitHub: Aloja el código fuente y sirve como repositorio para verificar y descargar las actualizaciones oficiales OTA (Over-The-Air).")
-    Text("• Vercel & Dominio Oficial: Plataforma de alojamiento para nuestra página web e infraestructura serverless, accesible en https://pacbarinas.sites y su espejo pac-barinas.vercel.app.")
+    Text("• Vercel & Dominio Oficial: Plataforma de alojamiento para nuestra página web e infraestructura serverless, accesible en https://pacbarinas.site y su espejo pac-barinas.vercel.app.")
     Text("• Google AdMob: Red publicitaria utilizada exclusivamente para financiar los costos operativos (servidores y dominios).")
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -169,7 +169,7 @@ fun DeveloperInfoContent() {
     Spacer(modifier = Modifier.height(8.dp))
     
     Text("Portal Web Oficial:", fontWeight = FontWeight.Bold)
-    Text("https://pacbarinas.sites (Espejo Vercel: https://pac-barinas.vercel.app)")
+    Text("https://pacbarinas.site (Espejo Vercel: https://pac-barinas.vercel.app)")
     Spacer(modifier = Modifier.height(8.dp))
     
     Text("Repositorio de Código:", fontWeight = FontWeight.Bold)
@@ -217,7 +217,7 @@ fun SystemDocumentationContent() {
     Spacer(modifier = Modifier.height(12.dp))
 
     Text("2. Arquitectura Global", fontWeight = FontWeight.Bold)
-    Text("• App Android: Interfaz nativa moderna construida 100% con Jetpack Compose y arquitectura MVVM (StateFlow, Coroutines).\n• Backend Cloud: Supabase (PostgreSQL 15 + WebSockets Realtime) para sincronización bidireccional instantánea sin polling.\n• APIs Serverless: Funciones serverless en Vercel para modelos de predicción y cálculo de rotaciones mensuales.\n• Portal Web Oficial: Plataforma web pública y administrativa alojada en Vercel bajo el dominio https://pacbarinas.sites.")
+    Text("• App Android: Interfaz nativa moderna construida 100% con Jetpack Compose y arquitectura MVVM (StateFlow, Coroutines).\n• Backend Cloud: Supabase (PostgreSQL 15 + WebSockets Realtime) para sincronización bidireccional instantánea sin polling.\n• APIs Serverless: Funciones serverless en Vercel para modelos de predicción y cálculo de rotaciones mensuales.\n• Portal Web Oficial: Plataforma web pública y administrativa alojada en Vercel bajo el dominio https://pacbarinas.site.")
     Spacer(modifier = Modifier.height(12.dp))
 
     Text("3. Notificaciones y Alarmas", fontWeight = FontWeight.Bold)
