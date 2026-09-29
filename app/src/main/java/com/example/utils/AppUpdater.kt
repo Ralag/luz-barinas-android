@@ -1,19 +1,12 @@
 package com.example.utils
 
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
 import android.widget.Toast
-import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -22,6 +15,9 @@ object AppUpdater {
     suspend fun checkForUpdates(): com.example.ui.viewmodel.AppUpdateInfo? {
         return withContext(Dispatchers.IO) {
             try {
+                // Sigue verificando las versiones a través de GitHub si lo deseas, 
+                // o puedes usar la API in-app-updates de Play Store más adelante.
+                // Por ahora mantenemos la alerta, pero el botón redirigirá a Play Store.
                 val apiUrl = URL("https://api.github.com/repos/Ralag/luz-barinas-android/releases/latest")
                 val connection = apiUrl.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
@@ -35,8 +31,7 @@ object AppUpdater {
                 val json = JSONObject(responseStr)
                 
                 val tagName = json.getString("tag_name")
-                val body = json.optString("body", "Nueva actualización disponible.")
-                val htmlUrl = json.getString("html_url")
+                val body = json.optString("body", "Nueva actualización disponible en Google Play.")
                 
                 val remoteVersionName = tagName.replace("v", "", ignoreCase = true).trim()
                 val remoteParts = remoteVersionName.split(".").map { it.toIntOrNull() ?: 0 }
@@ -57,23 +52,11 @@ object AppUpdater {
                 }
                 
                 if (isNewer) {
-                    var apkUrl = htmlUrl
-                    val assets = json.optJSONArray("assets")
-                    if (assets != null) {
-                        for (i in 0 until assets.length()) {
-                            val asset = assets.getJSONObject(i)
-                            if (asset.getString("name").endsWith(".apk")) {
-                                apkUrl = asset.getString("browser_download_url")
-                                break
-                            }
-                        }
-                    }
-                    
                     return@withContext com.example.ui.viewmodel.AppUpdateInfo(
                         versionCode = com.example.BuildConfig.VERSION_CODE + 1,
                         versionName = remoteVersionName,
                         releaseNotes = body,
-                        downloadUrl = apkUrl,
+                        downloadUrl = "market://details?id=com.ralag.pacbarinas", // Play Store intent scheme
                         isMandatory = body.contains("[MANDATORY]", ignoreCase = true)
                     )
                 }
@@ -85,151 +68,23 @@ object AppUpdater {
         }
     }
     
-    suspend fun downloadAndInstallLatestRelease(context: Context) {
-        withContext(Dispatchers.IO) {
+    suspend fun openPlayStoreForUpdate(context: Context) {
+        withContext(Dispatchers.Main) {
             try {
-                // 1. Fetch latest release from GitHub API
-                val apiUrl = URL("https://api.github.com/repos/Ralag/luz-barinas-android/releases/latest")
-                val connection = apiUrl.openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
-                
-                if (connection.responseCode != HttpURLConnection.HTTP_OK) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "No se pudo obtener la última versión. Intente descargar manualmente.", Toast.LENGTH_LONG).show()
-                    }
-                    return@withContext
+                // Redirigir siempre a la Play Store para cumplir con las políticas de Google Play
+                val appPackageName = "com.ralag.pacbarinas" // Tu nuevo ID
+                try {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    })
+                } catch (anfe: android.content.ActivityNotFoundException) {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    })
                 }
-                
-                val responseStr = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(responseStr)
-                val assets = json.getJSONArray("assets")
-                
-                var apkUrl: String? = null
-                var apkName = "PAC-BARINAS-update.apk"
-                
-                for (i in 0 until assets.length()) {
-                    val asset = assets.getJSONObject(i)
-                    val name = asset.getString("name")
-                    if (name.endsWith(".apk")) {
-                        apkUrl = asset.getString("browser_download_url")
-                        apkName = name
-                        break
-                    }
-                }
-                
-                if (apkUrl == null) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "No se encontró un archivo APK en el último release.", Toast.LENGTH_LONG).show()
-                    }
-                    return@withContext
-                }
-                
-                // 2. Prepare file destination and clean stale APKs to avoid DownloadManager duplicate renames (-1.apk)
-                val destDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-                val file = File(destDir, apkName)
-                if (file.exists()) {
-                    file.delete()
-                }
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Descargando actualización en segundo plano...", Toast.LENGTH_LONG).show()
-                }
-                
-                val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                val request = DownloadManager.Request(Uri.parse(apkUrl)).apply {
-                    setTitle("Actualizando PAC Barinas")
-                    setDescription("Descargando la última versión...")
-                    setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, apkName)
-                }
-                
-                val downloadId = downloadManager.enqueue(request)
-                
-                // 3. Register Receiver to install APK once downloaded
-                val onComplete = object : BroadcastReceiver() {
-                    override fun onReceive(ctxt: Context, intent: Intent) {
-                        val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                        if (id == downloadId) {
-                            installApk(ctxt, file)
-                            try {
-                                ctxt.unregisterReceiver(this)
-                            } catch (_: Exception) {}
-                        }
-                    }
-                }
-                
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    context.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_EXPORTED)
-                } else {
-                    context.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-                }
-                
             } catch (e: Exception) {
                 e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error al descargar: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
-    
-    private fun installApk(context: Context, apkFile: File) {
-        if (!apkFile.exists() || apkFile.length() == 0L) {
-            android.os.Handler(android.os.Looper.getMainLooper()).post {
-                Toast.makeText(context, "Archivo de instalación incompleto o dañado.", Toast.LENGTH_LONG).show()
-            }
-            return
-        }
-        
-        try {
-            // Check unknown apps install permission on Android 8.0+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (!context.packageManager.canRequestPackageInstalls()) {
-                    val settingsIntent = Intent(
-                        android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                        Uri.parse("package:${context.packageName}")
-                    ).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    context.startActivity(settingsIntent)
-                    android.os.Handler(android.os.Looper.getMainLooper()).post {
-                        Toast.makeText(context, "Por favor autoriza la instalación de actualizaciones para PAC Barinas e intenta de nuevo.", Toast.LENGTH_LONG).show()
-                    }
-                    return
-                }
-            }
-
-            val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                FileProvider.getUriForFile(context, "${context.packageName}.provider", apkFile)
-            } else {
-                Uri.fromFile(apkFile)
-            }
-            
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "application/vnd.android.package-archive")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-
-            // Explicitly grant read URI permission to all potential package installers
-            val resolvedActivities = context.packageManager.queryIntentActivities(
-                intent,
-                android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
-            )
-            for (resolveInfo in resolvedActivities) {
-                context.grantUriPermission(
-                    resolveInfo.activityInfo.packageName,
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-            }
-
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            android.os.Handler(android.os.Looper.getMainLooper()).post {
-                Toast.makeText(context, "Error al iniciar instalador: " + e.message, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "No se pudo abrir Google Play Store.", Toast.LENGTH_SHORT).show()
             }
         }
     }

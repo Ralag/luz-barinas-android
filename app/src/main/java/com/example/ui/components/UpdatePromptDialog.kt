@@ -112,7 +112,7 @@ fun UpdatePromptDialog(
                         try {
                             // If they already have an update URL but want a native download
                             scope.launch {
-                                com.example.utils.AppUpdater.downloadAndInstallLatestRelease(context)
+                                com.example.utils.AppUpdater.openPlayStoreForUpdate(context)
                                 onDismiss()
                             }
                         } catch (e: Exception) {
