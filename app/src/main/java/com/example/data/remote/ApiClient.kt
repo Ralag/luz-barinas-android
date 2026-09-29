@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
     // Asegúrate de cambiar esta URL por la URL real de tu proyecto Vercel (ej: https://tu-proyecto.vercel.app/)
-    private const val BASE_URL = "https://luz-barinas-admin-web.vercel.app/"
+    private const val BASE_URL = "https://pac-barinas.vercel.app/"
 
     private val moshi: Moshi by lazy {
         Moshi.Builder()
