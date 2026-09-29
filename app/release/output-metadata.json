@@ -4,16 +4,16 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.aistudio.luzbarinas.wvykrp",
+  "applicationId": "com.ralag.pacbarinas",
   "variantName": "release",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 4,
-      "versionName": "1.2",
-      "outputFile": "PAC-BARINAS-v${version}-${variant.name}.apk"
+      "versionCode": 6,
+      "versionName": "1.3",
+      "outputFile": "PAC-BARINAS-v1.3-release.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/PAC-BARINAS-v${version}-${variant.name}.dm"
+        "baselineProfiles/1/PAC-BARINAS-v1.3-release.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/PAC-BARINAS-v${version}-${variant.name}.dm"
+        "baselineProfiles/0/PAC-BARINAS-v1.3-release.dm"
       ]
     }
   ],
