@@ -1,16 +1,30 @@
 package com.example.ui.screens
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.OpenInBrowser
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -153,33 +167,132 @@ fun TransparenciaContent() {
 
 @Composable
 fun DeveloperInfoContent() {
-    Text("Datos del Negocio / Desarrollador", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+    val context = LocalContext.current
+
+    Text(
+        "Equipo, Desarrollador y Créditos",
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary
+    )
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+        "Personas que hicieron posible el origen y funcionamiento de PAC Barinas",
+        fontSize = 12.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
     Spacer(modifier = Modifier.height(16.dp))
-    
+
+    // RECONOCIMIENTO ESPECIAL: ElMatrushka (Ideación del Proyecto)
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.elmatrushka),
+                    contentDescription = "ElMatrushka - Co-creador de la idea",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                )
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = "💡 IDEACIÓN DEL PROYECTO",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "ElMatrushka",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Co-creador de la idea de PAC Barinas",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Reconocimiento y agradecimiento especial a ElMatrushka por ser parte fundamental en el nacimiento y formulación de la idea del sistema PAC Barinas. Su aporte, visión y motivación constante fueron esenciales para transformar la necesidad comunitaria en una herramienta digital abierta al servicio de Barinas.",
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+            Button(
+                onClick = {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/elmatrushka.bv/"))
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF1877F2),
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Visitar perfil en Facebook", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+    Text("Desarrollo de Software y Arquitectura:", fontWeight = FontWeight.Bold)
+    Text("Ing. Jorluis (Desarrollo Móvil Android & Plataforma Web)")
+    Spacer(modifier = Modifier.height(10.dp))
+
     Text("Nombre del Proyecto:", fontWeight = FontWeight.Bold)
     Text("PAC Barinas")
     Spacer(modifier = Modifier.height(8.dp))
-    
+
     Text("Tipo de Proyecto:", fontWeight = FontWeight.Bold)
-    Text("Proyecto comunitario independiente de código abierto")
+    Text("Iniciativa comunitaria independiente de software libre")
     Spacer(modifier = Modifier.height(8.dp))
-    
+
     Text("Ubicación:", fontWeight = FontWeight.Bold)
     Text("Barinas, Estado Barinas, Venezuela")
     Spacer(modifier = Modifier.height(8.dp))
-    
+
     Text("Portal Web Oficial:", fontWeight = FontWeight.Bold)
     Text("https://pacbarinas.site (Espejo Vercel: https://pac-barinas.vercel.app)")
     Spacer(modifier = Modifier.height(8.dp))
-    
-    Text("Repositorio de Código:", fontWeight = FontWeight.Bold)
+
+    Text("Repositorio de Código Abierto:", fontWeight = FontWeight.Bold)
     Text("https://github.com/Ralag/luz-barinas-android")
     Spacer(modifier = Modifier.height(8.dp))
-    
+
     Text("Contacto:", fontWeight = FontWeight.Bold)
-    Text("Correo: jorluis255@gmail.com\nTeléfono: +58 412 264 4894")
-    Spacer(modifier = Modifier.height(8.dp))
-    
+    Text("Correo: jorluis255@gmail.com\nTeléfono / WhatsApp: +58 412 264 4894")
+    Spacer(modifier = Modifier.height(12.dp))
+
     Text("Nota Legal:", fontWeight = FontWeight.Bold)
     Text("PAC Barinas no es una entidad comercial registrada, gubernamental ni corporativa. Es un esfuerzo civil desarrollado por ingenieros y ciudadanos para la comunidad.")
 }
@@ -231,3 +344,113 @@ fun SystemDocumentationContent() {
     Text("5. Repositorio y Documentación Completa", fontWeight = FontWeight.Bold)
     Text("El documento maestro 'DOCUMENTACION_SISTEMA.md' con más de 1.400 líneas de detalles técnicos, esquemas DDL y flujos de datos se encuentra disponible en la raíz del repositorio oficial en GitHub:\nhttps://github.com/Ralag/luz-barinas-android")
 }
+
+@Composable
+fun GovernmentDisclaimerContent() {
+    val context = LocalContext.current
+
+    Text(
+        "Descargo de Responsabilidad y Fuentes Gubernamentales",
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(
+        "Declaración de no representación gubernamental y procedencia oficial de datos",
+        fontSize = 12.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+
+    // Tarjeta destacada de renuncia de responsabilidad
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+        ),
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.45f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                "RENUNCIA DE RESPONSABILIDAD (DISCLAIMER)",
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 13.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Esta aplicación NO representa a ninguna entidad pública o gubernamental. PAC Barinas es una iniciativa civil y desarrollo de tecnología comunitaria completamente independiente y sin fines de lucro.\n\n" +
+                "Esta aplicación NO está afiliada, autorizada, asociada, operada ni respaldada por la Corporación Eléctrica Nacional (CORPOELEC), ni por el Ministerio del Poder Popular para la Energía Eléctrica (MPPEE), ni por ningún organismo o ente del Estado venezolano.",
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+    Text("Fuentes Oficiales de Información Pública", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    Spacer(modifier = Modifier.height(6.dp))
+    Text(
+        "Los cronogramas y esquemas de rotación de bloques del Plan de Administración de Carga (PAC) presentados en esta app se obtienen exclusivamente a partir de comunicaciones, avisos y cronogramas de acceso público divulgados por los canales y portales oficiales del ente prestador del servicio eléctrico en Venezuela. Puedes consultar y verificar las fuentes originales directamente en los siguientes enlaces oficiales:",
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Spacer(modifier = Modifier.height(14.dp))
+
+    Button(
+        onClick = {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.corpoelec.gob.ve/"))
+                context.startActivity(intent)
+            } catch (e: Exception) { e.printStackTrace() }
+        },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Icon(Icons.Outlined.OpenInBrowser, contentDescription = null)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text("Portal Oficial CORPOELEC (corpoelec.gob.ve)")
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    OutlinedButton(
+        onClick = {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://mppee.gob.ve/"))
+                context.startActivity(intent)
+            } catch (e: Exception) { e.printStackTrace() }
+        },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Icon(Icons.Outlined.OpenInBrowser, contentDescription = null)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text("Portal Oficial MPPEE (mppee.gob.ve)")
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+    Text("Telemetría Comunitaria y Predicciones", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    Spacer(modifier = Modifier.height(6.dp))
+    Text(
+        "Los reportes de estado eléctrico ('Con Luz' / 'Sin Luz') y los mapas de calor en la aplicación son generados en tiempo real por los propios habitantes y usuarios del Estado Barinas mediante colaboración ciudadana anónima.\n\n" +
+        "Esta aplicación no tiene facultades operativas sobre las líneas de distribución ni potestad para emitir o modificar disposiciones gubernamentales.",
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+    Text("Contacto del Desarrollador", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+        "Para dudas o consultas respecto a esta plataforma comunitaria independiente:\nCorreo: jorluis255@gmail.com\nTeléfono: +58 412 264 4894\nBarinas, Estado Barinas, Venezuela",
+        fontSize = 12.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        lineHeight = 16.sp
+    )
+}
+

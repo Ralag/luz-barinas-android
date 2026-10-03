@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.*
@@ -96,7 +97,7 @@ private fun WelcomeStep(onNext: () -> Unit) {
                 modifier = Modifier.size(48.dp)
             )
         }
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = "Bienvenido a PAC Barinas",
             style = MaterialTheme.typography.headlineSmall,
@@ -104,14 +105,51 @@ private fun WelcomeStep(onNext: () -> Unit) {
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "Esta aplicación te permite conocer el cronograma de racionamiento eléctrico (PAC) de tu comunidad y recibir alertas antes de los cortes.",
-            style = MaterialTheme.typography.bodyLarge,
+            text = "Herramienta comunitaria para consultar cronogramas referenciales del Plan de Administración de Carga (PAC) y registrar el estado eléctrico de tu sector.",
+            style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Tarjeta obligatoria de renuncia de responsabilidad y fuentes oficiales
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+            ),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Aviso Legal",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Aviso de Independencia y Fuentes",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "• Esta aplicación NO representa a CORPOELEC, al MPPEE ni a ninguna entidad pública o gubernamental.\n• La información del cronograma es referencial y proviene de comunicaciones públicas del prestador eléctrico (corpoelec.gob.ve).",
+                    fontSize = 11.sp,
+                    lineHeight = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
         Button(
             onClick = onNext,
             modifier = Modifier.fillMaxWidth().height(50.dp),

@@ -218,7 +218,7 @@ fun MapScreen(
                                     color = if (hasPower) StatusNormalGreen else StatusScheduledRed
                                 )
                                 Text(
-                                    text = if (hasPower) "Suministro estable en este sector" else "Interrupción programada Corpoelec",
+                                    text = if (hasPower) "Suministro estable en este sector" else "Horario de corte según cronograma PAC",
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

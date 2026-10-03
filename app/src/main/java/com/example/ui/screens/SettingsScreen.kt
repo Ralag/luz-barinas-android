@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.example.BuildConfig
 
 enum class LegalPage {
-    PRIVACY, TERMS, DEVELOPER, REFUND, SYSTEM_DOC, TRANSPARENCIA
+    PRIVACY, TERMS, DEVELOPER, REFUND, SYSTEM_DOC, TRANSPARENCIA, GOV_DISCLAIMER
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,15 +52,17 @@ fun SettingsScreen(
     Crossfade(targetState = currentLegalPage, label = "Settings_Legal_Transition") { legalPage ->
         if (legalPage != null) {
             val title = when (legalPage) {
+                LegalPage.GOV_DISCLAIMER -> "Aviso Legal y Fuentes"
                 LegalPage.PRIVACY -> "Política de Privacidad"
                 LegalPage.TERMS -> "Términos y Condiciones"
-                LegalPage.DEVELOPER -> "Datos del Desarrollador"
+                LegalPage.DEVELOPER -> "Equipo, Desarrollador y Créditos"
                 LegalPage.REFUND -> "Política de Reembolsos"
                 LegalPage.SYSTEM_DOC -> "Documentación del Sistema"
                 LegalPage.TRANSPARENCIA -> "Transparencia y Datos"
             }
             LegalScreen(title = title, onBack = { currentLegalPage = null }) {
                 when (legalPage) {
+                    LegalPage.GOV_DISCLAIMER -> GovernmentDisclaimerContent()
                     LegalPage.PRIVACY -> PrivacyPolicyContent()
                     LegalPage.TERMS -> TermsAndConditionsContent()
                     LegalPage.DEVELOPER -> DeveloperInfoContent()
@@ -226,9 +228,16 @@ fun SettingsScreen(
                         }
                     }
 
-                    // Categoría: Legal
+                    // Categoría: Aviso Legal y Fuentes Gubernamentales
                     item {
-                        SettingsCategory(title = "Legal") {
+                        SettingsCategory(title = "Aviso Legal y Fuentes Oficiales") {
+                            SettingsItem(
+                                icon = Icons.Outlined.Gavel,
+                                title = "Descargo de Responsabilidad y Fuentes",
+                                subtitle = "No afiliación gubernamental y enlaces a fuentes oficiales",
+                                onClick = { currentLegalPage = LegalPage.GOV_DISCLAIMER }
+                            )
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                             SettingsItem(
                                 icon = Icons.Outlined.Policy,
                                 title = "Política de Privacidad",
@@ -237,16 +246,16 @@ fun SettingsScreen(
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                             SettingsItem(
-                                icon = Icons.Outlined.Gavel,
+                                icon = Icons.Outlined.Description,
                                 title = "Términos y Condiciones",
                                 subtitle = "Reglas de uso del servicio",
                                 onClick = { currentLegalPage = LegalPage.TERMS }
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                             SettingsItem(
-                                icon = Icons.Outlined.Business,
-                                title = "Datos del Negocio/Desarrollador",
-                                subtitle = "Información sobre el proyecto",
+                                icon = Icons.Outlined.People,
+                                title = "Equipo, Desarrollador y Créditos",
+                                subtitle = "Concepción de la idea, creadores y reconocimiento a ElMatrushka",
                                 onClick = { currentLegalPage = LegalPage.DEVELOPER }
                             )
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))

@@ -1,4 +1,4 @@
-package com.example.ui.screens
+﻿package com.example.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -315,7 +315,7 @@ fun DashboardScreen(
                                                     border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
                                                 ) {
                                                     Text(
-                                                        text = "Oficial 🏛️",
+                                                        text = "Sector PAC 📋",
                                                         fontSize = 9.sp,
                                                         fontWeight = FontWeight.Bold,
                                                         color = MaterialTheme.colorScheme.primary,
@@ -835,6 +835,39 @@ fun DashboardScreen(
                 Text("Ver Horarios Semanales y Mensuales", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             }
         }
+
+        // 5. Disclaimer & Official Sources Footer Card
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                )
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "Aviso Legal y Fuentes Oficiales",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "PAC Barinas es una plataforma comunitaria independiente. No representa a CORPOELEC, al MPPEE ni a entes gubernamentales. Cronogramas referenciales obtenidos de fuentes oficiales públicas (corpoelec.gob.ve).",
+                        fontSize = 10.sp,
+                        lineHeight = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
     }
 }
 }
@@ -888,7 +921,7 @@ fun BroadcastNoticeBanner(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Warning,
-                        contentDescription = "Aviso oficial",
+                        contentDescription = "Aviso informativo",
                         tint = iconTint,
                         modifier = Modifier.size(18.dp)
                     )

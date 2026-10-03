@@ -517,7 +517,7 @@ fun PacScheduleView(
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))
                                     Text(
-                                        text = "Cronograma mensual oficial organizado por semanas y bloques para $selectedMonthName $currentYear. Las rotaciones avanzan de forma cíclica durante el mes.",
+                                        text = "Cronograma mensual referencial PAC organizado por semanas y bloques para $selectedMonthName $currentYear. Las rotaciones avanzan de forma cíclica durante el mes.",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

@@ -252,7 +252,7 @@ class CloudSyncRepository(
             "broadcast_notice" -> {
                 val active = obj["active"]?.jsonPrimitive?.booleanOrNull ?: false
                 if (active) {
-                    val title = obj["title"]?.jsonPrimitive?.content ?: "Aviso Oficial"
+                    val title = obj["title"]?.jsonPrimitive?.content ?: "Aviso Informativo"
                     val message = obj["message"]?.jsonPrimitive?.content ?: ""
                     val level = obj["level"]?.jsonPrimitive?.content ?: "INFO"
                     val timestamp = obj["timestamp"]?.jsonPrimitive?.longOrNull ?: System.currentTimeMillis()

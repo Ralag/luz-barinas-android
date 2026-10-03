@@ -102,12 +102,12 @@ fun BarinasAddressDialog(
             BarinasLocation(
                 id = sector.id,
                 name = sector.name,
-                type = if (sector.isCommunity) "Sector Comunitario 🤝" else "Sector Oficial 🏛️",
+                type = if (sector.isCommunity) "Sector Comunitario 🤝" else "Sector Base PAC 📋",
                 parroquia = "Barinas",
                 block = cleanBlock,
                 circuitCode = sector.circuitCode,
                 sectorEntityId = sector.id,
-                description = if (sector.isCommunity) "Incorporado por la comunidad" else "Sector oficial de Barinas",
+                description = if (sector.isCommunity) "Incorporado por la comunidad" else "Sector del catálogo PAC Barinas",
                 keywords = listOf(sector.name.lowercase(), sector.circuitCode.lowercase(), "barinas"),
                 municipio = "Barinas"
             )
@@ -550,7 +550,7 @@ fun BarinasAddressDialog(
                                                     border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
                                                 ) {
                                                     Text(
-                                                        text = "Oficial 🏛️",
+                                                        text = "Base PAC 📋",
                                                         fontSize = 9.sp,
                                                         fontWeight = FontWeight.Bold,
                                                         color = MaterialTheme.colorScheme.primary,
