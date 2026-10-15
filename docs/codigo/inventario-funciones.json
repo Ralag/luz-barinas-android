@@ -1,0 +1,5380 @@
+{
+  "scope": "Código propio; excluye dependencias, build/dist, código generado y skills. Callbacks anónimos se explican dentro de su función contenedora.",
+  "files": [
+    {
+      "file": "admin-web/admin.html",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "HTML con JavaScript",
+      "sha256": "281633a3e4e9d75a085aa51bf868e0fbeed5dba249b9531150cdc8f77afd8501",
+      "lines": 1765
+    },
+    {
+      "file": "admin-web/api/getMonthlyWeeks.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "373188f0205dae17a303d471addbe94d32f4302abeaea252edaef5229b8eb71d",
+      "lines": 93
+    },
+    {
+      "file": "admin-web/api/getOutagePrediction.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "22ce71a7df9b0b9587f895262232f404c1f6ff07707642ab6b8554a190fd788a",
+      "lines": 183
+    },
+    {
+      "file": "admin-web/api/sendPushAlert.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "0725d0c5c9655a63177e7ba3242b876c679a2c6d12ec5edc94c9d019c8b7ad1c",
+      "lines": 60
+    },
+    {
+      "file": "admin-web/app.js",
+      "chapter": "05-panel-clasico.md",
+      "language": "JavaScript/JSX",
+      "sha256": "e3d56605ca587e36c88cd87d5fc152b87d5f2b8f1cadcfd6e1c3568dd44a9339",
+      "lines": 4108
+    },
+    {
+      "file": "admin-web/patch_donations.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "ea0853f8d81905edcd0ce8ac27568fc2a03eb1923adbbfa1b67d864716917d85",
+      "lines": 67
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "chapter": "05-panel-clasico.md",
+      "language": "JavaScript/JSX",
+      "sha256": "3ec2f9841d6690d27f11f97193edd581df456e4b917354646bedb3050ab8551f",
+      "lines": 4108
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "efa34802bd991d06a2e0a50e99800b552e489384a9f24978ce74f4e4869e79f7",
+      "lines": 273
+    },
+    {
+      "file": "admin-web/src/App.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "95b1b63f3c67b36124fa253c5225bcccbd04e7152f7187872c4320010226c367",
+      "lines": 113
+    },
+    {
+      "file": "admin-web/src/components/blog/ArticleCover.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "9c0e34552207b49c9bafbbe48e79fbb49b5d16932561487791543db04b1252bc",
+      "lines": 48
+    },
+    {
+      "file": "admin-web/src/components/blog/EditorialDisclaimer.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "ad3dcc57a98afb1e10de795770cd6f2f46c3c5e769513738c07fd9ad52a6f7a8",
+      "lines": 43
+    },
+    {
+      "file": "admin-web/src/components/BlogPreviewSection.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "97fcb232c48ad2b02bb74561a40836028d3e46c86ba7805afcca6691afe1c532",
+      "lines": 80
+    },
+    {
+      "file": "admin-web/src/components/ContactSection.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "2130d6323e639cdcb0a3bdde2f4c9887607542dc4c9593304427b48a4fbb33d9",
+      "lines": 229
+    },
+    {
+      "file": "admin-web/src/components/DonationsSection.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "02ef619434036f7304950c3d3516e75015a737efba750e1cf2b5202edb9b629e",
+      "lines": 251
+    },
+    {
+      "file": "admin-web/src/components/Features.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "b27b62c1174525aaf95094192b56ef30fbfe811be27a16fca824f49ca48aeb52",
+      "lines": 149
+    },
+    {
+      "file": "admin-web/src/components/Footer.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "f3310d49239b61719a2ad3ffe2f94858bd3c9da969283c0aa518a383d6f15420",
+      "lines": 128
+    },
+    {
+      "file": "admin-web/src/components/Hero.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "a4f039ce1c81adf4f0f9ec579022e25e71c52ae1bc7e69fac3e4c4f69d1eed05",
+      "lines": 167
+    },
+    {
+      "file": "admin-web/src/components/Navbar.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "6f895fca41dc788999f0f106b49ce4d4b3058e408c7308648edfe831f6997f31",
+      "lines": 197
+    },
+    {
+      "file": "admin-web/src/components/PacLiveWidget.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "d3f5ef18894615dcc263dbd827956c05cdfdf3426add0e1d81583ce6d69cfc4a",
+      "lines": 249
+    },
+    {
+      "file": "admin-web/src/components/telemetry/CircuitStabilityWidget.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "f52d96586dd50d89ada518cdbab28c943ce389b0f30a5f3315028fea044b98e3",
+      "lines": 217
+    },
+    {
+      "file": "admin-web/src/components/telemetry/CitizenReportsTicker.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "8b18b8f4030e28cefa23e159326e5ded5919d82ce3bef4d0c73bf440b4acb4ee",
+      "lines": 185
+    },
+    {
+      "file": "admin-web/src/components/telemetry/LiveBlockCountdown.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "fa0d97f5183892c3281fc94872a24a00dc123b73c6c1cff7328f7eef7378e5c4",
+      "lines": 151
+    },
+    {
+      "file": "admin-web/src/data/articles.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "73cacadff269cd659503ef30acf17eb568359f5eeabc42064dca2b11900f4ff4",
+      "lines": 93
+    },
+    {
+      "file": "admin-web/src/data/articles/anatomia-pac.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "6ed15eea34a1475d3eaf113e4ad5b8c713faf2ce574f7c80c62a77b8deddb455",
+      "lines": 57
+    },
+    {
+      "file": "admin-web/src/data/articles/conceptos-energia.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "f99863f3a82c6ab03d82ee25139b213602f273a10530ec8a32ed98f1a51da4a6",
+      "lines": 74
+    },
+    {
+      "file": "admin-web/src/data/articles/historia-sen-guri.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "4b3b9b2ea986794a52c728af442568f808330e37dda5ef8021b43d935e6c995c",
+      "lines": 55
+    },
+    {
+      "file": "admin-web/src/data/articles/proteccion-electrodomesticos.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "84d8eda1081e9e0ebc392d731f62e9a2e6879e66dc1cf0981e86e88e92a72c77",
+      "lines": 74
+    },
+    {
+      "file": "admin-web/src/data/articles/telemetria-ciudadana.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "55ccbc4d70853c95a4fd119ed1919c7ec82e173a3a542fe9921b93773df9b819",
+      "lines": 68
+    },
+    {
+      "file": "admin-web/src/lib/seo.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "7527d26b4cb1367b037a9e875e61607a5970d0b8d6381fb8386d774842047365",
+      "lines": 86
+    },
+    {
+      "file": "admin-web/src/lib/supabase.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "395bc9ebe97094d8a88447679e385e264c54750a3373e0eb1f01d56590102fc1",
+      "lines": 76
+    },
+    {
+      "file": "admin-web/src/lib/telemetry.js",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "8b5f52724cdc109c8d3746194ac349793e8733412fa5cdd435d4a0e0d5ed08e0",
+      "lines": 336
+    },
+    {
+      "file": "admin-web/src/main.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "79dd228d9216385682c6fed3de971be133e5dc74f7d94b3cea2ae00c1d73b0ca",
+      "lines": 11
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "3298015f38e1aff0a6c8e33e092e8c517b4ccc33de5220bb3854ab8ce2876bc9",
+      "lines": 898
+    },
+    {
+      "file": "admin-web/src/pages/Blog.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "30cfcc85d75325bb8db575a7f4f5ad1b92c740ea4ec7d5286897d8bd6f25dfaf",
+      "lines": 148
+    },
+    {
+      "file": "admin-web/src/pages/BlogPost.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "07cd66a8cf319b15f9383f43486552368834d330addda03d8cd821f19619e904",
+      "lines": 214
+    },
+    {
+      "file": "admin-web/src/pages/DeveloperInfo.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "7d922e38f7b356a52d9406dac2d4ea6ea3417c2971330bd51b9e640cb233fa8e",
+      "lines": 164
+    },
+    {
+      "file": "admin-web/src/pages/LandingPage.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "b1465cb35dae9e38cba2b11837c93718849688ad69627f9d4e3daa92c8e2337c",
+      "lines": 25
+    },
+    {
+      "file": "admin-web/src/pages/PrivacyPolicy.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "0fd68b9909bdb9f69a076af8eaf9c925d62f48839fc2032fb0dc4ed84c9df9d8",
+      "lines": 146
+    },
+    {
+      "file": "admin-web/src/pages/RefundPolicy.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "08da66a36ef0560520ee3a92f72e32af907de9af79f3d60af72e98f6b8eb19c7",
+      "lines": 80
+    },
+    {
+      "file": "admin-web/src/pages/TermsConditions.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "4a19455fc4cdd4383136ad9200d9e7a24240680e9034ae06c9100e3c8d3afe60",
+      "lines": 135
+    },
+    {
+      "file": "admin-web/src/pages/Transparencia.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "682a64491b093209dee486e26bc5d3932db0933b1a406ccc66637ee0621538e3",
+      "lines": 85
+    },
+    {
+      "file": "admin-web/src/pages/tv/AppTheme.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "1717195114aeeea0787d44784bf45d0316f569898993c8b97502a9a5924b4c1c",
+      "lines": 427
+    },
+    {
+      "file": "admin-web/src/pages/tv/LightTheme.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "db33646448543267e06e3891f8b12403bbaaa1d9c5b13e8b943f3e2bc20ed798",
+      "lines": 290
+    },
+    {
+      "file": "admin-web/src/pages/tv/MercuryTheme.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "852434b99e482b0d545171d08179a06da6bd67e5fc2464eae7be6e1fb1288882",
+      "lines": 328
+    },
+    {
+      "file": "admin-web/src/pages/tv/PerformanceTheme.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "0becdb84804df88015cb666ebafa0a7e43f061bd400ab3e67b584047d8aa9b28",
+      "lines": 265
+    },
+    {
+      "file": "admin-web/src/pages/tv/RadarTheme.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "3fe1e694f3f84060078e95e9d9698f751170f1fecd00fa01a4f54e26f3e72151",
+      "lines": 288
+    },
+    {
+      "file": "admin-web/src/pages/tv/WebTheme.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "1f1da87037bb6b55715f99ef62c47778d08f8742cfec29d853166b76306b7439",
+      "lines": 348
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "aa3c885051d8e0b3f4602c189a53fb1ce8f27e1865a6f54772a2a432eab58c92",
+      "lines": 687
+    },
+    {
+      "file": "admin-web/update_index.py",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "Python",
+      "sha256": "38f555d514b739b5a3a862b5e3b70e5689a2fa3c39b3a6e7fde5a6e8808e9766",
+      "lines": 20
+    },
+    {
+      "file": "admin-web/update_text.py",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "Python",
+      "sha256": "184d75a6417a0fa5ef83394ede47af274c1f339e47012c080cc85fea9eb0a08e",
+      "lines": 15
+    },
+    {
+      "file": "admin-web/vite.config.mjs",
+      "chapter": "04-web-react-y-api.md",
+      "language": "JavaScript/JSX",
+      "sha256": "b07b24145fd59f47e08cadee3d7758ae693ba01eda0c0a1af5e4bfed86d4faaa",
+      "lines": 29
+    },
+    {
+      "file": "app/src/androidTest/java/com/example/ExampleInstrumentedTest.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "c6ef958cafb00dbec798a71f5be604e9cf56189676312bea40f63dd07ca0d674",
+      "lines": 23
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "HTML con JavaScript",
+      "sha256": "85555735d57f11a756dd68b1457be1f221dd51a4c6453f4fba96893b6b580680",
+      "lines": 485
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/AppDatabase.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "b5f86eeab5492cf3269aecb9840d6eb5193d448386364db2205175b017bc3459",
+      "lines": 55
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/OutageRecordDao.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "3a35c21c55432ee91714db64039b44515ecc8ab9e1b5c588537acb6313099999",
+      "lines": 27
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/PendingReportDao.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "c4c7a39935c5015ce5a11e79849306196fcebb23335cc76068920173fe46a625",
+      "lines": 34
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/SectorDao.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "7888a1cc8c50f92dd6eae60a0669514b5e2728638886c0c01937994a22ff665e",
+      "lines": 37
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/entity/OutageRecordEntity.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "abad70ed2506c3b561b655e3030b73ce1770a6650bb114c29a414a2fad6598eb",
+      "lines": 41
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/entity/PendingReportEntity.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "2bfe81518e2f80173d8ade927e4343a0d7653953dd90bb3654271c26385cb853",
+      "lines": 36
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/entity/SectorEntity.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "a33a6fcf260730a8ac63e11d0942f50e2955a0ab77323f05064bedba6f9d6ed2",
+      "lines": 53
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/BarinasLocationsData.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "48526ff179be00d3f7421947f8d81b72cd13dfa3915761f745174a1ad4bbdd6a",
+      "lines": 1204
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/DonationConfig.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "238f6a1760ec133530e1ab2bb574b35d4238bd4302766e45ff6773884a27d9f3",
+      "lines": 10
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/MonthlyWeeksResponse.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "a2f98d1599cc21ea0ab40772ab64b52eafa6321ef370e1cbced66e7a8f24723b",
+      "lines": 12
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacAlertSettings.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "a9af87fc988384ba20d4eabdab665c7dd3af0b6be9721a61273ac7bd8e975ea6",
+      "lines": 48
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "59a28ee81742841c14c1edfab3c46a154da5a994bdacd1e0bea734453a45cbf7",
+      "lines": 741
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PowerStatus.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "1b43b57fbf5eb5d81eb4d4918f811c6229ea8dc6a2707cc8b68efeec3d04cf4d",
+      "lines": 62
+    },
+    {
+      "file": "app/src/main/java/com/example/data/PacSchedulePrefs.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "7f557774671d3c21e6558d607b1db9323af6a20ad8e2ebcbfd223313bf0b6acf",
+      "lines": 120
+    },
+    {
+      "file": "app/src/main/java/com/example/data/remote/ApiClient.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "d9f99997d82a84f7698bd3fc3a2428530e8e3d7586c7b880c3089ca6fc3b7375",
+      "lines": 44
+    },
+    {
+      "file": "app/src/main/java/com/example/data/remote/dto/TelemetryDtos.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "15948bd084d219a57802c08767d72af8d6a31316af023a662018a5655e976d07",
+      "lines": 38
+    },
+    {
+      "file": "app/src/main/java/com/example/data/remote/LuzBarinasApi.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "60e9d79180886a4c63931b5a403a22bf268e41af081fb4cdcce1d5f4841253f3",
+      "lines": 37
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "0d518f6184303fcb9d5153c73cea1b9560708b4571101bafc16383a58ab3260e",
+      "lines": 570
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/EnergyRepository.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "76edef293d4e9ffc09a64e151f40b4d770f478f559bbde621e01b9710712e79c",
+      "lines": 384
+    },
+    {
+      "file": "app/src/main/java/com/example/engine/OutagePredictionEngine.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "318ee7ddb6562bb2ae1654a1cc20782cbff54df07317712075e95c7f24950aec",
+      "lines": 162
+    },
+    {
+      "file": "app/src/main/java/com/example/glance/LuzBarinasWidget.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "1d5a230e86446f6a9de74c8dedd02dcb22d1a6ed5d4ec7713e65455e14f8dac5",
+      "lines": 231
+    },
+    {
+      "file": "app/src/main/java/com/example/MainActivity.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "bbceaab9ab463358867d5a04a9f606a5bbb66ed35dd23818e43f2943939f8780",
+      "lines": 553
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/NotificationActionReceiver.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "d0c99a5201674901f9f696319284e7950784b5cd4f69405aa26d8903cede139e",
+      "lines": 109
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/NotificationHelper.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "a81f3e4a8fd6db2b62d5d0eb6dd455f5d16b6ea449c4274a7d29b3412df6b647",
+      "lines": 268
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmPlayer.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "7a3853ae09de17c7ea496d5f7d59b274c653bd46c2c73171f6f1a98828fb38e3",
+      "lines": 82
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmReceiver.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "07000c651f3408adc7b18fa288a1a87f92a13a0dbdf30ce7b0ea901b033338c2",
+      "lines": 240
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmScheduler.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "6faa3ec2d1f99977ce3c5912f980a6b48f63de32d70401dc9e400d4420e13b2d",
+      "lines": 186
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "68e3191834daf9a8ff7b0cf1e4d681360b9aa09d05b96042197605e131a5d349",
+      "lines": 175
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "b630a34895a0b7b4e2d02971831d886c347ae567af4621b57233a266e07a5e4d",
+      "lines": 778
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/DonationsDialog.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "e545837ba5431ae6dddd1107dac6eff13cc93a71fa04c365911f1117b0f646cd",
+      "lines": 179
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/GoogleSearchBar.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "b84354dc08974b8534dabdaf82911b2fe70b763f264975faafcf2285e14728f3",
+      "lines": 299
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "253305b64578c46109f94a43b83b92a11bcc24ee582ffa3206ed27797e2e42b4",
+      "lines": 164
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "c01e4295bd13fceacfa7d8ea56390d0bf0610997d8fb64e0dfb37b288cabe725",
+      "lines": 287
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/PacScheduleView.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "def0407d940c466a6d4e6073c01858e9f00c32766189b522dbecfa235d0e1a8a",
+      "lines": 1019
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/PacSettingsDialog.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "adbb6c4f3333d1cbcb9a54ee326fdbddcfe185f2d86fd4851f9025275d224fd0",
+      "lines": 561
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/StatusBadge.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "22eb8a96385373197ff57f55d2b243e87530ccf24349ac627e7ad7d0ec2ff81f",
+      "lines": 111
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "53140224b2d5e04addb005e7a06bc5282b8ba9e50119ba20d5a9706c52062ba6",
+      "lines": 178
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/UpdatePromptDialog.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "fd394e30059cef6339507241f7c97ca540ccb432f5dcdf3544dd547344b00136",
+      "lines": 151
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/AdminScreen.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "633182643f332a7c75b6b4d9fded583603257d5da9d7294342b6fee6d86a6a12",
+      "lines": 1181
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/DashboardScreen.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "d4338286bb9813f8088171dc23d9eb804aa21f82d96f0fed9e645e0aabcc5a77",
+      "lines": 972
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "0c1fb967a1c82b13d402bc82ddfbae416c66c4afce3f4616d1eb696f2bae3875",
+      "lines": 457
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/MapScreen.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "8218e2e363d020d2a3020b9fa830d9e574194b57f8ddb3949d63294d27800bb0",
+      "lines": 338
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/SettingsScreen.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "bf5ed085c93da6cd476919f083cdc4965b7d19647f86840e1d001331819cbb45",
+      "lines": 386
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/TelemetryScreen.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "2bb736d511c895d12db7e1ef4f71ae3c29ef510d4e428ad42eb4ea88c3317911",
+      "lines": 345
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/theme/Color.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "4e90c825a16b41b82d15b6134be54ffa57523df4248e73ab03ca71c75f326f55",
+      "lines": 100
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/theme/Shape.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "dac46c46e20b26390f99f8c266725977c40ec3b64734bf22cd898423acd49055",
+      "lines": 14
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/theme/Theme.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "ef9a96a442d5df4b4e050a4df21da134210502b2da9f944bc399a66fce64dc90",
+      "lines": 88
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/theme/Type.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "c02b0806dc2b91cf5b880ab0b5628eaa3d5412ba3eb2968738e996d1249f3725",
+      "lines": 120
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "b37b76d51b38a3f2ac44238ff8a5e59461f10303b42e7c59f4688fadbd7fd966",
+      "lines": 593
+    },
+    {
+      "file": "app/src/main/java/com/example/utils/AppUpdater.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "042b3298ffbc91e2c9d49ceb148a5ef3386580fd889d90acebb2445a3fd97092",
+      "lines": 92
+    },
+    {
+      "file": "app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "d5b1b4af50bb0d81ebef9734b5d7aecf8fabd0ca50b34af15c1a959c6eb6af08",
+      "lines": 115
+    },
+    {
+      "file": "app/src/main/java/com/example/worker/ReportPowerWorker.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "sha256": "b082372eb2eb882e57a1b74a52dcc7acae5c936cb5a552bb840172e6c616b7be",
+      "lines": 97
+    },
+    {
+      "file": "app/src/test/java/com/example/ExampleRobolectricTest.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "1ca18eed6a0a49fb65d85cf3a734ac05dc4c9b20844ee845d743af1dd5140395",
+      "lines": 53
+    },
+    {
+      "file": "app/src/test/java/com/example/ExampleUnitTest.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "258eafaa81075b671aa6baf66e38ac0fea3e7798f0c470359eba49d8f1271a67",
+      "lines": 71
+    },
+    {
+      "file": "app/src/test/java/com/example/GreetingScreenshotTest.kt",
+      "chapter": "02-android-datos-y-motor.md",
+      "language": "Kotlin",
+      "sha256": "aa849b379a8ef6d87fcc322501e0ac8f7bb10a513a7d9aa628297c271c3c44aa",
+      "lines": 36
+    },
+    {
+      "file": "patch_appupdater.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "f9452a7082d31e25de02af78ffd17151e23d63e4c5dd786bf32c28d147dca71a",
+      "lines": 10
+    },
+    {
+      "file": "patch_appupdater2.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "644520b736b2654c640a039e19cae5ec2bc66d7ba77f5a60e4896555cdc3a77b",
+      "lines": 15
+    },
+    {
+      "file": "patch_cloudsync_fix.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "4739e78528dd281d590f1215e37bcdca0eecf91e9aa4a5f24f7c3d2bf01192cd",
+      "lines": 7
+    },
+    {
+      "file": "patch_cloudsync.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "b5f0509f8d217ff83f1d667880b1f287d54825315d7414e1f29b7905c4be19d0",
+      "lines": 16
+    },
+    {
+      "file": "patch_icons_final.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "c56b78423f644a34e6c05d421e9e304ceb0ac8b62b0dc8612f481715b4016719",
+      "lines": 5
+    },
+    {
+      "file": "patch_icons_finally.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "42665ab5c0ad664012e70400e80dfee180e05322f8bba88774a89f7f7fb5874f",
+      "lines": 5
+    },
+    {
+      "file": "patch_icons.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "fba36aaaa9fb0a01929b2fbebb4a22e77556e1e5677aeab004e1ba110a9b17a8",
+      "lines": 5
+    },
+    {
+      "file": "patch_icons2.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "9556d1c9de83ef6f2487a2fe426f240bcfbd106b8c1ac4c08080c07fda1b801e",
+      "lines": 5
+    },
+    {
+      "file": "patch_imports.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "1fa249221d79f060cb4d5213bf239e8dc8f5dbd9471b94242f16212d993808ca",
+      "lines": 10
+    },
+    {
+      "file": "patch_settings_dialog.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "10c80eb40da6c655f6c77cc458e48f823a285f2b5db10aa56c376cb54e895471",
+      "lines": 44
+    },
+    {
+      "file": "patch_vm.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "54c2b10c153b1c31f06f529fd3343d798950a7d94424f321af98d14a45c09ef8",
+      "lines": 14
+    },
+    {
+      "file": "patch_vm2.js",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "JavaScript/JSX",
+      "sha256": "80b580044dd67a7ac565c651c281b2febe8ac9fb7268f95d34abb5ee252d7db9",
+      "lines": 7
+    },
+    {
+      "file": "seed_firestore.py",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "Python",
+      "sha256": "568221615aa27284f9c7d13b389a75ca763f3f288760d83669b6ea68d8030648",
+      "lines": 345
+    },
+    {
+      "file": "seed_supabase.py",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "Python",
+      "sha256": "b2c0ddb48d8dab46bb920cf051cf5de24b257e9fd90bf558037e80e855b64150",
+      "lines": 263
+    },
+    {
+      "file": "test.py",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "Python",
+      "sha256": "af70e94487a9b2db0c08fdfc988871a47971d5d07b4e862b83f237f6efcdaac4",
+      "lines": 2
+    },
+    {
+      "file": "update_script.py",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md",
+      "language": "Python",
+      "sha256": "1eae03234ed1976a2b404ea0ecfc1844ea41d127b86f49d4a00736353e60a662",
+      "lines": 341
+    }
+  ],
+  "symbols": [
+    {
+      "file": "admin-web/api/getMonthlyWeeks.js",
+      "name": "exports",
+      "line": 7,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/api/getOutagePrediction.js",
+      "name": "getDayIndex",
+      "line": 17,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/api/getOutagePrediction.js",
+      "name": "exports",
+      "line": 21,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/api/sendPushAlert.js",
+      "name": "exports",
+      "line": 21,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "checkAuth",
+      "line": 102,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleLogin",
+      "line": 117,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleLogout",
+      "line": 136,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "switchTab",
+      "line": 142,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "initVercelLogsSync",
+      "line": 171,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "clearVercelConsole",
+      "line": 220,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "pingVercelApi",
+      "line": 225,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "updateSyncStatus",
+      "line": 247,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "initConnectionMonitor",
+      "line": 265,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "retryFirebaseConnection",
+      "line": 279,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "initFirebaseSync",
+      "line": 291,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "fetchPac",
+      "line": 295,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "fetchSectors",
+      "line": 335,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "fetchCommunity",
+      "line": 385,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "fetchCitizen",
+      "line": 413,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "fetchBroadcast",
+      "line": 429,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderMatrixTable",
+      "line": 452,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "onclick",
+      "line": 482,
+      "kind": "ArrowFunctionExpression",
+      "scope": "renderMatrixTable",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "getBlockBadgeClass",
+      "line": 514,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderWeeklyAudit",
+      "line": 527,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "updateDetectedSchemeBadge",
+      "line": 529,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "openCellModal",
+      "line": 554,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "closeCellModal",
+      "line": 576,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "setCellBlock",
+      "line": 581,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "openBranchGeneratorModal",
+      "line": 673,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "closeBranchGeneratorModal",
+      "line": 677,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleApplyBranchScale",
+      "line": 681,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "setPacViewMode",
+      "line": 752,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderMonthlyProjection",
+      "line": 777,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "applyMonthlyWeekAsBase",
+      "line": 849,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "openSchemeConfigModal",
+      "line": 866,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "closeSchemeConfigModal",
+      "line": 891,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "onSchemeModeChanged",
+      "line": 895,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleApplySchemeConfig",
+      "line": 909,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "applySingleTurnPreset",
+      "line": 983,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "applyDoubleTurnPreset",
+      "line": 987,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "publishPacSchedule",
+      "line": 991,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "openEditSlotModal",
+      "line": 1037,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "closeEditSlotModal",
+      "line": 1047,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleSaveSlot",
+      "line": 1051,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "openAddSlotModal",
+      "line": 1069,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "closeAddSlotModal",
+      "line": 1073,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "onNewSlotDurationChanged",
+      "line": 1077,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "onNewSlotTimeChanged",
+      "line": 1087,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleAddSlot",
+      "line": 1098,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "deleteSlot",
+      "line": 1136,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "getActiveBlockNow",
+      "line": 1152,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "updateTelemetryActiveCut",
+      "line": 1198,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "applyActivePacCutToSectors",
+      "line": 1216,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "setTelemetryFilter",
+      "line": 1259,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderTelemetryList",
+      "line": 1276,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "isSectorCommunity",
+      "line": 1306,
+      "kind": "FunctionDeclaration",
+      "scope": "renderTelemetryList",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "updateSectorStatus",
+      "line": 1385,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "resetAllTelemetryToNormal",
+      "line": 1398,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "setAllSectorsStatus",
+      "line": 1420,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderBlockKanban",
+      "line": 1438,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "reassignSector",
+      "line": 1486,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "removeSectorFromBlock",
+      "line": 1510,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "openAddSectorToBlockModal",
+      "line": 1522,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "closeAddSectorModal",
+      "line": 1526,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleAddSectorToBlock",
+      "line": 1530,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "normalizeSectorText",
+      "line": 1562,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "getSignificantTokens",
+      "line": 1578,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "levenshteinDistance",
+      "line": 1584,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "computeLevenshteinSimilarity",
+      "line": 1607,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "computeTokenJaccardSimilarity",
+      "line": 1613,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "computeSectorSimilarity",
+      "line": 1624,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "analyzeTypoClusters",
+      "line": 1648,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "updateClusterBadge",
+      "line": 1714,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "toggleClusteringPanel",
+      "line": 1719,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderTypoClusters",
+      "line": 1729,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "upsertSectorSafe",
+      "line": 1808,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "mergeAndApproveCluster",
+      "line": 1853,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "validateWithOSM",
+      "line": 1992,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderOsmResult",
+      "line": 2047,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "validateMasterSectorsWithOSM",
+      "line": 2067,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "validateAllWithOSM",
+      "line": 2155,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderCommunityTable",
+      "line": 2160,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "approveCommunityLocation",
+      "line": 2228,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "rejectCommunityLocation",
+      "line": 2331,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderActiveBroadcast",
+      "line": 2349,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "hideActiveBroadcast",
+      "line": 2391,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleDismissBroadcast",
+      "line": 2396,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleSendBroadcast",
+      "line": 2415,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "testGlobalPushAlert",
+      "line": 2442,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "setReportFeedFilter",
+      "line": 2479,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderCitizenReportsFeed",
+      "line": 2495,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "seedAllBarinasCatalog",
+      "line": 2796,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "saveDonationConfig",
+      "line": 2847,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "loadDonationUrl",
+      "line": 2862,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleFilterMasterTypeChange",
+      "line": 2891,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "getSectorCoordinates",
+      "line": 2940,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "applyBasemap",
+      "line": 2969,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "changeMapBasemap",
+      "line": 3029,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "initBarinasMasterMap",
+      "line": 3033,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "focusBarinasMapHome",
+      "line": 3069,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "focusSectorOnMap",
+      "line": 3074,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "updateBarinasMapMarkers",
+      "line": 3095,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "toggleMapHeatmapMode",
+      "line": 3204,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleMapBlockFilterChange",
+      "line": 3219,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "initMasterFilterDropdowns",
+      "line": 3224,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleFilterMasterMunChange",
+      "line": 3249,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleFilterMasterChange",
+      "line": 3270,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleSearchMasterInput",
+      "line": 3278,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "setDirectoryViewMode",
+      "line": 3283,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderGeneralSectorsMaster",
+      "line": 3299,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderWikipediaCardsView",
+      "line": 3379,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "renderDetailedTableView",
+      "line": 3500,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "editSector",
+      "line": 3604,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "openCreateSectorModal",
+      "line": 3611,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "onclick",
+      "line": 3693,
+      "kind": "ArrowFunctionExpression",
+      "scope": "openCreateSectorModal",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "closeCreateSectorModal",
+      "line": 3731,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleModalMunicipioChange",
+      "line": 3736,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleGeocodeForManualSector",
+      "line": 3751,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "handleSaveManualSector",
+      "line": 3796,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "deleteMasterSector",
+      "line": 3900,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "openDbMigrationHelper",
+      "line": 3958,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "closeDbMigrationHelper",
+      "line": 3966,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "checkSchemaCacheStatus",
+      "line": 3971,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "copyMigrationSql",
+      "line": 4031,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/app.js",
+      "name": "runClientSideLegacyMigration",
+      "line": 4082,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "checkAuth",
+      "line": 102,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleLogin",
+      "line": 117,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleLogout",
+      "line": 136,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "switchTab",
+      "line": 142,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "initVercelLogsSync",
+      "line": 171,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "clearVercelConsole",
+      "line": 220,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "pingVercelApi",
+      "line": 225,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "updateSyncStatus",
+      "line": 247,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "initConnectionMonitor",
+      "line": 265,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "retryFirebaseConnection",
+      "line": 279,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "initFirebaseSync",
+      "line": 291,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "fetchPac",
+      "line": 295,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "fetchSectors",
+      "line": 335,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "fetchCommunity",
+      "line": 385,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "fetchCitizen",
+      "line": 413,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "fetchBroadcast",
+      "line": 429,
+      "kind": "ArrowFunctionExpression",
+      "scope": "initFirebaseSync",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderMatrixTable",
+      "line": 452,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "onclick",
+      "line": 482,
+      "kind": "ArrowFunctionExpression",
+      "scope": "renderMatrixTable",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "getBlockBadgeClass",
+      "line": 514,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderWeeklyAudit",
+      "line": 527,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "updateDetectedSchemeBadge",
+      "line": 529,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "openCellModal",
+      "line": 554,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "closeCellModal",
+      "line": 576,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "setCellBlock",
+      "line": 581,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "openBranchGeneratorModal",
+      "line": 673,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "closeBranchGeneratorModal",
+      "line": 677,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleApplyBranchScale",
+      "line": 681,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "setPacViewMode",
+      "line": 752,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderMonthlyProjection",
+      "line": 777,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "applyMonthlyWeekAsBase",
+      "line": 849,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "openSchemeConfigModal",
+      "line": 866,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "closeSchemeConfigModal",
+      "line": 891,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "onSchemeModeChanged",
+      "line": 895,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleApplySchemeConfig",
+      "line": 909,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "applySingleTurnPreset",
+      "line": 983,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "applyDoubleTurnPreset",
+      "line": 987,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "publishPacSchedule",
+      "line": 991,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "openEditSlotModal",
+      "line": 1037,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "closeEditSlotModal",
+      "line": 1047,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleSaveSlot",
+      "line": 1051,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "openAddSlotModal",
+      "line": 1069,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "closeAddSlotModal",
+      "line": 1073,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "onNewSlotDurationChanged",
+      "line": 1077,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "onNewSlotTimeChanged",
+      "line": 1087,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleAddSlot",
+      "line": 1098,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "deleteSlot",
+      "line": 1136,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "getActiveBlockNow",
+      "line": 1152,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "updateTelemetryActiveCut",
+      "line": 1198,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "applyActivePacCutToSectors",
+      "line": 1216,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "setTelemetryFilter",
+      "line": 1259,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderTelemetryList",
+      "line": 1276,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "isSectorCommunity",
+      "line": 1306,
+      "kind": "FunctionDeclaration",
+      "scope": "renderTelemetryList",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "updateSectorStatus",
+      "line": 1385,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "resetAllTelemetryToNormal",
+      "line": 1398,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "setAllSectorsStatus",
+      "line": 1420,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderBlockKanban",
+      "line": 1438,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "reassignSector",
+      "line": 1486,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "removeSectorFromBlock",
+      "line": 1510,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "openAddSectorToBlockModal",
+      "line": 1522,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "closeAddSectorModal",
+      "line": 1526,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleAddSectorToBlock",
+      "line": 1530,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "normalizeSectorText",
+      "line": 1562,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "getSignificantTokens",
+      "line": 1578,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "levenshteinDistance",
+      "line": 1584,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "computeLevenshteinSimilarity",
+      "line": 1607,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "computeTokenJaccardSimilarity",
+      "line": 1613,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "computeSectorSimilarity",
+      "line": 1624,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "analyzeTypoClusters",
+      "line": 1648,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "updateClusterBadge",
+      "line": 1714,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "toggleClusteringPanel",
+      "line": 1719,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderTypoClusters",
+      "line": 1729,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "upsertSectorSafe",
+      "line": 1808,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "mergeAndApproveCluster",
+      "line": 1853,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "validateWithOSM",
+      "line": 1992,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderOsmResult",
+      "line": 2047,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "validateMasterSectorsWithOSM",
+      "line": 2067,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "validateAllWithOSM",
+      "line": 2155,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderCommunityTable",
+      "line": 2160,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "approveCommunityLocation",
+      "line": 2228,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "rejectCommunityLocation",
+      "line": 2331,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderActiveBroadcast",
+      "line": 2349,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "hideActiveBroadcast",
+      "line": 2391,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleDismissBroadcast",
+      "line": 2396,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleSendBroadcast",
+      "line": 2415,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "testGlobalPushAlert",
+      "line": 2442,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "setReportFeedFilter",
+      "line": 2479,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderCitizenReportsFeed",
+      "line": 2495,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "seedAllBarinasCatalog",
+      "line": 2796,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "saveDonationConfig",
+      "line": 2847,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "loadDonationUrl",
+      "line": 2862,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleFilterMasterTypeChange",
+      "line": 2891,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "getSectorCoordinates",
+      "line": 2940,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "applyBasemap",
+      "line": 2969,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "changeMapBasemap",
+      "line": 3029,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "initBarinasMasterMap",
+      "line": 3033,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "focusBarinasMapHome",
+      "line": 3069,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "focusSectorOnMap",
+      "line": 3074,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "updateBarinasMapMarkers",
+      "line": 3095,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "toggleMapHeatmapMode",
+      "line": 3204,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleMapBlockFilterChange",
+      "line": 3219,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "initMasterFilterDropdowns",
+      "line": 3224,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleFilterMasterMunChange",
+      "line": 3249,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleFilterMasterChange",
+      "line": 3270,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleSearchMasterInput",
+      "line": 3278,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "setDirectoryViewMode",
+      "line": 3283,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderGeneralSectorsMaster",
+      "line": 3299,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderWikipediaCardsView",
+      "line": 3379,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "renderDetailedTableView",
+      "line": 3500,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "editSector",
+      "line": 3604,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "openCreateSectorModal",
+      "line": 3611,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "onclick",
+      "line": 3693,
+      "kind": "ArrowFunctionExpression",
+      "scope": "openCreateSectorModal",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "closeCreateSectorModal",
+      "line": 3731,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleModalMunicipioChange",
+      "line": 3736,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleGeocodeForManualSector",
+      "line": 3751,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "handleSaveManualSector",
+      "line": 3796,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "deleteMasterSector",
+      "line": 3900,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "openDbMigrationHelper",
+      "line": 3958,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "closeDbMigrationHelper",
+      "line": 3966,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "checkSchemaCacheStatus",
+      "line": 3971,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "copyMigrationSql",
+      "line": 4031,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/public/app.js",
+      "name": "runClientSideLegacyMigration",
+      "line": 4082,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "05-panel-clasico.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "esc",
+      "line": 28,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "jsonLdTag",
+      "line": 35,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "upsertTag",
+      "line": 38,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "setMeta",
+      "line": 42,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "applyHead",
+      "line": 47,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "injectRoot",
+      "line": 63,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "articleMarkup",
+      "line": 87,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "blogIndexMarkup",
+      "line": 118,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "breadcrumb",
+      "line": 140,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "sitemapXml",
+      "line": 148,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "blogPrerender",
+      "line": 173,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "configResolved",
+      "line": 178,
+      "kind": "FunctionExpression",
+      "scope": "blogPrerender",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/scripts/blog-prerender.mjs",
+      "name": "closeBundle",
+      "line": 181,
+      "kind": "FunctionExpression",
+      "scope": "blogPrerender",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/App.jsx",
+      "name": "App",
+      "line": 17,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/App.jsx",
+      "name": "getInitialRoute",
+      "line": 19,
+      "kind": "ArrowFunctionExpression",
+      "scope": "App",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/App.jsx",
+      "name": "handlePopState",
+      "line": 39,
+      "kind": "ArrowFunctionExpression",
+      "scope": "App",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/App.jsx",
+      "name": "navigate",
+      "line": 47,
+      "kind": "ArrowFunctionExpression",
+      "scope": "App",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/blog/ArticleCover.jsx",
+      "name": "ArticleCover",
+      "line": 13,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/blog/EditorialDisclaimer.jsx",
+      "name": "EditorialDisclaimer",
+      "line": 6,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/BlogPreviewSection.jsx",
+      "name": "BlogPreviewSection",
+      "line": 6,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/BlogPreviewSection.jsx",
+      "name": "navigateTo",
+      "line": 9,
+      "kind": "ArrowFunctionExpression",
+      "scope": "BlogPreviewSection",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/ContactSection.jsx",
+      "name": "ContactSection",
+      "line": 5,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/ContactSection.jsx",
+      "name": "handleSubmit",
+      "line": 15,
+      "kind": "ArrowFunctionExpression",
+      "scope": "ContactSection",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/DonationsSection.jsx",
+      "name": "DonationsSection",
+      "line": 5,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/DonationsSection.jsx",
+      "name": "loadRemoteDonations",
+      "line": 18,
+      "kind": "FunctionDeclaration",
+      "scope": "DonationsSection",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/DonationsSection.jsx",
+      "name": "copyToClipboard",
+      "line": 39,
+      "kind": "ArrowFunctionExpression",
+      "scope": "DonationsSection",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/Features.jsx",
+      "name": "Features",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/Footer.jsx",
+      "name": "Footer",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/Footer.jsx",
+      "name": "navigateTo",
+      "line": 5,
+      "kind": "ArrowFunctionExpression",
+      "scope": "Footer",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/Hero.jsx",
+      "name": "Hero",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/Navbar.jsx",
+      "name": "Navbar",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/Navbar.jsx",
+      "name": "navigateTo",
+      "line": 7,
+      "kind": "ArrowFunctionExpression",
+      "scope": "Navbar",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/PacLiveWidget.jsx",
+      "name": "PacLiveWidget",
+      "line": 9,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/telemetry/CircuitStabilityWidget.jsx",
+      "name": "CircuitStabilityWidget",
+      "line": 5,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/telemetry/CircuitStabilityWidget.jsx",
+      "name": "getStatusConfig",
+      "line": 41,
+      "kind": "ArrowFunctionExpression",
+      "scope": "CircuitStabilityWidget",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/telemetry/CitizenReportsTicker.jsx",
+      "name": "CitizenReportsTicker",
+      "line": 5,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/telemetry/CitizenReportsTicker.jsx",
+      "name": "getStatusBadge",
+      "line": 8,
+      "kind": "ArrowFunctionExpression",
+      "scope": "CitizenReportsTicker",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/telemetry/LiveBlockCountdown.jsx",
+      "name": "getBlockBadgeClass",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/telemetry/LiveBlockCountdown.jsx",
+      "name": "getBlockBgSoft",
+      "line": 14,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/components/telemetry/LiveBlockCountdown.jsx",
+      "name": "LiveBlockCountdown",
+      "line": 24,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/data/articles.js",
+      "name": "stripHtml",
+      "line": 42,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/data/articles.js",
+      "name": "countWords",
+      "line": 49,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/data/articles.js",
+      "name": "enrich",
+      "line": 51,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/data/articles.js",
+      "name": "getArticleBySlug",
+      "line": 69,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/data/articles.js",
+      "name": "getRelatedArticles",
+      "line": 71,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/data/articles.js",
+      "name": "getTableOfContents",
+      "line": 75,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/data/articles.js",
+      "name": "formatDate",
+      "line": 85,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/seo.js",
+      "name": "upsert",
+      "line": 11,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/seo.js",
+      "name": "metaByName",
+      "line": 30,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/seo.js",
+      "name": "metaByProperty",
+      "line": 36,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/seo.js",
+      "name": "useDocumentMeta",
+      "line": 42,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/telemetry.js",
+      "name": "formatRelativeTime",
+      "line": 10,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/telemetry.js",
+      "name": "calculatePacTime",
+      "line": 30,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/telemetry.js",
+      "name": "processCircuitsSummary",
+      "line": 114,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/telemetry.js",
+      "name": "fetchTelemetryFromSupabase",
+      "line": 181,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/telemetry.js",
+      "name": "useTelemetry",
+      "line": 235,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/telemetry.js",
+      "name": "refresh",
+      "line": 262,
+      "kind": "useCallback",
+      "scope": "useTelemetry",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/lib/telemetry.js",
+      "name": "handleVisibilityChange",
+      "line": 297,
+      "kind": "ArrowFunctionExpression",
+      "scope": "useTelemetry",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "AdminPortal",
+      "line": 13,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "fetchAdminData",
+      "line": 74,
+      "kind": "FunctionDeclaration",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleLogin",
+      "line": 140,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleLogout",
+      "line": 152,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "cycleCell",
+      "line": 159,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleSavePac",
+      "line": 175,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleSaveDonations",
+      "line": 201,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleAddSector",
+      "line": 222,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleRemoveSector",
+      "line": 232,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleSendBroadcast",
+      "line": 240,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "pingApi",
+      "line": 264,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "getBadgeClass",
+      "line": 345,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/Blog.jsx",
+      "name": "Blog",
+      "line": 8,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/Blog.jsx",
+      "name": "open",
+      "line": 43,
+      "kind": "ArrowFunctionExpression",
+      "scope": "Blog",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/BlogPost.jsx",
+      "name": "BlogPost",
+      "line": 15,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/BlogPost.jsx",
+      "name": "handleContentClick",
+      "line": 60,
+      "kind": "ArrowFunctionExpression",
+      "scope": "BlogPost",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/BlogPost.jsx",
+      "name": "go",
+      "line": 70,
+      "kind": "ArrowFunctionExpression",
+      "scope": "BlogPost",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/DeveloperInfo.jsx",
+      "name": "DeveloperInfo",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/LandingPage.jsx",
+      "name": "LandingPage",
+      "line": 9,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/PrivacyPolicy.jsx",
+      "name": "PrivacyPolicy",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/RefundPolicy.jsx",
+      "name": "RefundPolicy",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TermsConditions.jsx",
+      "name": "TermsConditions",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/Transparencia.jsx",
+      "name": "Transparencia",
+      "line": 4,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/tv/AppTheme.jsx",
+      "name": "AppTheme",
+      "line": 16,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/tv/AppTheme.jsx",
+      "name": "getAppBlockColor",
+      "line": 31,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AppTheme",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/tv/LightTheme.jsx",
+      "name": "LightTheme",
+      "line": 12,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/tv/MercuryTheme.jsx",
+      "name": "MercuryTheme",
+      "line": 11,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/tv/PerformanceTheme.jsx",
+      "name": "PerformanceTheme",
+      "line": 12,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/tv/RadarTheme.jsx",
+      "name": "RadarTheme",
+      "line": 11,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/tv/WebTheme.jsx",
+      "name": "WebTheme",
+      "line": 14,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "name": "TvKioskMode",
+      "line": 96,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "name": "handleSelectTheme",
+      "line": 119,
+      "kind": "ArrowFunctionExpression",
+      "scope": "TvKioskMode",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "name": "handleSelectBlock",
+      "line": 141,
+      "kind": "ArrowFunctionExpression",
+      "scope": "TvKioskMode",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "name": "toggleFullscreen",
+      "line": 151,
+      "kind": "ArrowFunctionExpression",
+      "scope": "TvKioskMode",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "name": "handleFsChange",
+      "line": 167,
+      "kind": "ArrowFunctionExpression",
+      "scope": "TvKioskMode",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "name": "requestWakeLock",
+      "line": 181,
+      "kind": "FunctionDeclaration",
+      "scope": "TvKioskMode",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "name": "handleVisibility",
+      "line": 192,
+      "kind": "ArrowFunctionExpression",
+      "scope": "TvKioskMode",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "name": "handleKeyDown",
+      "line": 210,
+      "kind": "ArrowFunctionExpression",
+      "scope": "TvKioskMode",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/TvKioskMode.jsx",
+      "name": "getCaracasClock",
+      "line": 265,
+      "kind": "FunctionDeclaration",
+      "scope": "TvKioskMode",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "app/src/androidTest/java/com/example/ExampleInstrumentedTest.kt",
+      "name": "useAppContext",
+      "line": 17,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "name": "initMap",
+      "line": 265,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "name": "setBasemap",
+      "line": 283,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "name": "toggleBasemap",
+      "line": 310,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "name": "toggleHeatmap",
+      "line": 314,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "name": "recenterBarinas",
+      "line": 327,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "name": "getCoords",
+      "line": 333,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "name": "renderLayers",
+      "line": 358,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "name": "handleSectorClick",
+      "line": 455,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/assets/map/map.html",
+      "name": "updateMapData",
+      "line": 463,
+      "kind": "FunctionExpression",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/AppDatabase.kt",
+      "name": "sectorDao",
+      "line": 24,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/AppDatabase.kt",
+      "name": "outageRecordDao",
+      "line": 25,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/AppDatabase.kt",
+      "name": "pendingReportDao",
+      "line": 26,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/AppDatabase.kt",
+      "name": "migrate",
+      "line": 33,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/AppDatabase.kt",
+      "name": "getInstance",
+      "line": 39,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/OutageRecordDao.kt",
+      "name": "getRecentOutagesBySector",
+      "line": 13,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/OutageRecordDao.kt",
+      "name": "getAllOutages",
+      "line": 16,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/OutageRecordDao.kt",
+      "name": "insertOutages",
+      "line": 19,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/OutageRecordDao.kt",
+      "name": "insertOutage",
+      "line": 22,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/OutageRecordDao.kt",
+      "name": "getCount",
+      "line": 25,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/PendingReportDao.kt",
+      "name": "getUnsyncedReports",
+      "line": 14,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/PendingReportDao.kt",
+      "name": "getAllReportsFlow",
+      "line": 17,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/PendingReportDao.kt",
+      "name": "getUnsyncedReportsCountFlow",
+      "line": 20,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/PendingReportDao.kt",
+      "name": "insertReport",
+      "line": 23,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/PendingReportDao.kt",
+      "name": "updateReport",
+      "line": 26,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/PendingReportDao.kt",
+      "name": "markAsSynced",
+      "line": 29,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/PendingReportDao.kt",
+      "name": "deleteOldSyncedReports",
+      "line": 32,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/SectorDao.kt",
+      "name": "getAllSectors",
+      "line": 14,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/SectorDao.kt",
+      "name": "getAllSectorsList",
+      "line": 17,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/SectorDao.kt",
+      "name": "getSectorById",
+      "line": 20,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/SectorDao.kt",
+      "name": "observeSectorById",
+      "line": 23,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/SectorDao.kt",
+      "name": "insertOrUpdateSectors",
+      "line": 26,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/SectorDao.kt",
+      "name": "insertOrUpdateSector",
+      "line": 29,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/SectorDao.kt",
+      "name": "updateSector",
+      "line": 32,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/dao/SectorDao.kt",
+      "name": "getSectorsCount",
+      "line": 35,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/entity/OutageRecordEntity.kt",
+      "name": "toDomain",
+      "line": 23,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/entity/PendingReportEntity.kt",
+      "name": "toDomain",
+      "line": 24,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/local/entity/SectorEntity.kt",
+      "name": "toDomain",
+      "line": 22,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/BarinasLocationsData.kt",
+      "name": "getParroquiasForMunicipality",
+      "line": 1144,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/BarinasLocationsData.kt",
+      "name": "addCustomLocation",
+      "line": 1153,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/BarinasLocationsData.kt",
+      "name": "getAllLocations",
+      "line": 1158,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/BarinasLocationsData.kt",
+      "name": "searchLocations",
+      "line": 1163,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacAlertSettings.kt",
+      "name": "getSettings",
+      "line": 23,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacAlertSettings.kt",
+      "name": "saveSettings",
+      "line": 36,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "updateSlot",
+      "line": 110,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "getMatrixSnapshot",
+      "line": 147,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "getSlotsSnapshot",
+      "line": 151,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "updateMatrix",
+      "line": 155,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "updateCell",
+      "line": 164,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "deleteSlot",
+      "line": 172,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "addSlot",
+      "line": 187,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "getDayTurnAudit",
+      "line": 200,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "deleteTurnAndRebalance",
+      "line": 225,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "applySingleTurnPreset",
+      "line": 291,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "applyDoubleTurnPreset",
+      "line": 309,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "resetToDefault",
+      "line": 320,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "addSectorToBlock",
+      "line": 494,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "removeSectorFromBlock",
+      "line": 511,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "reassignSector",
+      "line": 521,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "getMonthlyWeeks",
+      "line": 541,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "getDayIndex",
+      "line": 586,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "getWeekOffsetForDayOfMonth",
+      "line": 599,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "getBlockForDate",
+      "line": 608,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "getCurrentSlotIndex",
+      "line": 615,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "getActiveBlockNow",
+      "line": 638,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/model/PacSchedule.kt",
+      "name": "findNextWindowForBlock",
+      "line": 648,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/PacSchedulePrefs.kt",
+      "name": "getPrefs",
+      "line": 27,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/PacSchedulePrefs.kt",
+      "name": "saveSchedule",
+      "line": 31,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/PacSchedulePrefs.kt",
+      "name": "loadSchedule",
+      "line": 62,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/remote/LuzBarinasApi.kt",
+      "name": "getSectors",
+      "line": 14,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/remote/LuzBarinasApi.kt",
+      "name": "getSectorDetails",
+      "line": 17,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/remote/LuzBarinasApi.kt",
+      "name": "submitPowerReport",
+      "line": 22,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/remote/LuzBarinasApi.kt",
+      "name": "getOutagePrediction",
+      "line": 27,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/remote/LuzBarinasApi.kt",
+      "name": "getMonthlyWeeks",
+      "line": 32,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "startRealtimeSync",
+      "line": 141,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "handleConfigChange",
+      "line": 235,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "processConfig",
+      "line": 245,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "listenToSector",
+      "line": 297,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "updateLocalSector",
+      "line": 329,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "uploadCitizenReport",
+      "line": 377,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "fetchWeeklyCitizenReports",
+      "line": 411,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "publishPacScheduleToCloud",
+      "line": 430,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "uploadCommunityLocation",
+      "line": 441,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "applyRemotePacScheduleJson",
+      "line": 489,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/CloudSyncRepository.kt",
+      "name": "stopRealtimeSync",
+      "line": 555,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/EnergyRepository.kt",
+      "name": "initializePreloadedDataIfEmpty",
+      "line": 60,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/EnergyRepository.kt",
+      "name": "getPredictionForSector",
+      "line": 210,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/EnergyRepository.kt",
+      "name": "submitReport",
+      "line": 226,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/EnergyRepository.kt",
+      "name": "syncPendingReportsNow",
+      "line": 326,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/data/repository/EnergyRepository.kt",
+      "name": "registerCommunityLocation",
+      "line": 351,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/engine/OutagePredictionEngine.kt",
+      "name": "calculateNextOutageWindow",
+      "line": 17,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/engine/OutagePredictionEngine.kt",
+      "name": "calculateLocalOutageWindow",
+      "line": 26,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/glance/LuzBarinasWidget.kt",
+      "name": "provideGlance",
+      "line": 47,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/glance/LuzBarinasWidget.kt",
+      "name": "onAction",
+      "line": 153,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/MainActivity.kt",
+      "name": "onCreate",
+      "line": 85,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/MainActivity.kt",
+      "name": "MainAppScreen",
+      "line": 136,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/NotificationActionReceiver.kt",
+      "name": "onReceive",
+      "line": 22,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/NotificationHelper.kt",
+      "name": "createNotificationChannel",
+      "line": 30,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/NotificationHelper.kt",
+      "name": "showInteractiveOutageAlert",
+      "line": 84,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/NotificationHelper.kt",
+      "name": "showConfirmationNotification",
+      "line": 160,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/NotificationHelper.kt",
+      "name": "showPredictiveAlert",
+      "line": 185,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/NotificationHelper.kt",
+      "name": "showBroadcastNoticeNotification",
+      "line": 223,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmPlayer.kt",
+      "name": "startAlarm",
+      "line": 24,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmPlayer.kt",
+      "name": "stopAlarm",
+      "line": 67,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmPlayer.kt",
+      "name": "isAlarmActive",
+      "line": 80,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmReceiver.kt",
+      "name": "onReceive",
+      "line": 16,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmReceiver.kt",
+      "name": "handlePreOutageAlert",
+      "line": 29,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmReceiver.kt",
+      "name": "handleRestoreAlert",
+      "line": 46,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmReceiver.kt",
+      "name": "handleStopAlarm",
+      "line": 59,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmReceiver.kt",
+      "name": "handleBoot",
+      "line": 68,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmReceiver.kt",
+      "name": "showAlarmNotification",
+      "line": 72,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmReceiver.kt",
+      "name": "showRestoreNotification",
+      "line": 133,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmReceiver.kt",
+      "name": "handleValidationAlert",
+      "line": 178,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmScheduler.kt",
+      "name": "scheduleNextAlarm",
+      "line": 21,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/notification/PacAlarmScheduler.kt",
+      "name": "cancelAlarms",
+      "line": 154,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "initializeAdMob",
+      "line": 21,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "getBannerAdUnitId",
+      "line": 28,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "AdaptiveBannerAd",
+      "line": 44,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "preload",
+      "line": 84,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdLoaded",
+      "line": 91,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdFailedToLoad",
+      "line": 94,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "showAd",
+      "line": 101,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdDismissedFullScreenContent",
+      "line": 107,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdFailedToShowFullScreenContent",
+      "line": 111,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "loadAd",
+      "line": 134,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdLoaded",
+      "line": 143,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdFailedToLoad",
+      "line": 146,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "showAdIfAvailable",
+      "line": 153,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdDismissedFullScreenContent",
+      "line": 158,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdFailedToShowFullScreenContent",
+      "line": 163,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdShowedFullScreenContent",
+      "line": 168,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt",
+      "name": "BarinasAddressDialog",
+      "line": 73,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/DonationsDialog.kt",
+      "name": "DonationsDialog",
+      "line": 30,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/GoogleSearchBar.kt",
+      "name": "GoogleSearchBar",
+      "line": 72,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt",
+      "name": "onSectorClicked",
+      "line": 39,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt",
+      "name": "onMapReady",
+      "line": 46,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt",
+      "name": "InteractiveBarinasMap",
+      "line": 55,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt",
+      "name": "sendDataToMap",
+      "line": 64,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt",
+      "name": "onPageFinished",
+      "line": 138,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt",
+      "name": "OnboardingFlowDialog",
+      "line": 38,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt",
+      "name": "WelcomeStep",
+      "line": 79,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt",
+      "name": "PermissionsStep",
+      "line": 165,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt",
+      "name": "BatteryStep",
+      "line": 226,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/PacScheduleView.kt",
+      "name": "PacScheduleView",
+      "line": 81,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/PacScheduleView.kt",
+      "name": "PacOfficialMatrixCard",
+      "line": 618,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/PacScheduleView.kt",
+      "name": "PacBlockSectorsGrid",
+      "line": 839,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/PacScheduleView.kt",
+      "name": "BlockSectorsCard",
+      "line": 884,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/PacScheduleView.kt",
+      "name": "getBlockColor",
+      "line": 1010,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/PacSettingsDialog.kt",
+      "name": "PacSettingsDialog",
+      "line": 45,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/StatusBadge.kt",
+      "name": "StatusBadge",
+      "line": 39,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt",
+      "name": "ThemeSettingsDialog",
+      "line": 18,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt",
+      "name": "ThemeOptionButton",
+      "line": 151,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/UpdatePromptDialog.kt",
+      "name": "UpdatePromptDialog",
+      "line": 26,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/AdminScreen.kt",
+      "name": "AdminScreen",
+      "line": 79,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/DashboardScreen.kt",
+      "name": "DashboardScreen",
+      "line": 85,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/DashboardScreen.kt",
+      "name": "BroadcastNoticeBanner",
+      "line": 876,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
+      "name": "LegalScreen",
+      "line": 31,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
+      "name": "PrivacyPolicyContent",
+      "line": 65,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
+      "name": "TermsAndConditionsContent",
+      "line": 100,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
+      "name": "TransparenciaContent",
+      "line": 135,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
+      "name": "DeveloperInfoContent",
+      "line": 169,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
+      "name": "RefundPolicyContent",
+      "line": 301,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
+      "name": "SystemDocumentationContent",
+      "line": 322,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
+      "name": "GovernmentDisclaimerContent",
+      "line": 349,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/MapScreen.kt",
+      "name": "MapScreen",
+      "line": 49,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/MapScreen.kt",
+      "name": "FilterChipItem",
+      "line": 304,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/SettingsScreen.kt",
+      "name": "SettingsScreen",
+      "line": 31,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/SettingsScreen.kt",
+      "name": "SettingsCategory",
+      "line": 314,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/SettingsScreen.kt",
+      "name": "SettingsItem",
+      "line": 342,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/TelemetryScreen.kt",
+      "name": "TelemetryScreen",
+      "line": 56,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/screens/TelemetryScreen.kt",
+      "name": "SummaryStatBox",
+      "line": 328,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/theme/Theme.kt",
+      "name": "MyApplicationTheme",
+      "line": 66,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "selectSector",
+      "line": 180,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "switchProfile",
+      "line": 210,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "selectSectorByName",
+      "line": 238,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "setFilter",
+      "line": 247,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "setTab",
+      "line": 251,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "toggleDarkMode",
+      "line": 255,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "updateTheme",
+      "line": 261,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "reportPowerStatus",
+      "line": 281,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "syncPendingReportsNow",
+      "line": 319,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "triggerPushAlertSimulation",
+      "line": 336,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "buildPacStateCopy",
+      "line": 351,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "setAdminOpen",
+      "line": 365,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "updateMatrixCell",
+      "line": 369,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "updateSlot",
+      "line": 377,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "deleteSlot",
+      "line": 385,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "addSlot",
+      "line": 395,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "addSectorToBlock",
+      "line": 403,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "removeSectorFromBlock",
+      "line": 411,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "reassignSector",
+      "line": 419,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "applyDoubleTurnPreset",
+      "line": 427,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "applySingleTurnPreset",
+      "line": 437,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "resetScheduleToDefault",
+      "line": 447,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "deleteTurnAndRebalance",
+      "line": 451,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "registerCommunityLocation",
+      "line": 461,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "setOnboardingOpen",
+      "line": 504,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "setUserLocation",
+      "line": 508,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "publishScheduleNotification",
+      "line": 550,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "dismissBroadcastNotice",
+      "line": 571,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "clearUserMessage",
+      "line": 575,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "refreshPrediction",
+      "line": 579,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt",
+      "name": "onCleared",
+      "line": 586,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/utils/AppUpdater.kt",
+      "name": "checkForUpdates",
+      "line": 15,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/utils/AppUpdater.kt",
+      "name": "openPlayStoreForUpdate",
+      "line": 71,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt",
+      "name": "doWork",
+      "line": 30,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt",
+      "name": "calculateMinutesUntil",
+      "line": 91,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt",
+      "name": "enqueue",
+      "line": 101,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/worker/ReportPowerWorker.kt",
+      "name": "doWork",
+      "line": 17,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/ExampleRobolectricTest.kt",
+      "name": "read string from context",
+      "line": 20,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/ExampleRobolectricTest.kt",
+      "name": "verify room sector dao insert and retrieve",
+      "line": 27,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/ExampleUnitTest.kt",
+      "name": "test modular arithmetic outage prediction engine",
+      "line": 14,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/GreetingScreenshotTest.kt",
+      "name": "greeting_screenshot",
+      "line": 25,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "seed_firestore.py",
+      "name": "firestore_patch",
+      "line": 21,
+      "kind": "Python def",
+      "scope": "",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md"
+    },
+    {
+      "file": "seed_firestore.py",
+      "name": "firestore_create",
+      "line": 33,
+      "kind": "Python def",
+      "scope": "",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md"
+    },
+    {
+      "file": "seed_firestore.py",
+      "name": "to_firestore_value",
+      "line": 50,
+      "kind": "Python def",
+      "scope": "",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md"
+    },
+    {
+      "file": "seed_firestore.py",
+      "name": "to_firestore_fields",
+      "line": 66,
+      "kind": "Python def",
+      "scope": "",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md"
+    },
+    {
+      "file": "seed_firestore.py",
+      "name": "main",
+      "line": 236,
+      "kind": "Python def",
+      "scope": "",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md"
+    },
+    {
+      "file": "seed_supabase.py",
+      "name": "supabase_upsert",
+      "line": 16,
+      "kind": "Python def",
+      "scope": "",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md"
+    },
+    {
+      "file": "seed_supabase.py",
+      "name": "main",
+      "line": 162,
+      "kind": "Python def",
+      "scope": "",
+      "chapter": "06-base-de-datos-configuracion-y-operacion.md"
+    }
+  ],
+  "errors": []
+}
