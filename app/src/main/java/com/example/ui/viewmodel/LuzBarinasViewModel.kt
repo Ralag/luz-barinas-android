@@ -11,6 +11,7 @@ import com.example.data.model.CitizenReport
 import com.example.data.model.DayTurnAudit
 import com.example.data.model.OutagePrediction
 import com.example.data.model.PacScheduleData
+import com.example.data.model.PacBlock
 import com.example.data.model.PacSlot
 import com.example.data.model.RebalanceResult
 import com.example.data.model.Sector
@@ -108,12 +109,10 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             repository.allSectorsFlow.collectLatest { list ->
                 _uiState.update { current ->
-                    val savedSectorId = userPrefs.getString("saved_sector_id", null)
-                    val currentSelected = current.selectedSector
-                    val updatedSelected = (if (currentSelected != null) list.find { it.id == currentSelected.id } else null)
-                        ?: (if (savedSectorId != null) list.find { it.id == savedSectorId } else null)
-                        ?: list.find { it.id == "sec_a_alto_barinas_1" }
-                        ?: list.firstOrNull()
+                    val profile = current.activeProfile
+                    val savedSectorId = userPrefs.getString("profile_${profile}_sector_id", null)
+                        ?: if (profile == "home") userPrefs.getString("saved_sector_id", null) else null
+                    val updatedSelected = savedSectorId?.let { id -> list.find { it.id == id } }
 
                     current.copy(
                         sectors = list,
@@ -178,8 +177,8 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun selectSector(sector: Sector) {
-        val cleanMatch = Regex("[ABCD]").find(sector.rotationBlock.uppercase())
-        val cleanBlock = cleanMatch?.value ?: "A"
+        com.example.notification.PacAlarmScheduler.cancelAlarms(getApplication())
+        val cleanBlock = PacBlock.normalize(sector.rotationBlock)
         val profile = _uiState.value.activeProfile
 
         userPrefs.edit()
@@ -187,11 +186,12 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             .putString("selected_sector_id", sector.id)
             .putString("saved_address", sector.name)
             .putString("selected_sector_name", sector.name)
-            .putString("saved_block", sector.rotationBlock)
+            .putString("saved_block", cleanBlock)
             .putString("saved_sector_block", cleanBlock)
             .putString("selected_sector_block", cleanBlock)
             .putString("profile_${profile}_sector_id", sector.id)
             .putString("profile_${profile}_address", sector.name)
+            .putString("profile_${profile}_block", cleanBlock)
             .apply()
 
         _uiState.update { 
@@ -208,7 +208,16 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun switchProfile(profile: String) {
-        if (profile == _uiState.value.activeProfile) return
+        if (profile !in setOf("home", "work") || profile == _uiState.value.activeProfile) return
+        val previousProfile = _uiState.value.activeProfile
+        _uiState.value.selectedSector?.let { previousSector ->
+            userPrefs.edit()
+                .putString("profile_${previousProfile}_sector_id", previousSector.id)
+                .putString("profile_${previousProfile}_address", _uiState.value.userAddress ?: previousSector.name)
+                .putString("profile_${previousProfile}_block", PacBlock.normalize(previousSector.rotationBlock))
+                .apply()
+        }
+        com.example.notification.PacAlarmScheduler.cancelAlarms(getApplication())
 
         userPrefs.edit().putString("active_profile", profile).apply()
 
@@ -219,13 +228,20 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         _uiState.update { 
             it.copy(
                 activeProfile = profile,
-                selectedSector = sector ?: it.selectedSector,
-                userAddress = savedAddress ?: it.userAddress
+                selectedSector = sector,
+                userAddress = savedAddress,
+                prediction = null
             ) 
         }
 
         if (sector != null) {
             selectSector(sector)
+            if (savedAddress != null) {
+                userPrefs.edit().putString("saved_address", savedAddress)
+                    .putString("selected_sector_name", savedAddress)
+                    .putString("profile_${profile}_address", savedAddress).apply()
+                _uiState.update { it.copy(userAddress = savedAddress) }
+            }
         } else {
             _uiState.update { 
                 it.copy(
@@ -369,6 +385,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun updateMatrixCell(slotIdx: Int, dayIdx: Int, block: String) {
         PacScheduleData.updateCell(slotIdx, dayIdx, block)
         PacSchedulePrefs.saveSchedule(getApplication())
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
         _uiState.update { buildPacStateCopy() }
         _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
         viewModelScope.launch { repository.cloudSync.publishPacScheduleToCloud() }
@@ -377,6 +394,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun updateSlot(slotIdx: Int, newLabel: String, startHour: Int, endHour: Int) {
         PacScheduleData.updateSlot(slotIdx, newLabel, startHour, endHour)
         PacSchedulePrefs.saveSchedule(getApplication())
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
         _uiState.update { buildPacStateCopy() }
         _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
         viewModelScope.launch { repository.cloudSync.publishPacScheduleToCloud() }
@@ -386,6 +404,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         val ok = PacScheduleData.deleteSlot(slotIdx)
         if (ok) {
             PacSchedulePrefs.saveSchedule(getApplication())
+            com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
             _uiState.update { buildPacStateCopy("🗑️ Turno eliminado correctamente.") }
             _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
             viewModelScope.launch { repository.cloudSync.publishPacScheduleToCloud() }
@@ -395,6 +414,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun addSlot(label: String, startHour: Int, endHour: Int) {
         PacScheduleData.addSlot(label, startHour, endHour)
         PacSchedulePrefs.saveSchedule(getApplication())
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
         _uiState.update { buildPacStateCopy("➕ Nuevo turno añadido al cronograma.") }
         _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
         viewModelScope.launch { repository.cloudSync.publishPacScheduleToCloud() }
@@ -403,6 +423,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun addSectorToBlock(sectorName: String, blockCode: String) {
         PacScheduleData.addSectorToBlock(sectorName, blockCode)
         PacSchedulePrefs.saveSchedule(getApplication())
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
         _uiState.update { buildPacStateCopy("Sector '$sectorName' asignado a Bloque $blockCode.") }
         _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
         viewModelScope.launch { repository.cloudSync.publishPacScheduleToCloud() }
@@ -411,6 +432,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun removeSectorFromBlock(sectorName: String, blockCode: String) {
         PacScheduleData.removeSectorFromBlock(sectorName, blockCode)
         PacSchedulePrefs.saveSchedule(getApplication())
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
         _uiState.update { buildPacStateCopy("Sector '$sectorName' removido de Bloque $blockCode.") }
         _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
         viewModelScope.launch { repository.cloudSync.publishPacScheduleToCloud() }
@@ -419,6 +441,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun reassignSector(sectorName: String, targetBlock: String) {
         PacScheduleData.reassignSector(sectorName, targetBlock)
         PacSchedulePrefs.saveSchedule(getApplication())
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
         _uiState.update { buildPacStateCopy("Sector '$sectorName' reasignado a Bloque $targetBlock.") }
         _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
         viewModelScope.launch { repository.cloudSync.publishPacScheduleToCloud() }
@@ -427,6 +450,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun applyDoubleTurnPreset() {
         PacScheduleData.applyDoubleTurnPreset()
         PacSchedulePrefs.saveSchedule(getApplication())
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
         _uiState.update {
             buildPacStateCopy("⚡ Esquema: 2 Cortes Diarios (8 hrs por bloque) [ACTIVO].")
         }
@@ -437,6 +461,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun applySingleTurnPreset() {
         PacScheduleData.applySingleTurnPreset()
         PacSchedulePrefs.saveSchedule(getApplication())
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
         _uiState.update {
             buildPacStateCopy("⚡ Esquema: 1 Solo Corte Diario (4 hrs por bloque) [ACTIVO].")
         }
@@ -451,6 +476,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     fun deleteTurnAndRebalance(slotIdx: Int, dayIdx: Int) {
         val result = PacScheduleData.deleteTurnAndRebalance(slotIdx, dayIdx)
         PacSchedulePrefs.saveSchedule(getApplication())
+        com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
         _uiState.update {
             buildPacStateCopy("🔄 ${result.explanation}").copy(lastRebalanceResult = result)
         }
@@ -506,20 +532,17 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun setUserLocation(location: BarinasLocation) {
-        // Match sector in current list or find appropriate sector for block
-        val cleanMatch = Regex("[ABCD]").find(location.block.uppercase())
-        val cleanBlock = cleanMatch?.value ?: "A"
+        com.example.notification.PacAlarmScheduler.cancelAlarms(getApplication())
         val matchingSector = _uiState.value.sectors.find { it.id == location.sectorEntityId }
-            ?: _uiState.value.sectors.find { it.name.contains(location.name, ignoreCase = true) }
-            ?: _uiState.value.sectors.find { it.rotationBlock.contains(cleanBlock, ignoreCase = true) }
-            ?: _uiState.value.selectedSector
+            ?: _uiState.value.sectors.find { it.name.equals(location.name, ignoreCase = true) }
+        val cleanBlock = PacBlock.normalize(matchingSector?.rotationBlock ?: location.block)
 
         val profile = _uiState.value.activeProfile
         val resolvedSectorId = matchingSector?.id ?: location.sectorEntityId
         userPrefs.edit()
             .putString("saved_address", location.name)
             .putString("selected_sector_name", location.name)
-            .putString("saved_block", location.block)
+            .putString("saved_block", cleanBlock)
             .putString("saved_sector_block", cleanBlock)
             .putString("selected_sector_block", cleanBlock)
             .putString("saved_sector_id", resolvedSectorId)
@@ -534,9 +557,10 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             current.copy(
                 userAddress = location.name,
                 isOnboardingOpen = false,
-                selectedSector = matchingSector ?: current.selectedSector,
+                selectedSector = matchingSector,
+                prediction = null,
                 hasWorkProfile = userPrefs.getString("profile_work_sector_id", null) != null,
-                userMessage = "📍 Ubicación (${if (profile == "work") "Trabajo" else "Casa"}) fijada en ${location.name} • Bloque ${cleanBlock}."
+                userMessage = "📍 Ubicación (${if (profile == "work") "Trabajo" else "Casa"}) fijada en ${location.name} • Bloque ${cleanBlock ?: "sin asignar"}."
             )
         }
 

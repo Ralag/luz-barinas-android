@@ -24,7 +24,7 @@ object PacAlertPrefs {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val legacy = prefs.getBoolean(KEY_USE_LEGACY_ALARM, false)
         return PacAlertSettings(
-            advanceMinutes = prefs.getInt(KEY_ADVANCE_MINUTES, 10),
+            advanceMinutes = prefs.getInt(KEY_ADVANCE_MINUTES, 10).coerceIn(1, 180),
             isNotificationEnabled = prefs.getBoolean(KEY_NOTIF_ENABLED, true),
             isAlarmEnabled = prefs.getBoolean(KEY_ALARM_ENABLED, legacy),
             isRestoreAlarmEnabled = prefs.getBoolean(KEY_RESTORE_ALARM_ENABLED, false),

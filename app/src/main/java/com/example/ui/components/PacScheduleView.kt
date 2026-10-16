@@ -104,7 +104,7 @@ fun PacScheduleView(
     var selectedMonthIdx by remember { mutableIntStateOf(currentMonthIdx) }
 
     val userBlock = remember(selectedSector) {
-        selectedSector?.rotationBlock?.uppercase()?.replace("BLOQUE", "")?.trim() ?: "A"
+        com.example.data.model.PacBlock.normalize(selectedSector?.rotationBlock) ?: ""
     }
 
     val currentYear = remember(timeKey) { cal.get(Calendar.YEAR) }

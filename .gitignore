@@ -4,6 +4,7 @@ admin-web/
 # Build and IDE artifacts
 *.iml
 .gradle
+.gradle-test-home/
 .kotlin
 /local.properties
 local.properties

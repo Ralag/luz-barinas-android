@@ -462,22 +462,9 @@ class CloudSyncRepository(
                 rotationBlock = block.trim()
             )
             
-            supabase.postgrest["community_locations"].upsert(loc)
-            
-            val cleanBlock = block.trim().replace("Bloque", "", true).trim().ifEmpty { "C" }
-            val sec = SupabaseSector(
-                id = loc.id,
-                name = loc.name,
-                parroquia = loc.parroquia,
-                circuitCode = loc.circuitCode,
-                status = loc.status,
-                voltage = loc.voltage,
-                confirmedReportsCount = loc.confirmedReportsCount,
-                withoutPowerPercentage = loc.withoutPowerPercentage,
-                rotationBlock = cleanBlock,
-                lastUpdatedMillis = loc.submittedAt
-            )
-            supabase.postgrest["sectors"].upsert(sec)
+            // Citizens submit a proposal; only an authenticated administrator
+            // may create or update the shared, approved sectors directory.
+            supabase.postgrest["community_locations"].insert(loc)
             
             true
         } catch (e: Exception) {
@@ -545,6 +532,7 @@ class CloudSyncRepository(
                 syncPrefs.edit().putLong("last_applied_pac_updated_at", remoteUpdatedAt).apply()
 
                 PacSchedulePrefs.saveSchedule(context)
+                com.example.notification.PacAlarmScheduler.scheduleNextAlarm(context)
                 _pacScheduleUpdatedFlow.tryEmit(remoteUpdatedAt)
             }
         } catch (e: Exception) {
