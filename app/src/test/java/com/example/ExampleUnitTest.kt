@@ -4,14 +4,30 @@ import com.example.data.model.OutageRecord
 import com.example.data.model.Sector
 import com.example.data.model.ServiceStatus
 import com.example.engine.OutagePredictionEngine
+import com.example.data.model.PacScheduleData
+import java.util.Calendar
+import java.util.GregorianCalendar
+import java.util.TimeZone
+import org.junit.Before
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ExampleUnitTest {
+  @Before
+  fun restoreSchedule() { PacScheduleData.applyDoubleTurnPreset() }
+  @After
+  fun resetSchedule() { PacScheduleData.applyDoubleTurnPreset() }
+
   @Test
   fun `test modular arithmetic outage prediction engine`() = kotlinx.coroutines.test.runTest {
+    // Monday, first monthly rotation: block A is active from 07:00 to 11:00 Caracas.
+    val now = GregorianCalendar(TimeZone.getTimeZone("America/Caracas")).apply {
+      clear()
+      set(2026, Calendar.OCTOBER, 5, 8, 0, 0)
+    }.timeInMillis
     val sector = Sector(
       id = "sector_alto_barinas_norte",
       name = "Alto Barinas Norte",
@@ -20,14 +36,13 @@ class ExampleUnitTest {
       voltage = 118f,
       confirmedReportsCount = 20,
       withoutPowerPercentage = 5,
-      lastUpdatedMillis = System.currentTimeMillis(),
+      lastUpdatedMillis = now,
       rotationBlock = "Bloque A",
       coordinates = emptyList()
     )
 
     val hourMs = 3600 * 1000L
     val dayMs = 24 * hourMs
-    val now = System.currentTimeMillis()
 
     // 3 historical cycles of 4-hour outages with 4-hour daily modular shift
     val history = listOf(
@@ -63,8 +78,11 @@ class ExampleUnitTest {
     assertEquals(sector.id, prediction?.sectorId)
     assertTrue("Estimated duration should be 4.0 hours", (prediction?.estimatedDurationHours ?: 0f) in 3.5f..4.5f)
     assertTrue("Confidence percentage should be at least 70%", (prediction?.confidencePercentage ?: 0) >= 70)
-    assertTrue("Next start should be in future or now", (prediction?.nextEstimatedStartMillis ?: 0L) >= now - 1000)
-    assertTrue("Next end must be after start", (prediction?.nextEstimatedEndMillis ?: 0L) > (prediction?.nextEstimatedStartMillis ?: 0L))
+    assertEquals(now - hourMs, prediction.nextEstimatedStartMillis)
+    assertEquals(now + 3 * hourMs, prediction.nextEstimatedEndMillis)
+    assertEquals(0f, prediction.hoursUntilWindow, 0f)
+    assertEquals(94, prediction.confidencePercentage)
+    assertTrue(prediction.algorithmDetail.contains("Corte en curso"))
   }
 }
 

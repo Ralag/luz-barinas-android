@@ -1,42 +1,44 @@
 <div align="center">
   <img src="./app/src/main/res/drawable/ic_pac_barinas_logo.png" width="128" alt="PAC Barinas Logo" />
-  <h1>PAC Barinas 2.0</h1>
-  <p><b>Sistema Comunitario de Telemetría Eléctrica para el Estado Barinas</b></p>
+  <h1>PAC Barinas</h1>
+  <p><b>Cronogramas eléctricos y reportes comunitarios para Barinas</b></p>
 </div>
 
-PAC Barinas es una aplicación nativa para Android diseñada para que los ciudadanos del Estado Barinas puedan monitorear, consultar y recibir notificaciones predictivas sobre el Plan de Administración de Carga (PAC). 
+Aplicación Android y plataforma web para consultar el Plan de Administración de Carga, relacionar sectores con bloques y colaborar mediante reportes del estado eléctrico.
 
-La nueva versión 2.0 redefine la arquitectura, aliviando la incertidumbre de los cortes eléctricos mediante **algoritmos predictivos comunitarios**, mapas de calor en vivo, notificaciones interactivas y soporte multizona.
+**Estado documentado:** 16 de octubre de 2026. Android declara **1.3.1 / versionCode 7**, Android7.0/API24 o superior. Esta corrección de código no emite un nuevo binario comercial.
 
-## 🚀 Características Principales
+## Documentación
 
-- **🤖 Motor Predictivo Ciudadano:** Un nuevo algoritmo que contrasta el cronograma referencial del PAC con el volumen real de reportes de los últimos 7 días, ajustando de forma dinámica las proyecciones de cortes si el comportamiento del proveedor se desvía de la teoría.
-- **🗺️ Mapa de Calor Interactivo:** Visualización térmica impulsada por métricas comunitarias. El radio y la intensidad del calor se adaptan en tiempo real al volumen de confirmaciones y cortes en cada sector de Barinas.
-- **🔔 Alertas Interactivas de Validación:** Alertas Push exactas que se activan al inicio de tu bloque horario preguntando *¿Se fue la luz?* con botones de respuesta rápida (1-tap) para inyectar telemetría directa desde la notificación.
-- **📍 Soporte Multizona (Casa / Trabajo):** Interfaz dual con perfiles de ubicación. Alterna con un toque entre tu residencia y lugar de trabajo, garantizando que el sistema silencie las notificaciones del sector inactivo para evitar distracciones.
-- **🎨 Motor de Temas y Ergonomía:** Un nuevo panel de personalización global. Soporte para Modo Oscuro, colores dinámicos (Material You) y ajustes de Escala Visual para adaptar fuentes y espaciados.
-- **📱 Optimización para Pantallas Grandes:** El nuevo motor de UI reacciona a pantallas de gran formato (Tablets y Smart TVs > 600dp) colapsando la barra inferior y mostrando un *Navigation Rail* lateral para un uso más ergonómico.
-- **🌐 Ecosistema Web Integrado:** Conexión nativa con `pacbarinas.web.app` para sincronización de actualizaciones OTA seguras y un panel de telemetría externo.
+- [Documentación actual del sistema](DOCUMENTACION_SISTEMA.md): arquitectura, capacidades reales, datos, distribución y pendientes.
+- [Manual detallado del código](DOCUMENTACION_CODIGO.md): guía de aprendizaje y siete capítulos, con explicación por archivo/función, flujos, contratos y mantenimiento.
+- [Índice de funciones](docs/codigo/07-indice-funciones.md): nombres, archivos y líneas para encontrar cada declaración.
+- [Análisis técnico previo](ANALISIS_SISTEMA_PAC_BARINAS_2026-10-15.md): hallazgos y prioridades que motivaron la actualización documental.
+- [Cambios de seguridad y alertas](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md): correcciones, pruebas y activación remota.
+- [Activación de acceso seguro](docs/ACTIVACION_SEGURIDAD.md): cuenta administradora, RLS y configuración del servidor.
 
-## 🛠 Arquitectura y Tecnologías
+## Componentes
 
-El proyecto fue reescrito bajo una filosofía estricta de eficiencia y Offline-First:
+- Android nativo con Kotlin, Jetpack Compose, ViewModel/StateFlow, Room y WorkManager.
+- Horarios semanales/mensuales, reglas predictivas heurísticas, perfiles Casa/Trabajo, mapas, alertas locales y widget.
+- Supabase para datos y cambios Realtime.
+- Portal público React/Vite, blog, modo TV, páginas informativas y dos implementaciones administrativas actualmente presentes.
+- Funciones Vercel para proyección, predicción y envío FCM de servidor.
 
-- **100% Kotlin y Jetpack Compose:** Interfaces declarativas y responsivas que se adaptan a cualquier resolución.
-- **Arquitectura MVVM Limpia:** Separación estricta de responsabilidades (Repositorios, ViewModels y StateFlow).
-- **Base de Datos Persistente (Room):** La app funciona a la perfección sin conexión a internet en medio de los apagones, gestionando los cronogramas a nivel local.
-- **Sincronización Inteligente & WorkManager:** Sistema de reportes perezosos que ahorran batería y enlazan la data bidireccionalmente con Supabase (PostgREST/Realtime) evitando bloqueos reactivos y mitigando el abuso de peticiones a servidores externos.
+## Límites actuales
 
-## 📱 Requisitos
-- Android 7.0 (API 24) o superior.
-- Pantallas tradicionales, Tablets o Smart TVs Android.
-- Conexión a internet esporádica (requerida para reportar y actualizar predicciones comunitarias).
+La primera corrección incorpora Supabase Auth, permisos administrativos, protección del endpoint push, escape del panel clásico y alarmas Android por perfil/bloque con medianoche y carga persistida. Quedan problemas de sincronización/fecha de reportes, persistencia del panel React y uniformidad predictiva. Los porcentajes no son probabilidades calibradas. Android aún no recibe FCM y el actualizador abre Google Play.
 
-## 👥 Créditos y Reconocimientos
+Consultar la documentación antes de utilizar seeds o scripts patch/update: pueden sobrescribir datos o código. Los cambios aplicados y su verificación figuran en el registro de cambios.
 
-- **💡 Ideación y Concepción del Proyecto:** [ElMatrushka](https://www.facebook.com/elmatrushka.bv/) — Parte fundamental en el surgimiento y formulación de la idea original del sistema PAC Barinas.
-- **💻 Desarrollo y Arquitectura de Software:** Ing. Jorluis — Desarrollo móvil nativo Android, plataforma web y telemetría.
-- **🤝 Comunidad de Barinas:** Todos los ciudadanos y comercios que día a día alimentan el mapa de telemetría ciudadana.
+## Organización y desarrollo
 
----
-*Desarrollado de forma comunitaria por y para los ciudadanos del Estado Barinas.*
+La raíz es el repositorio Android `Ralag/luz-barinas-android`. La carpeta `admin-web` es otro repositorio, cuyo remoto configurado actualmente es `Ralag/pac-barinas`; está excluida del Git Android.
+
+Abrir la raíz con Android Studio y preparar SDK36, JVM/wrapper compatibles y firma configurada. La web utiliza sus scripts npm dentro de admin-web. Configuración, dependencias, pruebas y procedimientos se explican en [el capítulo de operación](docs/codigo/06-base-de-datos-configuracion-y-operacion.md).
+
+## Créditos
+
+- **Ideación y concepción:** [ElMatrushka](https://www.facebook.com/elmatrushka.bv/).
+- **Desarrollo y arquitectura:** Ing. Jorluis.
+- **Colaboración ciudadana:** comunidad de Barinas.

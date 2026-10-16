@@ -636,42 +636,37 @@ object PacScheduleData {
     }
 
     fun getActiveBlockNow(currentTimeMillis: Long = System.currentTimeMillis()): String {
-        val cal = Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")).apply {
-            timeInMillis = currentTimeMillis
-        }
-        val dayIdx = getDayIndex(cal.get(Calendar.DAY_OF_WEEK))
-        val slotIdx = getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
-        val dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
-        return getBlockForDate(slotIdx, dayIdx, dayOfMonth)
+        return listOf("A", "B", "C", "D").firstOrNull { block ->
+            findScheduledWindowForBlock(block, currentTimeMillis)?.isCurrentlyActive == true
+        } ?: "-"
     }
 
-    fun findNextWindowForBlock(
+    /** Actual scheduled windows only. Overnight ownership belongs to the start date. */
+    fun findScheduledWindowForBlock(
         targetBlock: String,
-        currentTimeMillis: Long = System.currentTimeMillis()
-    ): PacScheduleWindow {
-        val cleanBlock = targetBlock.uppercase().replace("BLOQUE", "").trim()
-        val cal = Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")).apply {
-            timeInMillis = currentTimeMillis
-        }
-
-        // Look ahead up to 14 days, rotating relative to current week (dayOffset 0 = current active matrix)
-        for (dayOffset in 0..14) {
-            val testCal = Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")).apply {
+        currentTimeMillis: Long = System.currentTimeMillis(),
+        includeActive: Boolean = true
+    ): PacScheduleWindow? {
+        val cleanBlock = PacBlock.normalize(targetBlock) ?: return null
+        val slots = getSlotsSnapshot()
+        val matrix = getMatrixSnapshot()
+        if (slots.isEmpty() || matrix.size != slots.size || matrix.any { it.size != 7 }) return null
+        val timezone = TimeZone.getTimeZone("America/Caracas")
+        val windows = mutableListOf<PacScheduleWindow>()
+        // Include yesterday so 23:00–03:00 survives midnight and monthly offset changes.
+        for (dayOffset in -1..14) {
+            val testCal = Calendar.getInstance(timezone).apply {
                 timeInMillis = currentTimeMillis
                 add(Calendar.DAY_OF_YEAR, dayOffset)
             }
             val dayIdx = getDayIndex(testCal.get(Calendar.DAY_OF_WEEK))
             val dayOfMonth = testCal.get(Calendar.DAY_OF_MONTH)
             val weekShift = getWeekOffsetForDayOfMonth(dayOfMonth)
-            val totalSlots = activeMatrix.size.coerceAtLeast(1)
-
-            for (slotIdx in activeSlots.indices) {
-                val slot = activeSlots[slotIdx]
-                val rotatedSlot = (slotIdx + weekShift) % totalSlots
-                val blockInSlot = activeMatrix.getOrNull(rotatedSlot)?.getOrNull(dayIdx) ?: "-"
-
-                if (blockInSlot.equals(cleanBlock, ignoreCase = true)) {
-                    val slotCalStart = Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")).apply {
+            for ((slotIdx, slot) in slots.withIndex()) {
+                if (slot.startHour !in 0..23 || slot.endHour !in 0..23 || slot.startHour == slot.endHour) continue
+                val blockInSlot = PacBlock.normalize(matrix[(slotIdx + weekShift) % matrix.size][dayIdx])
+                if (blockInSlot == cleanBlock) {
+                    val slotCalStart = Calendar.getInstance(timezone).apply {
                         timeInMillis = testCal.timeInMillis
                         set(Calendar.HOUR_OF_DAY, slot.startHour)
                         set(Calendar.MINUTE, 0)
@@ -679,7 +674,7 @@ object PacScheduleData {
                         set(Calendar.MILLISECOND, 0)
                     }
 
-                    val slotCalEnd = Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")).apply {
+                    val slotCalEnd = Calendar.getInstance(timezone).apply {
                         timeInMillis = testCal.timeInMillis
                         if (slot.endHour < slot.startHour) {
                             // Overnight slot 23:00 to 03:00
@@ -691,46 +686,41 @@ object PacScheduleData {
                         set(Calendar.MILLISECOND, 0)
                     }
 
-                    // Check if active right now
-                    if (currentTimeMillis in slotCalStart.timeInMillis..slotCalEnd.timeInMillis) {
-                        return PacScheduleWindow(
-                            dayName = DAYS[dayIdx].name,
-                            timeLabel = slot.timeLabel,
-                            block = cleanBlock,
-                            startMillis = slotCalStart.timeInMillis,
-                            endMillis = slotCalEnd.timeInMillis,
-                            isCurrentlyActive = true,
-                            hoursUntil = 0f
-                        )
-                    }
-
-                    // If in future
-                    if (slotCalStart.timeInMillis > currentTimeMillis) {
-                        val hoursUntil = (slotCalStart.timeInMillis - currentTimeMillis) / (3600000f)
+                    val start = slotCalStart.timeInMillis
+                    val end = slotCalEnd.timeInMillis
+                    val active = currentTimeMillis >= start && currentTimeMillis < end
+                    if ((includeActive && active) || start > currentTimeMillis) {
                         val dayLabel = when (dayOffset) {
                             0 -> "Hoy"
                             1 -> "Mañana"
                             else -> "${DAYS[dayIdx].name} $dayOfMonth"
                         }
-                        return PacScheduleWindow(
-                            dayName = dayLabel,
+                        windows.add(PacScheduleWindow(
+                            dayName = if (active) DAYS[dayIdx].name else dayLabel,
                             timeLabel = slot.timeLabel,
                             block = cleanBlock,
-                            startMillis = slotCalStart.timeInMillis,
-                            endMillis = slotCalEnd.timeInMillis,
-                            isCurrentlyActive = false,
-                            hoursUntil = hoursUntil
-                        )
+                            startMillis = start,
+                            endMillis = end,
+                            isCurrentlyActive = active,
+                            hoursUntil = ((start - currentTimeMillis) / 3600000f).coerceAtLeast(0f)
+                        ))
                     }
                 }
             }
         }
+        return windows.minByOrNull { it.startMillis }
+    }
 
-        // Fallback default
+    // Compatibility for the legacy prediction/UI contract. Alarm code uses the nullable API.
+    fun findNextWindowForBlock(
+        targetBlock: String,
+        currentTimeMillis: Long = System.currentTimeMillis()
+    ): PacScheduleWindow {
+        findScheduledWindowForBlock(targetBlock, currentTimeMillis)?.let { return it }
         return PacScheduleWindow(
             dayName = "Hoy",
             timeLabel = "15:00 a 19:00",
-            block = cleanBlock,
+            block = PacBlock.normalize(targetBlock) ?: "-",
             startMillis = currentTimeMillis + 3600000L,
             endMillis = currentTimeMillis + 5 * 3600000L,
             isCurrentlyActive = false,

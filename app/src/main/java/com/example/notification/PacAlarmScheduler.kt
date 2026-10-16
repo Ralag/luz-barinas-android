@@ -6,180 +6,143 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
+import com.example.data.PacAlertTarget
+import com.example.data.PacAlertTargetResolver
+import com.example.data.PacSchedulePrefs
 import com.example.data.model.PacAlertPrefs
+import com.example.data.model.PacAlertSettings
 import com.example.data.model.PacScheduleData
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.data.model.PacScheduleWindow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+internal data class PacScheduledAlert(val action: String, val triggerAtMillis: Long, val window: PacScheduleWindow)
 
 object PacAlarmScheduler {
     private const val TAG = "PacAlarmScheduler"
-    private const val REQUEST_CODE_PRE_ALERT = 5001
-    private const val REQUEST_CODE_RESTORE_ALERT = 5002
-    private const val REQUEST_CODE_VALIDATION_ALERT = 5003
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val lock = Any()
+    private var generation = 0L
+    private val requestCodes = mapOf(
+        PacAlarmReceiver.ACTION_PAC_PRE_ALERT to 5001,
+        PacAlarmReceiver.ACTION_PAC_RESTORE_ALERT to 5002,
+        PacAlarmReceiver.ACTION_PAC_VALIDATION_ALERT to 5003
+    )
 
     fun scheduleNextAlarm(context: Context) {
-        val prefs = context.getSharedPreferences("luz_barinas_user_prefs", Context.MODE_PRIVATE)
-        val rawBlock = prefs.getString("saved_sector_block", null)
-            ?: prefs.getString("saved_block", null)
-            ?: prefs.getString("selected_sector_block", "A")
-            ?: "A"
-        val cleanMatch = Regex("[ABCD]").find(rawBlock.uppercase())
-        val userBlock = cleanMatch?.value ?: "A"
-        val userSectorName = prefs.getString("saved_address", null)
-            ?: prefs.getString("selected_sector_name", "Mi Sector")
-            ?: "Mi Sector"
+        val app = context.applicationContext
+        val ticket = beginReschedule(app)
+        scope.launch { schedule(app, ticket, System.currentTimeMillis()) }
+    }
 
-        val settings = PacAlertPrefs.getSettings(context)
-        if (!settings.isNotificationEnabled && !settings.isAlarmEnabled && !settings.isRestoreAlarmEnabled) {
-            cancelAlarms(context)
-            return
+    suspend fun scheduleNextAlarmAndWait(context: Context, nowMillis: Long = System.currentTimeMillis()) {
+        val app = context.applicationContext
+        val ticket = beginReschedule(app)
+        schedule(app, ticket, nowMillis)
+    }
+
+    private fun beginReschedule(context: Context): Long = synchronized(lock) {
+        generation++
+        cancelPendingAlarms(context)
+        generation
+    }
+
+    private suspend fun schedule(context: Context, ticket: Long, nowMillis: Long): Unit = withContext(Dispatchers.IO) {
+        try {
+            // Receivers and workers can be the first entry into a fresh Android process.
+            PacSchedulePrefs.loadSchedule(context)
+            val settings = PacAlertPrefs.getSettings(context)
+            val target = PacAlertTargetResolver.resolve(context)
+            if (target == null) return@withContext
+            val alerts = buildPlan(target.block, settings, nowMillis)
+            synchronized(lock) {
+                if (ticket != generation) return@synchronized
+                if (!settings.isAlarmEnabled) PacAlarmPlayer.stopAlarm(context)
+                val notifications = NotificationManagerCompat.from(context)
+                if (!settings.isNotificationEnabled) notifications.cancel(NotificationHelper.NOTIFICATION_ID_ALERT)
+                if (!settings.isNotificationEnabled && !settings.isAlarmEnabled) notifications.cancel(PacAlarmReceiver.NOTIFICATION_ID_PAC_ALARM)
+                if (!settings.isRestoreAlarmEnabled) notifications.cancel(NotificationHelper.NOTIFICATION_ID_RESTORE)
+                for (alert in alerts) arm(context, target, settings, alert)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Could not schedule PAC alerts", e)
         }
+    }
 
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
-        val now = System.currentTimeMillis()
-
-        // Find the next scheduled outage window for this user's block
-        val nextWindow = PacScheduleData.findNextWindowForBlock(userBlock, now)
-
-        val advanceMs = settings.advanceMinutes * 60 * 1000L
-        val preAlertTime = nextWindow.startMillis - advanceMs
-
-        if (preAlertTime > now) {
-            val preIntent = Intent(context, PacAlarmReceiver::class.java).apply {
-                action = PacAlarmReceiver.ACTION_PAC_PRE_ALERT
-                putExtra(PacAlarmReceiver.EXTRA_BLOCK, userBlock)
-                putExtra(PacAlarmReceiver.EXTRA_SECTOR_NAME, userSectorName)
-                putExtra(PacAlarmReceiver.EXTRA_MINUTES_UNTIL, settings.advanceMinutes)
-                putExtra(PacAlarmReceiver.EXTRA_TIME_LABEL, nextWindow.timeLabel)
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                REQUEST_CODE_PRE_ALERT,
-                preIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        preAlertTime,
-                        pendingIntent
-                    )
-                } else {
-                    alarmManager.setExact(
-                        AlarmManager.RTC_WAKEUP,
-                        preAlertTime,
-                        pendingIntent
-                    )
+    internal fun buildPlan(block: String, settings: PacAlertSettings, nowMillis: Long): List<PacScheduledAlert> {
+        val future = PacScheduleData.findScheduledWindowForBlock(block, nowMillis, includeActive = false)
+        val currentOrNext = PacScheduleData.findScheduledWindowForBlock(block, nowMillis)
+        return buildList {
+            if (future != null) {
+                val preTime = future.startMillis - settings.advanceMinutes.coerceIn(1, 180) * 60_000L
+                if ((settings.isNotificationEnabled || settings.isAlarmEnabled) && preTime > nowMillis) {
+                    add(PacScheduledAlert(PacAlarmReceiver.ACTION_PAC_PRE_ALERT, preTime, future))
                 }
-                val fmt = SimpleDateFormat("HH:mm dd/MM", Locale.getDefault()).format(Date(preAlertTime))
-                Log.i(TAG, "Scheduled pre-outage alarm for $fmt (${settings.advanceMinutes} min before ${nextWindow.timeLabel})")
-            } catch (e: SecurityException) {
-                Log.w(TAG, "SCHEDULE_EXACT_ALARM permission not granted: ${e.message}")
-            }
-        }
-
-        // Schedule exact start time validation alert
-        if (nextWindow.startMillis > now) {
-            val userSectorId = prefs.getString("saved_sector_id", null)
-                ?: prefs.getString("selected_sector_id", "sec_a_alto_barinas_1")
-                ?: "sec_a_alto_barinas_1"
-
-            val validationIntent = Intent(context, PacAlarmReceiver::class.java).apply {
-                action = PacAlarmReceiver.ACTION_PAC_VALIDATION_ALERT
-                putExtra(PacAlarmReceiver.EXTRA_SECTOR_ID, userSectorId)
-                putExtra(PacAlarmReceiver.EXTRA_SECTOR_NAME, userSectorName)
-            }
-            val validationPendingIntent = PendingIntent.getBroadcast(
-                context,
-                REQUEST_CODE_VALIDATION_ALERT,
-                validationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        nextWindow.startMillis,
-                        validationPendingIntent
-                    )
-                } else {
-                    alarmManager.setExact(
-                        AlarmManager.RTC_WAKEUP,
-                        nextWindow.startMillis,
-                        validationPendingIntent
-                    )
+                if (settings.isNotificationEnabled) {
+                    add(PacScheduledAlert(PacAlarmReceiver.ACTION_PAC_VALIDATION_ALERT, future.startMillis, future))
                 }
-            } catch (e: SecurityException) {
-                Log.w(TAG, "Cannot schedule validation alarm: ${e.message}")
             }
-        }
-
-        // Schedule restore alert if enabled
-        if (settings.isRestoreAlarmEnabled && nextWindow.endMillis > now) {
-            val restoreIntent = Intent(context, PacAlarmReceiver::class.java).apply {
-                action = PacAlarmReceiver.ACTION_PAC_RESTORE_ALERT
-                putExtra(PacAlarmReceiver.EXTRA_SECTOR_NAME, userSectorName)
-            }
-            val restorePendingIntent = PendingIntent.getBroadcast(
-                context,
-                REQUEST_CODE_RESTORE_ALERT,
-                restoreIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        nextWindow.endMillis,
-                        restorePendingIntent
-                    )
-                } else {
-                    alarmManager.setExact(
-                        AlarmManager.RTC_WAKEUP,
-                        nextWindow.endMillis,
-                        restorePendingIntent
-                    )
-                }
-            } catch (e: SecurityException) {
-                Log.w(TAG, "Cannot schedule restore alarm: ${e.message}")
+            if (settings.isRestoreAlarmEnabled && currentOrNext != null) {
+                add(PacScheduledAlert(PacAlarmReceiver.ACTION_PAC_RESTORE_ALERT, currentOrNext.endMillis, currentOrNext))
             }
         }
     }
 
+    private fun arm(context: Context, target: PacAlertTarget, settings: PacAlertSettings, alert: PacScheduledAlert) {
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+        val intent = Intent(context, PacAlarmReceiver::class.java).apply {
+            action = alert.action
+            putExtra(PacAlarmReceiver.EXTRA_PROFILE, target.profile)
+            putExtra(PacAlarmReceiver.EXTRA_BLOCK, target.block)
+            putExtra(PacAlarmReceiver.EXTRA_SECTOR_ID, target.sectorId)
+            putExtra(PacAlarmReceiver.EXTRA_SECTOR_NAME, target.sectorName)
+            putExtra(PacAlarmReceiver.EXTRA_MINUTES_UNTIL, settings.advanceMinutes)
+            putExtra(PacAlarmReceiver.EXTRA_TIME_LABEL, alert.window.timeLabel)
+            putExtra(PacAlarmReceiver.EXTRA_WINDOW_START, alert.window.startMillis)
+            putExtra(PacAlarmReceiver.EXTRA_WINDOW_END, alert.window.endMillis)
+        }
+        val pending = PendingIntent.getBroadcast(
+            context, requestCodes.getValue(alert.action), intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || manager.canScheduleExactAlarms()) {
+                manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alert.triggerAtMillis, pending)
+            } else {
+                // Preserve a best-effort alert when exact-alarm access has not been granted.
+                manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alert.triggerAtMillis, pending)
+            }
+        } catch (e: SecurityException) {
+            Log.w(TAG, "Alarm permission changed while scheduling", e)
+        }
+    }
+
     fun cancelAlarms(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
-        val preIntent = Intent(context, PacAlarmReceiver::class.java).apply {
-            action = PacAlarmReceiver.ACTION_PAC_PRE_ALERT
+        synchronized(lock) {
+            generation++
+            cancelPendingAlarms(context)
         }
-        val p1 = PendingIntent.getBroadcast(
-            context, REQUEST_CODE_PRE_ALERT, preIntent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
-        p1?.let { alarmManager.cancel(it) }
+        PacAlarmPlayer.stopAlarm(context)
+        val notifications = NotificationManagerCompat.from(context)
+        listOf(PacAlarmReceiver.NOTIFICATION_ID_PAC_ALARM, NotificationHelper.NOTIFICATION_ID_ALERT,
+            NotificationHelper.NOTIFICATION_ID_PREDICTIVE, NotificationHelper.NOTIFICATION_ID_RESTORE)
+            .forEach { notifications.cancel(it) }
+    }
 
-        val restoreIntent = Intent(context, PacAlarmReceiver::class.java).apply {
-            action = PacAlarmReceiver.ACTION_PAC_RESTORE_ALERT
+    private fun cancelPendingAlarms(context: Context) {
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+        for ((action, requestCode) in requestCodes) {
+            val intent = Intent(context, PacAlarmReceiver::class.java).setAction(action)
+            val pending = PendingIntent.getBroadcast(context, requestCode, intent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)
+            if (pending != null) {
+                manager.cancel(pending)
+                pending.cancel()
+            }
         }
-        val p2 = PendingIntent.getBroadcast(
-            context, REQUEST_CODE_RESTORE_ALERT, restoreIntent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
-        p2?.let { alarmManager.cancel(it) }
-
-        val valIntent = Intent(context, PacAlarmReceiver::class.java).apply {
-            action = PacAlarmReceiver.ACTION_PAC_VALIDATION_ALERT
-        }
-        val p3 = PendingIntent.getBroadcast(
-            context, REQUEST_CODE_VALIDATION_ALERT, valIntent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
-        p3?.let { alarmManager.cancel(it) }
-
-        Log.i(TAG, "All PAC alarms cancelled")
     }
 }

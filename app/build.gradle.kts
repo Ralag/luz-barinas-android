@@ -28,9 +28,9 @@ android {
     create("release") {
       val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
       storeFile = file(keystorePath)
-      storePassword = System.getenv("STORE_PASSWORD") ?: "password"
+      storePassword = System.getenv("STORE_PASSWORD")
       keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
-      keyPassword = System.getenv("KEY_PASSWORD") ?: "password"
+      keyPassword = System.getenv("KEY_PASSWORD")
       enableV1Signing = true
       enableV2Signing = true
     }
@@ -42,9 +42,6 @@ android {
       isMinifyEnabled = true
       isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      signingConfig = signingConfigs.getByName("release")
-    }
-    debug {
       signingConfig = signingConfigs.getByName("release")
     }
   }

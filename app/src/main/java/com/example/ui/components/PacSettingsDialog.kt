@@ -66,8 +66,8 @@ fun PacSettingsDialog(
     var showCustomInput by remember { mutableStateOf(advanceMinutes !in listOf(5, 10, 15, 30, 60)) }
 
     // Next window preview
-    val nextWindow = remember(userBlock) {
-        PacScheduleData.findNextWindowForBlock(userBlock)
+    val nextWindow = remember(userBlock, PacScheduleData.scheduleVersion) {
+        PacScheduleData.findScheduledWindowForBlock(userBlock)
     }
 
     // Stop demo alarm if dialog dismissed
@@ -194,7 +194,8 @@ fun PacSettingsDialog(
                             }
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "${nextWindow.dayName} • ${nextWindow.timeLabel}",
+                                text = nextWindow?.let { "${it.dayName} • ${it.timeLabel}" }
+                                    ?: "Sin cortes programados para tu bloque",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.onSurface

@@ -105,7 +105,7 @@ fun DashboardScreen(
     var showObservationInput by remember { mutableStateOf(false) }
 
     val userBlock = remember(selectedSector) {
-        selectedSector?.rotationBlock?.uppercase()?.replace("BLOQUE", "")?.trim() ?: "A"
+        com.example.data.model.PacBlock.normalize(selectedSector?.rotationBlock) ?: ""
     }
 
     val blockColor = remember(userBlock) {

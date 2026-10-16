@@ -169,7 +169,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
     var showThemeScreen by remember { mutableStateOf(false) }
 
     val currentBlock = remember(uiState.selectedSector) {
-        uiState.selectedSector?.rotationBlock?.uppercase()?.replace("BLOQUE", "")?.trim() ?: "A"
+        com.example.data.model.PacBlock.normalize(uiState.selectedSector?.rotationBlock) ?: ""
     }
 
     // Synchronize exact PAC Alarm whenever block or sector changes
