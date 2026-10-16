@@ -1,8 +1,8 @@
 # 04. Manual de mantenimiento del sitio React, modo TV y APIs
 
-Fecha de lectura del código: **15 de octubre de 2026**. Este capítulo describe la implementación local existente, sus conexiones y sus límites. No representa una comprobación del despliegue ni del contenido actual de Supabase, Firebase, Google Play o Vercel. Los ejemplos HTTP son ilustrativos y no se ejecutaron contra servicios reales. Se omiten deliberadamente contraseñas, claves y datos de pago.
+Fecha de actualización del código y del capítulo: **16 de octubre de 2026**. Este capítulo describe la implementación local existente, sus conexiones y sus límites. No representa una comprobación del despliegue ni del contenido actual de Supabase, Firebase, Google Play o Vercel. Los ejemplos HTTP son ilustrativos y no se ejecutaron contra servicios reales. Se omiten deliberadamente contraseñas, claves y datos de pago. La autenticación y emisión push ahora tienen controles compartidos; su puesta en servicio requiere la migración y configuración descritas en el capítulo 06.
 
-El alcance incluye **todos los archivos de `admin-web/src`**, los tres archivos de `admin-web/api`, el generador `scripts/blog-prerender.mjs`, `vite.config.mjs`, `index.html`, `package.json`, `vercel.json` y `firebase.json`. El panel antiguo `admin.html`/`public/app.js`, su copia raíz y el SQL se explican en otros capítulos; aquí aparecen únicamente cuando condicionan al código React. `dist`, dependencias instaladas y recursos binarios no son fuentes de esta explicación.
+El alcance incluye **todos los archivos de `admin-web/src`**, el núcleo compartido `public/admin-security.js`, los tests `tests/*.test.cjs`, los tres archivos de `admin-web/api`, el generador `scripts/blog-prerender.mjs`, `vite.config.mjs`, `index.html`, `package.json`, `vercel.json` y `firebase.json`. El panel antiguo `admin.html`/`public/app.js`, su copia raíz y el SQL se explican en otros capítulos; aquí aparecen únicamente cuando condicionan al código React. `dist`, dependencias instaladas y recursos binarios no son fuentes de esta explicación.
 
 ## Índice de lectura
 
@@ -30,7 +30,7 @@ La mayoría del sitio público lee directamente Supabase mediante su cliente Jav
 
 ### 1.1 `index.html`: documento que recibe el navegador
 
-Fuente: [index.html](<E:/LUZ BARINAS/admin-web/index.html:1>), 46 líneas.
+Fuente: [index.html](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/index.html#L1), 46 líneas.
 
 Este archivo no contiene el panel administrativo antiguo. Es la plantilla del sitio público: idioma español, codificación UTF-8, viewport adaptable, título inicial, descripción, palabras clave, favicon y enlace canónico a `pacbarinas.site`. Las líneas 20–30 aportan Open Graph y Twitter para compartir enlaces. Las líneas 33–35 cargan fuentes de Google y 38–40 incluyen AdSense. Son solicitudes de recursos de terceros realizadas por el navegador; no son lecturas de Supabase.
 
@@ -40,7 +40,7 @@ El cuerpo contiene `div#root` en la línea 43. El módulo `/src/main.jsx`, líne
 
 ### 1.2 `src/main.jsx`: punto de entrada
 
-Fuente: [main.jsx](<E:/LUZ BARINAS/admin-web/src/main.jsx:1>), 10 líneas.
+Fuente: [main.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/main.jsx#L1), 10 líneas.
 
 Importa React, `react-dom/client`, `App` y `index.css`. En la línea 6 ejecuta `ReactDOM.createRoot(document.getElementById('root')).render(...)` y envuelve `App` en `React.StrictMode`. No declara funciones propias ni recibe parámetros. El resultado es el montaje de la interfaz; no crea usuarios, tablas ni datos iniciales.
 
@@ -48,7 +48,7 @@ Importa React, `react-dom/client`, `App` y `index.css`. En la línea 6 ejecuta `
 
 ### 1.3 `src/App.jsx`: enrutador manual
 
-Fuente: [App.jsx](<E:/LUZ BARINAS/admin-web/src/App.jsx:17>), 112 líneas.
+Fuente: [App.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/App.jsx#L17), 112 líneas.
 
 **`App()` — línea 17.** No recibe props. Mantiene `currentRoute`, calcula si hay artículo o modo TV y devuelve el armazón de navegación, página actual y pie. Carga el inicio de forma directa y las otras páginas con `React.lazy`; `Suspense` muestra un indicador mientras llega el módulo. Solo la página correspondiente a la ruta se monta. Oculta `Navbar` y `Footer` en `/admin` y `/tv`.
 
@@ -74,15 +74,15 @@ Fuente: [App.jsx](<E:/LUZ BARINAS/admin-web/src/App.jsx:17>), 112 líneas.
 
 ### 1.4 La misma ruta administrativa llega a dos implementaciones
 
-Es una condición de mantenimiento esencial. Desde `Navbar` o `Footer`, `navigate('/admin')` cambia el estado e historial y monta `src/pages/AdminPortal.jsx`. En cambio, las reescrituras de [vercel.json](<E:/LUZ BARINAS/admin-web/vercel.json:8>) sirven `admin.html` cuando una solicitud HTTP llega a `/admin` o `/admin/...`. Refrescar la página puede cambiar de panel aunque la dirección parezca igual.
+Es una condición de mantenimiento esencial. Desde `Navbar` o `Footer`, `navigate('/admin')` cambia el estado e historial y monta `src/pages/AdminPortal.jsx`. En cambio, las reescrituras de [vercel.json](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/vercel.json#L8) sirven `admin.html` cuando una solicitud HTTP llega a `/admin` o `/admin/...`. Refrescar la página puede cambiar de panel aunque la dirección parezca igual.
 
-El panel antiguo carga `app.js`; en la distribución Vite ese archivo procede de `public/app.js`. La copia `admin-web/app.js` presenta diferencias respecto de `public/app.js` en el manejo de tipos de fallas y bloques sin asignar; no debe asumirse que modificar la copia raíz cambia el archivo distribuido. Esta explicación no extiende el alcance a las funciones internas de ese panel.
+El panel antiguo carga primero `admin-security.js` y después `app.js`; en la distribución Vite ambos proceden de `public`. La copia `admin-web/app.js` se mantiene ahora idéntica a `public/app.js` y una prueba lo comprueba. El hecho de que existan dos paneles sigue siendo una condición de mantenimiento: comparten autenticación y servidor de permisos, pero no todas sus operaciones. Las funciones internas del clásico se explican en el capítulo 05.
 
 ## 2. Bibliotecas compartidas
 
 ### 2.1 `src/lib/supabase.js`: cliente y valores iniciales
 
-Fuente: [supabase.js](<E:/LUZ BARINAS/admin-web/src/lib/supabase.js:1>), 75 líneas. No declara funciones propias.
+Fuente: [supabase.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/lib/supabase.js#L1), 75 líneas. No declara funciones propias.
 
 En la línea 6 exporta `supabase = createClient(supabaseUrl, supabaseKey)`. Utiliza una clave pública de cliente; los valores concretos se omiten aquí. El objeto se comparte entre formularios públicos, telemetría y panel React. El módulo no inicia una sesión administrativa con Supabase Auth. Las políticas del servidor determinan qué operaciones puede realizar ese cliente.
 
@@ -99,7 +99,7 @@ Un cambio de estas constantes modifica los valores de respaldo empaquetados para
 
 ### 2.2 `src/lib/telemetry.js`: consultas y reloj compartidos
 
-Fuente: [telemetry.js](<E:/LUZ BARINAS/admin-web/src/lib/telemetry.js:1>), 335 líneas. Lo consumen `PacLiveWidget`, `TvKioskMode` y los componentes de reportes. No usa las APIs serverless para obtener el cronograma público: consulta Supabase directamente.
+Fuente: [telemetry.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/lib/telemetry.js#L1), 335 líneas. Lo consumen `PacLiveWidget`, `TvKioskMode` y los componentes de reportes. No usa las APIs serverless para obtener el cronograma público: consulta Supabase directamente.
 
 #### `formatRelativeTime(timestampMillis)` — línea 10
 
@@ -173,7 +173,7 @@ El efecto de la línea 257 crea un temporizador de un segundo y lo elimina al de
 
 ### 2.3 `src/lib/seo.js`: metadatos al navegar dentro del sitio
 
-Fuente: [seo.js](<E:/LUZ BARINAS/admin-web/src/lib/seo.js:11>), 85 líneas. Lo importan las páginas del blog.
+Fuente: [seo.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/lib/seo.js#L11), 85 líneas. Lo importan las páginas del blog.
 
 **`upsert(selector, create, attr, value, restorers)` — línea 11.** Busca un elemento en `document.head`; si no existe lo obtiene llamando a `create()` y lo inserta. Guarda el atributo anterior, coloca el nuevo y añade a `restorers` una función que restaura el atributo o elimina el elemento recién creado. No devuelve un valor útil. El hook lo llama para metas y canónico. Solo modifica el documento de esa pestaña.
 
@@ -187,7 +187,7 @@ La restauración cubre metas que el propio efecto modificó, pero no reconstruye
 
 ### 2.4 `src/index.css`: presentación común
 
-Fuente: [index.css](<E:/LUZ BARINAS/admin-web/src/index.css:1>), 176 líneas. Es importado por `main.jsx`; no contiene funciones JavaScript ni red/persistencia.
+Fuente: [index.css](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/index.css#L1), 176 líneas. Es importado por `main.jsx`; no contiene funciones JavaScript ni red/persistencia.
 
 Importa Tailwind en la línea 1. `@theme` define colores, familias tipográficas y radios, mientras `:root` repite parte de las variables como propiedades CSS. El cuerpo fija fondo, tinta, tipografía y suavizado. `.notion-border`, `.notion-nav-shadow` y `.notion-mockup-shadow` dan borde y sombra a tarjetas y navegación.
 
@@ -195,17 +195,46 @@ Las reglas `.article-prose` de las líneas 71–134 dan formato a HTML editorial
 
 `@keyframes radar-sweep` (153) rota un radar; `.animate-radar-sweep` (163) lo repite cada 6 s. `@keyframes kiosk-marquee` (158) desplaza hasta -50%; `.animate-kiosk-marquee` (168) lo repite cada 35 s y se pausa al pasar el cursor. La duplicación de reportes realizada por `TvKioskMode` permite que ese -50% forme un bucle visual. No existe aquí una excepción de movimiento reducido; el tema de rendimiento cambia efectos de las vistas, pero no demuestra una tasa real de 60 FPS.
 
+### 2.5 `public/admin-security.js` y `src/lib/adminAuth.js`: autenticación compartida
+
+Fuentes: [núcleo común](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/public/admin-security.js) y [adaptador React](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/lib/adminAuth.js). El mismo núcleo se carga como script global por el clásico y como import de efecto lateral por React. No contiene credenciales de administrador ni una lista de correos privilegiados.
+
+**`installAdminSecurity(root,factory)`** es la función autoejecutada que instala el resultado de `factory(root)` como `globalThis.PacAdminSecurity` y, cuando existe CommonJS, como `module.exports` para pruebas. **`adminSecurityFactory(root)`** construye y devuelve los helpers. No realiza red al importar; crea el controlador cuando un consumidor llama a su factoría.
+
+**`escapeHtml(value)`** convierte nulos a cadena vacía y escapa `&`, `<`, `>`, comillas dobles y simples. Devuelve texto utilizable en cuerpo HTML o atributos entrecomillados. No debe usarse como codificación de código JavaScript: por eso los datos de botones clásicos ahora van en `data-*` y callbacks DOM. **`normalizeBlock(value)`** convierte a mayúsculas, quita el prefijo BLOQUE y acepta solo A/B/C/D; devuelve `-` para otro valor. Evita insertar clases de bloque arbitrarias. **`accessError(message,status=401)`** crea un Error con propiedad status para distinguir sesión, permiso y servicio.
+
+**`createAdminAuth(client,options={})`** recibe un cliente Supabase, un reloj opcional `now` y un `fetch` opcional para comprobaciones aisladas. Mantiene estado `{status,user,error}`, listeners, revisión de sesión, suscripción Auth, temporizador y una promesa de comprobación compartida. Devuelve `{subscribe,requireAdmin,signIn,signOut,postJson,getState}`. Cada panel crea su instancia para su cliente; no duplica el algoritmo ni usa preferencias del usuario como autoridad.
+
+| Función interna/pública | Parámetros, retorno y pasos |
+|---|---|
+| `publish(next)` | Sin retorno útil: reemplaza estado y notifica a listeners. No escribe almacenamiento ni roles. |
+| `clearTimer()` | Cancela el temporizador de revisión y limpia su referencia. La llaman comprobación, salida y desuscripción. |
+| `verifiedSession()` | Promise de sesión verificada. Lee getSession; si vence en 30 s intenta refreshSession. Rechaza sesión ausente/vencida; verifica el token con getUser y exige RPC is_admin() estrictamente true. Retorna sesión con usuario verificado; no confía en user_metadata/app_metadata del cliente. |
+| `requireAdmin()` | Promise compartida mientras hay comprobación en curso. Usa verifiedSession; rechaza si cambió la revisión, publica admin y programa revisión al vencer o en un máximo de 60 s. Ante error publica salida/forbidden y propaga el fallo. No concede permisos de servidor. |
+| `handleVisibility()` | Al volver visible pide requireAdmin; ignora el rechazo porque el estado ya informa el cierre. |
+| `subscribe(listener)` | Entrega estado inicial, instala una sola escucha onAuthStateChange y visibilidad al primer lector, y comprueba acceso. SIGNED_OUT cierra inmediatamente; otros eventos difieren la comprobación fuera del callback de Auth. Devuelve limpieza que elimina escucha/timer cuando ya no hay lectores e invalida comprobaciones pendientes. |
+| `signIn(email,password)` | Promise de sesión administrativa: recorta correo, conserva contraseña exacta y llama signInWithPassword; comprueba identidad/rol después. Errores de red o credenciales dejan un estado cerrado que permite reintentar. |
+| `signOut()` | Promise<void>: invalida revisión, cierra UI/cancela timer y llama auth.signOut con scope local. Propaga error del SDK. No afirma revocación inmediata de JWT emitidos hasta su caducidad. |
+| `postJson(endpoint,payload)` | Promise del JSON exitoso. Revalida admin, usa su access_token vigente en Authorization Bearer y POST JSON. Un HTTP no exitoso lanza Error con status; 401/403 también cierra la interfaz. No presenta un rechazo como envío exitoso. |
+| `getState()` | Devuelve el estado actual sin red; lo utilizan el primer render y el dispatcher clásico. No constituye un guardado duradero de sesión. |
+
+**`readPacSchedule(client)`** hace una única lectura de app_config/pac_schedule. Comprueba error, documento, matriz no vacía de siete columnas, coincidencia con franjas, bloques permitidos, horas numéricas dentro de rango y listas sectorsA–D de cadenas cuando existen. Devuelve el documento íntegro sin mutarlo. Ante error lanza y **no tiene ninguna ruta de escritura**. Los paneles solo reemplazan su copia después de que la lectura valide; no publican valores iniciales para reparar un fallo.
+
+El adaptador **`adminAuth`** de React importa el núcleo y crea una única instancia con `supabase`. No tiene rol por su cuenta. Supabase guarda/renueva su sesión según su SDK; la antigua bandera local del panel no se consulta. Para servir administración es necesario que la migración instale RPC y permisos y que el usuario esté autorizado en la base. El estado remoto de esa preparación se documenta por operación, no se presume a partir de estas pruebas locales.
+
+Referencias de mantenimiento: [getUser](https://supabase.com/docs/reference/javascript/auth-getuser), [eventos de sesión](https://supabase.com/docs/reference/javascript/auth-onauthstatechange) y [salida local](https://supabase.com/docs/reference/javascript/auth-signout). El servidor vuelve a validar identidad, rol y RLS aunque la UI ya lo haya hecho.
+
 ## 3. Página principal y componentes públicos
 
 ### 3.1 `LandingPage({setCurrentRoute})` — `src/pages/LandingPage.jsx:9`
 
-Fuente: [LandingPage.jsx](<E:/LUZ BARINAS/admin-web/src/pages/LandingPage.jsx:9>), 24 líneas.
+Fuente: [LandingPage.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/LandingPage.jsx#L9), 24 líneas.
 
 Devuelve la página de inicio con este orden: `Hero`, `PacLiveWidget`, `Features`, `BlogPreviewSection`, `DonationsSection`, `ContactSection`. Entrega la navegación a los dos componentes que cambian de ruta. El efecto de la línea 10 fija `document.title` al montar y no lo restaura. No tiene estado propio ni red: las consultas y formularios pertenecen a los hijos. Lo monta `App` para `/`.
 
 ### 3.2 `Navbar({currentRoute,setCurrentRoute})` — `src/components/Navbar.jsx:4`
 
-Fuente: [Navbar.jsx](<E:/LUZ BARINAS/admin-web/src/components/Navbar.jsx:4>), 196 líneas.
+Fuente: [Navbar.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/Navbar.jsx#L4), 196 líneas.
 
 Muestra marca, enlaces a secciones del inicio, Blog, modo TV, descarga de APK y acceso administrativo, con variantes de escritorio y menú móvil. `mobileMenuOpen` comienza en `false`; el botón de menú lo alterna. No lee Supabase ni guarda preferencias.
 
@@ -215,7 +244,7 @@ Los enlaces de descarga apuntan a un APK concreto de GitHub Releases y no pregun
 
 ### 3.3 `Footer({setCurrentRoute})` — `src/components/Footer.jsx:4`
 
-Fuente: [Footer.jsx](<E:/LUZ BARINAS/admin-web/src/components/Footer.jsx:4>), 127 líneas.
+Fuente: [Footer.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/Footer.jsx#L4), 127 líneas.
 
 Muestra identidad, aviso comunitario, enlaces internos —inicio, blog, TV, privacidad, términos, transparencia, desarrollador, reembolsos—, código fuente, descarga y entrada administrativa. Usa el año actual del navegador para el copyright. No tiene estado, efectos ni consultas.
 
@@ -223,7 +252,7 @@ Muestra identidad, aviso comunitario, enlaces internos —inicio, blog, TV, priv
 
 ### 3.4 `Hero()` — `src/components/Hero.jsx:4`
 
-Fuente: [Hero.jsx](<E:/LUZ BARINAS/admin-web/src/components/Hero.jsx:4>), 166 líneas.
+Fuente: [Hero.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/Hero.jsx#L4), 166 líneas.
 
 Devuelve la cabecera promocional: titular, explicación del proyecto, distintivos y botones de descarga. Solo mantiene `playStoreModal`, inicialmente `false`. El botón de Google Play abre un modal informativo; sus botones lo cierran y uno permite descargar el APK concreto desde GitHub. Esos callbacks son anónimos y solo invocan `setPlayStoreModal`.
 
@@ -231,7 +260,7 @@ No busca una publicación real de Google Play ni confirma disponibilidad. Tampoc
 
 ### 3.5 `Features()` — `src/components/Features.jsx:4`
 
-Fuente: [Features.jsx](<E:/LUZ BARINAS/admin-web/src/components/Features.jsx:4>), 148 líneas.
+Fuente: [Features.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/Features.jsx#L4), 148 líneas.
 
 No recibe parámetros. Construye el array local `cards` y devuelve tarjetas explicativas sobre reportes anónimos, predicción y características de la aplicación, además de avisos de independencia y reconocimiento al origen de la idea. El mapeo de tarjetas es puramente visual. Incluye un enlace externo de reconocimiento. No tiene estado, hooks ni peticiones.
 
@@ -239,7 +268,7 @@ El identificador de sección permite llegar a `proyecto` desde la barra. Las pro
 
 ### 3.6 `PacLiveWidget({setCurrentRoute})` — `src/components/PacLiveWidget.jsx:9`
 
-Fuente: [PacLiveWidget.jsx](<E:/LUZ BARINAS/admin-web/src/components/PacLiveWidget.jsx:9>), 248 líneas.
+Fuente: [PacLiveWidget.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/PacLiveWidget.jsx#L9), 248 líneas.
 
 Es el contenedor público de horarios y telemetría. Llama `useTelemetry()` y recibe reportes, sectores, circuitos, conteo, matriz, franjas, `pacTime`, fecha de actualización y `refresh`. Mantiene únicamente `searchQuery` como estado propio.
 
@@ -251,7 +280,7 @@ Muestra `LiveBlockCountdown`, `CitizenReportsTicker`, tabla del día, buscador d
 
 ### 3.7 `LiveBlockCountdown({pacTime})` — `src/components/telemetry/LiveBlockCountdown.jsx:24`
 
-Fuente: [LiveBlockCountdown.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/LiveBlockCountdown.jsx:4>), 150 líneas.
+Fuente: [LiveBlockCountdown.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/telemetry/LiveBlockCountdown.jsx#L4), 150 líneas.
 
 Recibe el objeto calculado por el hook, desestructura día, franja, bloque actual, siguiente y cuenta regresiva y devuelve una tarjeta con esos datos. No tiene estado, temporizadores ni consultas propios. Lo llama `PacLiveWidget`; el paso de los segundos lo provoca el padre.
 
@@ -263,7 +292,7 @@ La tarjeta representa el cronograma referencial. No valida por sí misma que hay
 
 ### 3.8 `CitizenReportsTicker({reports = [],totalCount = 2002})` — `src/components/telemetry/CitizenReportsTicker.jsx:5`
 
-Fuente: [CitizenReportsTicker.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/CitizenReportsTicker.jsx:5>), 184 líneas.
+Fuente: [CitizenReportsTicker.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/telemetry/CitizenReportsTicker.jsx#L5), 184 líneas.
 
 Mantiene `modalOpen`. Muestra hasta diez reportes en una banda horizontal y un botón que abre un modal de historial con los reportes ya recibidos. El historial no hace una consulta nueva ni descarga toda la historia de la base: con el hook actual dispone de un máximo de veinte. Usa `formatRelativeTime` para sus marcas temporales. Cerrar el modal modifica el estado local; no elimina datos.
 
@@ -273,7 +302,7 @@ No tiene persistencia ni red. El conteo por defecto y la palabra «validados» s
 
 ### 3.9 `CircuitStabilityWidget({circuits = [],activeCutBlock = 'B'})` — `src/components/telemetry/CircuitStabilityWidget.jsx:5`
 
-Fuente: [CircuitStabilityWidget.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/CircuitStabilityWidget.jsx:5>), 216 líneas.
+Fuente: [CircuitStabilityWidget.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/telemetry/CircuitStabilityWidget.jsx#L5), 216 líneas.
 
 Recibe el resultado agregado del hook. Conserva `circuitFilter` para un buscador local y muestra métricas generales, tarjetas de circuitos y nota de interpretación comunitaria. Resalta la tarjeta cuyo bloque coincide con el corte calculado, sin modificar su estado observado.
 
@@ -285,7 +314,7 @@ Recibe el resultado agregado del hook. Conserva `circuitFilter` para un buscador
 
 ### 3.10 `DonationsSection()` — `src/components/DonationsSection.jsx:5`
 
-Fuente: [DonationsSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/DonationsSection.jsx:5>), 250 líneas.
+Fuente: [DonationsSection.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/DonationsSection.jsx#L5), 250 líneas.
 
 Devuelve una sección de aportes con pestañas Binance, Pago Móvil y PayPal. Los estados son `activeTab` (comienza en Binance), `copiedField` y `donationConfig`, inicialmente un objeto con valores estáticos de respaldo. No se copian aquí los datos de pago.
 
@@ -297,7 +326,7 @@ El botón PayPal usa la URL remota o el respaldo en un enlace externo. La secci�
 
 ### 3.11 `ContactSection()` — `src/components/ContactSection.jsx:5`
 
-Fuente: [ContactSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/ContactSection.jsx:5>), 228 líneas.
+Fuente: [ContactSection.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/ContactSection.jsx#L5), 228 líneas.
 
 Muestra enlaces directos de contacto y un formulario de nombre, sector, correo y mensaje. Conserva `formData`, `submitted` y `loading`. Los campos `onChange` actualizan una propiedad mediante copia del objeto. La sección recopila los valores opcionales que el visitante escriba, por lo que sus textos deben distinguir el uso anónimo básico de la entrega voluntaria de datos de contacto.
 
@@ -311,7 +340,7 @@ El blog no usa Supabase, una API de noticias ni un CMS remoto. Su contenido est�
 
 ### 4.1 `src/data/articles.js`: catálogo y utilidades
 
-Fuente: [articles.js](<E:/LUZ BARINAS/admin-web/src/data/articles.js:17>), 92 líneas.
+Fuente: [articles.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/data/articles.js#L17), 92 líneas.
 
 Importa los cinco objetos editoriales de `src/data/articles/`. Exporta `SITE_URL` (23), `BLOG_AUTHOR` (24), `BLOG_META` (26), `EDITORIAL_DISCLAIMER` (32) y `OFFICIAL_SOURCES` (35). Estos valores construyen canónicos, firmas, advertencias y enlaces de consulta. Son constantes de producto, no datos de usuario. `WORDS_PER_MINUTE = 200` es la velocidad convencional para estimar lectura.
 
@@ -335,17 +364,17 @@ Cada archivo empieza en la línea 1 con `export default { ... }`. **No es una fu
 
 | Archivo completo | Tema, clasificación y estructura interna |
 |---|---|
-| [historia-sen-guri.js](<E:/LUZ BARINAS/admin-web/src/data/articles/historia-sen-guri.js:1>) | `slug='historia-sistema-electrico-nacional-guri'`; categoría Historia y contexto; portada `waves`. Sus h2 cubren primeros pasos (23), interconexión (27), Guri (31), transmisión (36), vulnerabilidades (46) y relación con Barinas (50). |
-| [proteccion-electrodomesticos.js](<E:/LUZ BARINAS/admin-web/src/data/articles/proteccion-electrodomesticos.js:1>) | `slug='proteccion-electrodomesticos-barinas'`; categoría Guías prácticas; portada `shield`. Secciones sobre perturbaciones (23), diagnóstico (32), protectores de voltaje (42), DPS (50), monitores de fase (53), tierra (56) y protocolo de cortes (65). |
-| [anatomia-pac.js](<E:/LUZ BARINAS/admin-web/src/data/articles/anatomia-pac.js:1>) | `slug='anatomia-plan-administracion-cargas-pac'`; categoría Ingeniería de distribución; portada `grid`. Explica motivo del PAC (24), circuito (27), bloques (31), franjas (41), rotación (45), reconexión (49) y desviaciones (52). |
-| [telemetria-ciudadana.js](<E:/LUZ BARINAS/admin-web/src/data/articles/telemetria-ciudadana.js:1>) | `slug='telemetria-ciudadana-modelos-predictivos'`; categoría Datos y tecnología; portada `activity`. Secciones problema (23), concepto (27), transformación a señal (36), modelo (46), limitaciones y ética (54), contribución (63). |
-| [conceptos-energia.js](<E:/LUZ BARINAS/admin-web/src/data/articles/conceptos-energia.js:1>) | `slug='conceptos-energia-electrica-domestica'`; categoría Fundamentos; portada `gauge`. Magnitudes (23), sistema residencial (33), protecciones/cables (37), caídas de fase (46), transformadores (54), acciones domésticas (64). |
+| [historia-sen-guri.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/data/articles/historia-sen-guri.js#L1) | `slug='historia-sistema-electrico-nacional-guri'`; categoría Historia y contexto; portada `waves`. Sus h2 cubren primeros pasos (23), interconexión (27), Guri (31), transmisión (36), vulnerabilidades (46) y relación con Barinas (50). |
+| [proteccion-electrodomesticos.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/data/articles/proteccion-electrodomesticos.js#L1) | `slug='proteccion-electrodomesticos-barinas'`; categoría Guías prácticas; portada `shield`. Secciones sobre perturbaciones (23), diagnóstico (32), protectores de voltaje (42), DPS (50), monitores de fase (53), tierra (56) y protocolo de cortes (65). |
+| [anatomia-pac.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/data/articles/anatomia-pac.js#L1) | `slug='anatomia-plan-administracion-cargas-pac'`; categoría Ingeniería de distribución; portada `grid`. Explica motivo del PAC (24), circuito (27), bloques (31), franjas (41), rotación (45), reconexión (49) y desviaciones (52). |
+| [telemetria-ciudadana.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/data/articles/telemetria-ciudadana.js#L1) | `slug='telemetria-ciudadana-modelos-predictivos'`; categoría Datos y tecnología; portada `activity`. Secciones problema (23), concepto (27), transformación a señal (36), modelo (46), limitaciones y ética (54), contribución (63). |
+| [conceptos-energia.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/data/articles/conceptos-energia.js#L1) | `slug='conceptos-energia-electrica-domestica'`; categoría Fundamentos; portada `gauge`. Magnitudes (23), sistema residencial (33), protecciones/cables (37), caídas de fase (46), transformadores (54), acciones domésticas (64). |
 
 Todos llevan actualmente fecha editorial de 3 de octubre de 2026 en la línea 19. Sus enlaces internos conectan artículos. El texto explica conceptos y modelos de forma divulgativa: no se debe inferir que cada filtro o método descrito esté implementado en las APIs actuales. Este manual explica cómo se procesa ese contenido; no valida técnicamente cada recomendación eléctrica del artículo.
 
 ### 4.3 `BlogPreviewSection({setCurrentRoute})` — `src/components/BlogPreviewSection.jsx:6`
 
-Fuente: [BlogPreviewSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/BlogPreviewSection.jsx:6>), 79 líneas.
+Fuente: [BlogPreviewSection.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/BlogPreviewSection.jsx#L6), 79 líneas.
 
 Lo monta `LandingPage`. Toma `articles.slice(0,3)` como `featured`; muestra las tres primeras tarjetas con `ArticleCover`, título, resumen, fecha y tiempo estimado. No ordena por fecha ni solicita datos. El botón «Ver todos» abre `/blog`; cada tarjeta abre su slug.
 
@@ -353,7 +382,7 @@ Lo monta `LandingPage`. Toma `articles.slice(0,3)` como `featured`; muestra las 
 
 ### 4.4 `ArticleCover({cover,category,size = 'card'})` — `src/components/blog/ArticleCover.jsx:13`
 
-Fuente: [ArticleCover.jsx](<E:/LUZ BARINAS/admin-web/src/components/blog/ArticleCover.jsx:13>), 47 líneas.
+Fuente: [ArticleCover.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/blog/ArticleCover.jsx#L13), 47 líneas.
 
 Devuelve una portada decorativa construida con CSS e iconos Lucide; no descarga una imagen. El diccionario `ICONS` de la línea 4 relaciona `waves`, `shield`, `grid`, `activity` y `gauge` con sus componentes. Una clave desconocida utiliza `BookOpen`. `size==='hero'` cambia altura, radios, tamaño de patrón e icono. `category` agrega la etiqueta si está presente; `cover.gradient` define las clases del fondo o se usa el degradado inicial.
 
@@ -361,13 +390,13 @@ Lo usan previsualización, índice y artículo. No tiene estado ni efectos. `ari
 
 ### 4.5 `EditorialDisclaimer({compact = false})` — `src/components/blog/EditorialDisclaimer.jsx:6`
 
-Fuente: [EditorialDisclaimer.jsx](<E:/LUZ BARINAS/admin-web/src/components/blog/EditorialDisclaimer.jsx:6>), 42 líneas.
+Fuente: [EditorialDisclaimer.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/blog/EditorialDisclaimer.jsx#L6), 42 líneas.
 
 Devuelve un `aside` con el aviso de independencia y enlaces de `OFFICIAL_SOURCES`, abiertos externamente con `noopener noreferrer nofollow`. `compact` solo cambia espaciado. Índice y artículo lo montan; no consulta fuentes al renderizar ni comprueba que estén disponibles. No tiene estado, red propia o persistencia.
 
 ### 4.6 `Blog({setCurrentRoute})` — `src/pages/Blog.jsx:8`
 
-Fuente: [Blog.jsx](<E:/LUZ BARINAS/admin-web/src/pages/Blog.jsx:8>), 147 líneas.
+Fuente: [Blog.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/Blog.jsx#L8), 147 líneas.
 
 Es el índice de artículos. Mantiene `activeTag`, inicialmente `null`; calcula `allTags` con `Set` sobre todas las etiquetas y filtra `visible` por coincidencia exacta. Muestra tarjetas con portada, fecha, tiempo, categoría, resumen y enlaces. Un botón puede quitar el filtro. No modifica el catálogo ni la dirección al filtrar; al remontarse se pierde la selección.
 
@@ -377,7 +406,7 @@ El efecto de la línea 11 desplaza al inicio. El `useMemo` de la línea 15 crea 
 
 ### 4.7 `BlogPost({slug,setCurrentRoute})` — `src/pages/BlogPost.jsx:15`
 
-Fuente: [BlogPost.jsx](<E:/LUZ BARINAS/admin-web/src/pages/BlogPost.jsx:15>), 213 líneas.
+Fuente: [BlogPost.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/BlogPost.jsx#L15), 213 líneas.
 
 Busca el artículo por slug. Memoriza `toc` (17), `related` (18) y JSON-LD (25). Su efecto (20) desplaza al inicio cada vez que cambia el slug. `useDocumentMeta` (50) establece título, descripción, palabras clave, canónico, tipo `article` y datos `BlogPosting`; si no existe el artículo instala un título de «no encontrado» y devuelve una pantalla con enlace al índice.
 
@@ -397,7 +426,7 @@ Las cinco páginas de este apartado comparten una estructura sencilla. Cada una 
 
 ### 5.1 `PrivacyPolicy({setCurrentRoute})` — `src/pages/PrivacyPolicy.jsx:4`
 
-Fuente: [PrivacyPolicy.jsx](<E:/LUZ BARINAS/admin-web/src/pages/PrivacyPolicy.jsx:4>), 145 líneas.
+Fuente: [PrivacyPolicy.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/PrivacyPolicy.jsx#L4), 145 líneas.
 
 Muestra identidad independiente, acceso sin cuentas, datos y reportes, almacenamiento local, terceros que prestan servicios, cambios y canales de contacto. El título es `Política de Privacidad — PAC Barinas`. La página describe tanto sitio como aplicación Android, aunque sus mecanismos concretos sean diferentes: Room/SharedPreferences pertenecen a Android; el sitio usa también `sessionStorage`, `localStorage` y el formulario de contacto.
 
@@ -405,7 +434,7 @@ Muestra identidad independiente, acceso sin cuentas, datos y reportes, almacenam
 
 ### 5.2 `TermsConditions({setCurrentRoute})` — `src/pages/TermsConditions.jsx:4`
 
-Fuente: [TermsConditions.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TermsConditions.jsx:4>), 134 líneas.
+Fuente: [TermsConditions.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/TermsConditions.jsx#L4), 134 líneas.
 
 Muestra términos de independencia del proyecto, carácter referencial de los horarios, condiciones de reportes comunitarios, uso responsable, límites de responsabilidad, aportes voluntarios y contacto. El título se establece a `Términos y Condiciones — PAC Barinas`. Explica que no hay garantía de cumplimiento matemático del cronograma.
 
@@ -413,13 +442,13 @@ No solicita una aceptación ni guarda versión/fecha aceptada. Las facultades de
 
 ### 5.3 `RefundPolicy({setCurrentRoute})` — `src/pages/RefundPolicy.jsx:4`
 
-Fuente: [RefundPolicy.jsx](<E:/LUZ BARINAS/admin-web/src/pages/RefundPolicy.jsx:4>), 79 líneas.
+Fuente: [RefundPolicy.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/RefundPolicy.jsx#L4), 79 líneas.
 
 Devuelve la política de gratuidad, naturaleza voluntaria de las donaciones, condiciones y canales para consultar reembolsos. El efecto fija `Política de Reembolsos — PAC Barinas`. No procesa una devolución ni se integra con PayPal, Binance o entidades bancarias. Los datos de contacto son texto/enlaces; una modificación de esta página no modifica destinos de donación de `DonationsSection`.
 
 ### 5.4 `Transparencia({setCurrentRoute})` — `src/pages/Transparencia.jsx:4`
 
-Fuente: [Transparencia.jsx](<E:/LUZ BARINAS/admin-web/src/pages/Transparencia.jsx:4>), 84 líneas.
+Fuente: [Transparencia.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/Transparencia.jsx#L4), 84 líneas.
 
 Muestra proveedores —Supabase, GitHub, Vercel y publicidad— y clasifica preferencias locales, reportes y datos publicitarios. Contiene enlaces a dominio principal y espejo; no verifica su configuración. El efecto fija `Transparencia y Gestión de Datos — PAC Barinas`.
 
@@ -427,103 +456,81 @@ Hay afirmaciones que requieren mantenimiento frente al código vigente: habla de
 
 ### 5.5 `DeveloperInfo({setCurrentRoute})` — `src/pages/DeveloperInfo.jsx:4`
 
-Fuente: [DeveloperInfo.jsx](<E:/LUZ BARINAS/admin-web/src/pages/DeveloperInfo.jsx:4>), 163 líneas.
+Fuente: [DeveloperInfo.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/DeveloperInfo.jsx#L4), 163 líneas.
 
 Muestra equipo/desarrollador, reconocimiento a ElMatrushka, explicación del proyecto, enlaces al sitio y al repositorio Android, contacto y deslinde legal. Utiliza un recurso gráfico público para el reconocimiento y enlaces externos de redes/correo. El título es `Equipo, Desarrollador y Créditos — PAC Barinas`. No obtiene perfiles, repositorios ni estadísticas en tiempo real. Un enlace o fotografía visible no acredita técnicamente mantenimiento activo del servicio.
 
 ## 6. Panel administrativo React
 
-### 6.1 Componente, sesión y pantalla
+Fuente: [AdminPortal.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/AdminPortal.jsx). Los números históricos del índice pueden cambiar; el nombre de función sigue siendo la referencia estable.
 
-Fuente: [AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:13>), 897 líneas.
+### 6.1 Componente, acceso y estado
 
-**`AdminPortal({setCurrentRoute})` — línea 13.** Devuelve una pantalla de acceso o el panel con seis pestañas: Matriz PAC, Bloques y Sectores, Feed de Reportes, Cuentas de Donación, Transmisión Push y Diagnóstico. No es equivalente funcional al panel clásico de `admin.html`. Lo monta `App` después de una navegación interna a `/admin`.
+**AdminPortal({setCurrentRoute})** devuelve el formulario de correo/contraseña o seis pestañas: Matriz PAC, Sectores, Reportes, Donaciones, Push y Diagnóstico. App lo monta por navegación interna a /admin; una recarga puede abrir el panel clásico. Conserva las funciones existentes y comparte permisos con el núcleo documentado en 2.5.
 
-| Estado | Uso y almacenamiento |
-|---|---|
-| `isAuthenticated`, `passwordInput`, `loginError` | Acceso visual, texto introducido y error. La sesión visual se recupera de `localStorage`. |
-| `activeTab` | Pestaña visible; inicia en `pac`, sin persistencia. |
-| `pacMatrix`, `pacSlots` | Matriz y franjas cargadas desde `app_config` o valores iniciales. |
-| `selectedDayIdx` | Se declara, pero no interviene en la edición visible actual. |
-| `isSavingPac`, `savePacSuccess` | Bloqueo del guardado e indicador temporal de éxito. |
-| `sectorsByBlock`, `selectedBlock`, `newSectorInput` | Catálogo editable únicamente en memoria en esta implementación. |
-| `sectorSearchQuery` | Se declara, pero no filtra la lista actual. |
-| `communitySectors` | Se intenta cargar, pero no hay una pestaña de aprobación que lo utilice. |
-| `citizenReports`, `reportsFilter` | Lista de reportes y filtro de visualización. |
-| `donationsForm`, `isSavingDonations`, `saveDonationsSuccess` | Configuración de cuentas y estado de guardado. |
-| `broadcastData`, `isBroadcasting`, `broadcastResult` | Título, mensaje, supuesto destino y resultado de la API de notificaciones. |
-| `diagnosticLog` | Entradas de diagnóstico conservadas durante el montaje. |
+**authState** se inicializa con adminAuth.getState() y un efecto se suscribe al controlador; su limpieza cancela la suscripción. **isAuthenticated** se deriva exclusivamente de status === 'admin'. Ya no se consulta una bandera local ni hay contraseñas de acceso en código. El formulario tiene etiquetas asociadas, autocompletado, mensajes role=alert, estado ocupado y botón desactivado durante comprobaciones. Correo y contraseña son estados temporales; la contraseña no se convierte a minúsculas ni se recorta.
 
-El efecto de la línea 63 lee `localStorage['luz_admin_session']`; si tiene el valor esperado pone `isAuthenticated=true`. El efecto de la línea 71 no actúa antes de eso; cuando hay acceso visual llama `fetchAdminData`. Esta condición no aporta un token al cliente Supabase ni a las APIs. La colección de contraseñas aceptadas se encuentra en el propio JavaScript; sus valores no se reproducen en este manual.
+El resto de estados mantiene matriz, franjas, configuración PAC cargada, pestaña, listas/selección de bloque, reportes/filtro, formulario de donaciones, emisión y consola. **pacConfig** conserva el documento remoto completo para evitar borrar propiedades omitidas. **dataError** comunica fallos de carga. selectedDayIdx y sectorSearchQuery siguen declarados sin uso efectivo; communitySectors se carga, pero no tiene un flujo de aprobación montado.
 
-### 6.2 Carga inicial: `fetchAdminData()` — línea 74
+Cuando se pierde permiso, la interfaz administrativa deja de renderizarse y se vacían el documento de configuración y listas sensibles en estado. El efecto de carga depende del permiso derivado, por lo que una renovación con el mismo rol no recarga innecesariamente cada pestaña. La validación de UI complementa RLS/API; no sustituye las restricciones del servidor.
 
-Es una función asíncrona interna del efecto de acceso. No recibe parámetros, no devuelve datos al llamador y actualiza estados del componente. Realiza estas cuatro cargas secuenciales con bloques `try/catch` separados:
+### 6.2 fetchAdminData()
 
-1. Lee `app_config/pac_schedule`; extrae `matrixRows[].cells` y `slots` si existen.
-2. Lee `app_config/donations_config`; reconstruye el formulario con cadenas vacías como alternativa.
-3. Lee hasta cien `citizen_reports`, ordenados por `created_at`.
-4. Lee `community_sectors`, también ordenados por `created_at`.
+Función interna asíncrona sin parámetros, llamada por el efecto después de verificar acceso. Lee secuencialmente:
 
-No extrae ni comprueba el `error` de Supabase. Los `catch` se activan ante excepciones, no ante todas las respuestas fallidas. El SQL local define `community_locations`, no `community_sectors`, y usa `timestamp` en reportes. Por eso esta pantalla puede quedar vacía aun cuando existan datos en el modelo que usa Android. El encabezado «Supabase Sincronizado» es texto fijo, no el resultado de validar las cuatro consultas. Tampoco hay suscripciones Realtime para mantener estas listas actualizadas mientras el panel permanece abierto.
+1. PAC mediante **readPacSchedule(supabase)**. Solo después de validar estructura actualiza pacConfig, matriz, franjas y listas sectorsA–D presentes; conserva listas previas para campos ausentes.
+2. app_config/donations_config y los cinco campos del formulario.
+3. Hasta cien citizen_reports ordenados por timestamp.
+4. community_locations ordenada por submittedAt.
 
-### 6.3 Acceso: `handleLogin(e)` y `handleLogout()`
+Las cuatro cargas comprueban errores y dejan un mensaje accesible; no escriben como recuperación. Un fallo PAC impide publicar desde valores iniciales: pacConfig permanece nulo. Las consultas se corrigieron al contrato camelCase existente. No hay suscripciones Realtime para estas listas React. El render del feed aún contiene campos heredados en snake_case y requiere unificar su mapeo con los campos consultados; no se presenta ese problema como corregido por autenticar el panel.
 
-**`handleLogin(e)` — línea 140.** Lo llama `onSubmit` del formulario. Previene el envío, recorta y convierte a minúsculas la entrada y la compara con `VALID_PASSWORDS`. Si coincide escribe el marcador de sesión en `localStorage`, abre la interfaz y limpia el error; si no, muestra una frase de acceso denegado. No llama al servidor, no tiene expiración, límite de intentos ni identidad de administrador. Su retorno no se usa.
+### 6.3 handleLogin(e) y handleLogout()
 
-**`handleLogout()` — línea 152.** Borra el marcador local, cierra la vista y navega a `/`. Lo llama el botón Cerrar Sesión. No revoca un token porque aquí no se crea ninguno; tampoco comunica un cierre a otras pestañas mediante un listener `storage`.
+**handleLogin(e)** previene submit, activa isSubmittingLogin, limpia el error y espera **adminAuth.signIn(emailInput,passwordInput)**. El controlador valida identidad y rol de servidor; el componente limpia la contraseña tras éxito. Ante error muestra el mensaje y siempre libera el estado de envío. Retorna Promise<void>; no concede un rol localmente.
 
-### 6.4 Matriz: `cycleCell(slotIdx,dayIdx)` y `handleSavePac()`
+**handleLogout()** espera **adminAuth.signOut()** y vuelve al inicio. Si falla, conserva un error visible en el formulario que ya está cerrado para administración. El controlador cierra la UI antes de esperar al SDK y utiliza cierre de sesión local. Una cuenta sin rol dispone de un botón para cerrar esa sesión. No debe describirse este cierre como revocación instantánea de todos los JWT ya emitidos.
 
-**`cycleCell(slotIdx,dayIdx)` — línea 159.** Recibe índices de fila y columna. Obtiene la celda, calcula el siguiente bloque en A→B→C→D→A, copia filas para conservar actualización inmutable y aplica `setPacMatrix`. Los botones de la tabla, línea 513, la invocan. No escribe a Supabase. Un valor desconocido pasa a A por el cálculo de índice. No valida índices fuera de rango.
+### 6.4 cycleCell(slotIdx,dayIdx), handleSavePac() y restablecer
 
-**`handleSavePac()` — línea 175.** Botón Guardar y Publicar. Activa `isSavingPac`, convierte cada fila en `{cells:row}` y forma `{updatedAt:fechaISO,version:Date.now(),slots:pacSlots,matrixRows}`. Hace `upsert` de `app_config` con `config_key='pac_schedule'`. Comprueba `error`, muestra éxito durante tres segundos o una alerta con el error; `finally` libera el botón. Devuelve una promesa de finalización.
+**cycleCell(slotIdx,dayIdx)** calcula A→B→C→D→A y aplica una copia de las filas a pacMatrix. Los botones de celda la llaman. No escribe red, valida permisos por separado o conserva el cambio fuera del montaje. Un valor desconocido pasa a A; no valida índices arbitrarios.
 
-El `upsert` **reemplaza `config_value` completo** con ese objeto. No fusiona las propiedades del JSON remoto. Las asignaciones `sectorsA-D` que guarda el panel clásico quedan fuera de este payload y pueden desaparecer. Tampoco conserva campos adicionales que futuras versiones añadan. `updatedAt` es una cadena ISO aquí, mientras el panel clásico utiliza milisegundos; el contrato debería ser único. Un `version` basado en el reloj del equipo no evita que dos administradores se sobrescriban mutuamente.
+**handleSavePac()** activa carga, vuelve a exigir adminAuth.requireAdmin() y rechaza si no existe pacConfig válido. Forma un payload con la configuración previa completa, updatedAt/version en milisegundos, slots y matrixRows[].cells; hace upsert de app_config/pac_schedule y comprueba error. Conserva así sectores y metadatos remotos ajenos al editor. Tras éxito actualiza pacConfig e indicador de tres segundos; catch presenta fallo y finally libera el botón.
 
-El botón Restablecer de la línea 544 solo ejecuta `setPacMatrix(DEFAULT_CORPOELEC_MATRIX)`; no guarda hasta pulsar publicación. Las franjas se muestran, pero esta pantalla no contiene un editor completo de franjas comparable al clásico. Las frases de «publicado en todos los teléfonos» no esperan confirmaciones individuales de los dispositivos.
+La operación sigue reemplazando config_value como JSON completo; la mezcla previa evita omitir campos, pero no aporta control de concurrencia entre editores. Los cambios locales de sectorsByBlock no se incluyen automáticamente: su gestión continúa siendo local en React. Restablecer matriz solo cambia estado y requiere publicación explícita. La confirmación del servidor no es un acuse de cada teléfono.
 
-### 6.5 Donaciones: `handleSaveDonations(e)` — línea 201
+### 6.5 handleSaveDonations(e)
 
-Lo llama el formulario de la pestaña. Previene el envío, activa carga y guarda `{config_key:'donations_config',config_value:donationsForm}` en `app_config`. Comprueba `error`, muestra éxito tres segundos y libera carga incluso ante fallo. El formulario contiene `paypal`, `binance`, `pmBank`, `pmPhone`, `pmId`; los `onChange` copian el objeto con la propiedad editada.
+Previene formulario, activa carga y exige una sesión/rol actuales. Guarda app_config/donations_config con paypal, binance, pmBank, pmPhone y pmId. Comprueba error, muestra éxito tres segundos y finaliza carga. Sus inputs copian la propiedad editada del formulario. No verifica titularidad o recepción de pagos ni valida todos los formatos bancarios; los valores no se registran en este manual.
 
-La escritura reemplaza ese JSON completo, sin historial ni validación de titularidad, formato bancario o host de la URL. `DonationsSection` lee la misma clave; Android también puede consumirla. El cambio requiere una autorización real del lado de datos. Los valores introducidos no se registran localmente fuera del estado ni se reproducen en este manual.
+### 6.6 handleAddSector() y handleRemoveSector(blockKey,sectorName)
 
-### 6.6 Sectores: `handleAddSector()` y `handleRemoveSector(blockKey,sectorName)`
+**handleAddSector()** ignora una cadena vacía, antepone el nombre recortado al array del bloque seleccionado y vacía el input. **handleRemoveSector(blockKey,sectorName)** elimina coincidencias exactas del array. Son funciones de estado, sin persistencia. La carga ahora puede hidratar listas desde PAC, pero estas acciones no escriben registros sectors ni publican asignaciones. Al recargar se pierden cambios no guardados por otra operación; no debe afirmarse sincronización remota de estas dos acciones.
 
-**`handleAddSector()` — línea 222.** Ignora la entrada vacía, agrega el nombre recortado al principio del array de `selectedBlock` mediante una copia del objeto y vacía el campo. Lo llama Agregar. No evita duplicados, no crea un registro `sectors`, no guarda configuración y no procesa geografía.
+### 6.7 Filtros del feed
 
-**`handleRemoveSector(blockKey,sectorName)` — línea 232.** Filtra del array los nombres idénticos al indicado y aplica el nuevo estado. Lo llaman los botones de papelera. Quita todas las coincidencias exactas de ese nombre y no pide una operación al servidor.
+Los botones cambian reportsFilter y el render usa filter/map locales. La consulta usa ahora timestamp y la tabla correcta. Persisten diferencias de representación por report_type, has_power, sector_name/comment/created_at frente a reportType, hasPower, sectorName/observation/timestamp. Se conserva esa deuda explícita; no hay moderación o eliminación en esta pestaña. JSX escapa el texto y no usa plantillas innerHTML para entradas ciudadanas.
 
-La pantalla describe asignación de circuitos/comunidades, pero estos dos handlers solo cambian la lista en memoria. No existe una operación de publicación de esa lista ni se hidrata desde `pac_schedule.sectorsA-D`. Al recargar vuelve al catálogo inicial. Los cambios no afectan al `sectors.rotationBlock` remoto.
+### 6.8 handleSendBroadcast(e)
 
-### 6.7 Reportes: filtros y campos visibles
+Previene submit, activa envío y espera **adminAuth.postJson('/api/sendPushAlert',broadcastData)**. El payload contiene solo title, message e is_alarm booleano. La UI declara audiencia global; se retiró el selector que aparentaba segmentar por bloques. Los campos limitan título a 120 y mensaje a 2000 caracteres, sin sustituir validación de servidor.
 
-El render de la línea 664 filtra por `reportsFilter` y examina `report_type`, `status`, `has_power`, `sector_name`, `sector`, `comment` y `created_at`. El modelo remoto disponible en el SQL y usado por `useTelemetry` utiliza `reportType`, `hasPower`, `sectorName`, `observation` y `timestamp`. Esto genera una segunda incompatibilidad además de la consulta inicial.
+postJson obtiene token actual verificado y añade Authorization Bearer. El componente muestra aceptación o error con estado HTTP y siempre libera el botón. Un 401/403 también cierra el estado administrativo mediante la suscripción. No escribe broadcast_notice: publicar un aviso persistente es otra función del clásico. Un éxito de FCM no confirma entrega en todos los dispositivos.
 
-Las ramas de color y estado se resuelven en callbacks anónimos del `filter/map`; no llaman a una función de normalización común. En ausencia de campos esperados, puede mostrar un nombre genérico, tiempo «Reciente» o clasificar como sin luz. Los botones Todos, Con Luz, Sin Luz y Falla Irregular solo cambian `reportsFilter` y no consultan más datos. No hay moderación, eliminación ni exportación implementadas en esta pestaña React.
+### 6.9 pingApi(endpoint)
 
-### 6.8 Push: `handleSendBroadcast(e)` — línea 240
+Recibe la dirección de una API, registra performance.now(), hace GET y lee JSON. Ahora **comprueba res.ok**; una respuesta 404/500 produce una línea ERROR, no OK. Ante éxito antepone una línea con hora, latencia y primeros 80 caracteres del JSON a diagnosticLog. Los botones llaman predicción con sector de prueba y proyección mensual. No verifica Firebase, no envía push ni persiste logs. La consola no tiene límite de longitud durante un montaje prolongado.
 
-Previene el formulario, activa `isBroadcasting`, limpia el resultado y hace POST a `/api/sendPushAlert` con `Content-Type: application/json` y el objeto `broadcastData`. Lee JSON; si `res.ok` presenta éxito con la respuesta, si no presenta estado/error, y si falla la comunicación presenta error de conexión. `finally` libera el formulario.
+### 6.10 getBadgeClass(b)
 
-El selector ofrece `all_users`, `block_a`, `block_b`, `block_c`, `block_d`, pero la API actual **ignora `topic` y envía siempre a `barinas_global`**. Por tanto, seleccionar un solo bloque no limita realmente la audiencia. No transmite `is_alarm`; la función usará su valor por defecto. No añade `Authorization`, y la API tampoco lo exige en su implementación actual. Este flujo no escribe el aviso persistente `broadcast_notice` que maneja el panel clásico; enviar una push y publicar un aviso de configuración son operaciones distintas.
+Helper local que devuelve clases de bloque A/B/C/D o gris. Lo usa la matriz y gestor. No hace red ni transforma asignaciones; sigue duplicando la paleta común del contador. Mantener una convención de color requiere revisar ambos lugares.
 
-### 6.9 Diagnóstico: `pingApi(endpoint)` — línea 264
-
-Recibe la dirección de una API, mide `performance.now()`, hace un GET, interpreta JSON y agrega al inicio de `diagnosticLog` una entrada con hora, latencia y primeros 80 caracteres del resultado. Si ocurre una excepción agrega una línea ERROR. Los botones de las líneas 865 y 871 la llaman con una predicción de `sectorId=test` y la proyección de octubre.
-
-No comprueba `res.ok`; una respuesta JSON 404 puede terminar etiquetada como `OK`. Por eso la existencia de una línea de consola no acredita salud del servicio ni que el sector de prueba exista. No envía notificaciones ni prueba Firebase, no almacena el log en la nube y no lo limita en longitud durante una sesión extensa.
-
-### 6.10 Colores: `getBadgeClass(b)` — línea 345
-
-Helper interno que devuelve clases Tailwind para los bloques A/B/C/D o gris. Lo usa la tabla de matriz y se parece a `getBlockBadgeClass` del contador, pero es otra implementación. No hace red ni modifica estado. La duplicación obliga a revisar ambos si cambia la convención cromática.
 
 ## 7. Modo TV y sus seis temas
 
 ### 7.1 Contenedor `TvKioskMode({setCurrentRoute})` — `src/pages/TvKioskMode.jsx:96`
 
-Fuente: [TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:96>), 686 líneas.
+Fuente: [TvKioskMode.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/TvKioskMode.jsx#L96), 686 líneas.
 
 Lo monta `App` para `/tv` y el alias inicial `/kiosk`. Ocupa el viewport, añade una barra de controles y reloj y elige una de seis vistas. Consume una instancia de `useTelemetry`; los temas reciben sus datos y no hacen consultas propias. `refresh` e `isLoading` se desestructuran pero los controles actuales no ofrecen un botón de actualización que los utilice.
 
@@ -603,7 +610,7 @@ La cuenta regresiva común expresa final de la franja activa. Un titular que la 
 
 ### 7.7 `RadarTheme(...)` — `src/pages/tv/RadarTheme.jsx:11`
 
-Fuente: [RadarTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/RadarTheme.jsx:11>), 287 líneas.
+Fuente: [RadarTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/RadarTheme.jsx#L11), 287 líneas.
 
 Tema oscuro azul con resplandores, tarjetas translúcidas y barrido de radar CSS. La columna izquierda muestra estado seleccionado, franja, bloque actual/siguiente y cifras grandes de cuenta regresiva. La derecha muestra los **primeros siete circuitos** (`slice` en 176), estado/estabilidad y la tira de franjas (`map` en 217). Abajo recorre `tickerReports` (259), con clasificación local de corte/fluctuación.
 
@@ -611,7 +618,7 @@ No existe un radar geográfico ni medición de posiciones: los círculos y barri
 
 ### 7.8 `LightTheme(...)` — `src/pages/tv/LightTheme.jsx:12`
 
-Fuente: [LightTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/LightTheme.jsx:12>), 289 líneas.
+Fuente: [LightTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/LightTheme.jsx#L12), 289 líneas.
 
 Presenta la misma organización funcional con fondo claro, contraste oscuro, halos y radar suave. Los primeros siete circuitos se mapean en 178; el cronograma en 219; ticker en 261. Colores del estado se deducen de `businessStatus.stateColor`. La diferencia respecto a Radar es de presentación, no una fuente de datos ni algoritmo alternativo.
 
@@ -619,7 +626,7 @@ Los filtros de bloque, pantalla completa y cambio de tema siguen en el padre. No
 
 ### 7.9 `PerformanceTheme(...)` — `src/pages/tv/PerformanceTheme.jsx:12`
 
-Fuente: [PerformanceTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/PerformanceTheme.jsx:12>), 264 líneas.
+Fuente: [PerformanceTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/PerformanceTheme.jsx#L12), 264 líneas.
 
 Tema oscuro de superficies planas, bordes fuertes y números monoespaciados; reduce desenfoques y adornos de las otras consolas. Muestra los siete primeros circuitos en 160, cronograma en 198 y ticker en 239. Se apoya en los mismos estados y mismos intervalos del padre/hook. La etiqueta `60 FPS LITE` es fija; el archivo no usa un contador de cuadros ni ajusta automáticamente el ritmo del polling a la capacidad de la TV.
 
@@ -627,7 +634,7 @@ No incorpora un motor distinto ni convierte el sitio en una aplicación nativa d
 
 ### 7.10 `WebTheme(...)` — `src/pages/tv/WebTheme.jsx:14`
 
-Fuente: [WebTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/WebTheme.jsx:14>), 347 líneas.
+Fuente: [WebTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/WebTheme.jsx#L14), 347 líneas.
 
 Vista de documento/tarjetas claras con barra lateral decorativa y propiedades del sistema: bloque en corte, franja, relevo, zona local y volumen de reportes. El área principal muestra encabezado, aviso de estado/cuenta regresiva, tabla de franjas y galería con **cinco circuitos** (`slice` en 276). Cronograma en 224, ticker en 320.
 
@@ -635,7 +642,7 @@ La barra lateral se oculta en pantallas pequeñas y sus rótulos son presentaci�
 
 ### 7.11 `AppTheme(...)` — `src/pages/tv/AppTheme.jsx:16`
 
-Fuente: [AppTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/AppTheme.jsx:16>), 426 líneas.
+Fuente: [AppTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/AppTheme.jsx#L16), 426 líneas.
 
 Imita una interfaz Android Material 3: rail lateral decorativo, barra de estado, tarjetas curvas, bloque actual, anillo de progreso, siguiente bloque, tira de franjas y lista de **cinco circuitos** (`slice` en 323). Cronograma en 274 y ticker en 395. Los iconos Monitor, Sectores y Alarmas del rail no implementan navegación. Los rótulos `Room SQLite Conectado`, `Sincronización Room DB (Offline)`, `5G` y `98%` son estáticos; este componente web **no abre Room ni mide batería/red móvil**.
 
@@ -645,7 +652,7 @@ Imita una interfaz Android Material 3: rail lateral decorativo, barra de estado,
 
 ### 7.12 `MercuryTheme(...)` — `src/pages/tv/MercuryTheme.jsx:11`
 
-Fuente: [MercuryTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/MercuryTheme.jsx:11>), 327 líneas.
+Fuente: [MercuryTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/MercuryTheme.jsx#L11), 327 líneas.
 
 Vista oscura de tarjetas grafito, acento cobalto y montañas hechas con SVG local. Tiene subbarra de identidad/estado, tarjeta principal con comparación de bloques y cuenta regresiva, **seis circuitos** (`slice` en 219), cronograma en 256 y ticker en 301. Las montañas no descargan una fotografía ni representan ubicación geográfica de un reporte. La clasificación visual enfatiza corte activo; la banda utiliza el estado de energía de cada reporte.
 
@@ -653,21 +660,21 @@ El texto del cuerpo menciona cronograma «oficial» de cuatro horas, aunque el r
 
 ## 8. APIs serverless
 
-Los tres módulos de `admin-web/api` usan CommonJS: la función exportada se asigna a **`module.exports = async (req,res) => ...`**. Son handlers sin nombre propio de declaración; el inventario AST puede denominarlos `exports` por el destino de la asignación. Los ejecuta el alojamiento al recibir una solicitud HTTP; importarlos no equivale a tener un servidor local escuchando.
+Los tres módulos de `admin-web/api` usan CommonJS. Las dos consultas públicas asignan un handler anónimo a **`module.exports`**; el inventario AST puede denominarlo `exports` por el destino de la asignación. El envío administrativo exporta el resultado de **`createHandler()`** y expone esa factoría para pruebas por inyección; su función interna se llama **`sendPushAlert(req,res)`**. El alojamiento ejecuta estos handlers al recibir una solicitud HTTP; importarlos no equivale a tener un servidor local escuchando.
 
 `req.query` aporta parámetros de URL y `req.body` el cuerpo interpretado por el alojamiento. `res.setHeader`, `res.status(...).json(...)` y `res.end()` producen la respuesta. El valor de retorno de los métodos de `res` no es un contrato de negocio para otro módulo JavaScript: el contrato externo es el estado, cabeceras y JSON HTTP.
 
 ### 8.1 Reglas comunes actuales
 
-Cada handler permite `OPTIONS` con estado 200 sin ejecutar su operación. Configura `Access-Control-Allow-Origin: *`, credenciales habilitadas, cabeceras arbitrarias y una lista amplia de métodos. **No restringe realmente los métodos recibidos** mediante una rama 405: la lista de CORS solo describe preferencias al navegador, no impide llamadas de otros clientes.
+Los handlers de lectura mensual y predicción permiten OPTIONS con estado 200, CORS de origen comodín y una lista amplia de métodos; esas cabeceras no equivalen a una restricción 405 ni a autorización. **sendPushAlert tiene reglas distintas**: POST/OPTIONS, origen comprobado, Bearer, usuario y rol verificados y cuota durable, detallados en 8.4.
 
-La combinación origen comodín y credenciales no constituye una configuración válida para solicitudes CORS con credenciales de navegador. Esto no protege los endpoints: una llamada sin credenciales puede seguir siendo válida y un cliente HTTP puede ignorar por completo las reglas de CORS. Ninguno de estos archivos comprueba un administrador autenticado o cuota por usuario.
+La combinación origen comodín y credenciales de los endpoints de lectura no constituye una configuración válida para CORS con credenciales de navegador; sus datos son de consulta pública. El envío privilegiado ya no utiliza ese comodín. Un cliente HTTP sin Origin sigue necesitando identidad/rol en la API de envío: CORS no sustituye ese control.
 
 Las APIs de lectura inicializan su propio cliente Supabase a nivel de módulo, separado del cliente de `src/lib/supabase.js`. Aunque contengan la misma dirección/clave pública, son instancias de ejecución distintas: servidor y navegador no comparten memoria ni sesión. Los valores de conexión no se reproducen en este manual.
 
 ### 8.2 `api/getMonthlyWeeks.js`
 
-Fuente: [getMonthlyWeeks.js](<E:/LUZ BARINAS/admin-web/api/getMonthlyWeeks.js:7>), 92 líneas.
+Fuente: [getMonthlyWeeks.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/api/getMonthlyWeeks.js#L7), 92 líneas.
 
 **Handler `module.exports(req,res)` — línea 7.** Recibe `monthName` y `totalDays` desde query o cuerpo, dando prioridad a un valor verdadero de query. Devuelve HTTP 400 si falta alguno, lee `app_config/pac_schedule` y devuelve 400 si falla o falta la configuración. Extrae `matrixRows` o `[]`, obtiene `activeMatrix = matrixRows.map(r=>r.cells||[])` y genera cuatro entradas:
 
@@ -709,7 +716,7 @@ Ejemplo 400 por parámetros faltantes: `{"error":"monthName and totalDays are re
 
 ### 8.3 `api/getOutagePrediction.js`
 
-Fuente: [getOutagePrediction.js](<E:/LUZ BARINAS/admin-web/api/getOutagePrediction.js:17>), 182 líneas.
+Fuente: [getOutagePrediction.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/api/getOutagePrediction.js#L17), 182 líneas.
 
 **`getDayIndex(dayOfWeek)` — línea 17.** Recibe el número de `Date.getDay()` y devuelve domingo→6 o resto→n−1. Es un helper interno puro para indexar las columnas lunes–domingo de `DAYS`. Lo llama la búsqueda de ventanas.
 
@@ -756,47 +763,50 @@ Ejemplo sintético de respuesta para un reloj de prueba fijado al 15 de octubre 
 
 Es un ejemplo de contrato, no la predicción de un sector real. Para reproducir exactamente esos timestamps el proceso de prueba debe usar la zona de Caracas o simularla; una ejecución en UTC mostraría precisamente el problema de zona descrito.
 
-### 8.4 `api/sendPushAlert.js`
+### 8.4 api/sendPushAlert.js: envío administrativo protegido
 
-Fuente: [sendPushAlert.js](<E:/LUZ BARINAS/admin-web/api/sendPushAlert.js:1>), 59 líneas.
+Fuente: [sendPushAlert.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/api/sendPushAlert.js). El módulo CommonJS exporta el handler creado por **createHandler()** y expone la factoría para pruebas. Firebase no se inicializa al importar ni antes de superar los controles.
 
-**Inicialización de módulo — líneas 4–19.** Conserva `initError`. Si no hay aplicaciones Firebase inicializadas, lee la variable de entorno `FIREBASE_SERVICE_ACCOUNT`, interpreta su JSON y crea credencial con `cert`; si no existe intenta `initializeApp()` con el entorno disponible. Un error de ese bloque se guarda y el handler responderá 500. Obtiene `getMessaging()` a nivel de módulo cuando no hay ese error. No almacena credenciales en el navegador ni las devuelve como respuesta normal; sus valores no aparecen aquí.
+**getFirebaseMessaging(env)** carga Firebase Admin de forma diferida. Si no hay una aplicación, usa FIREBASE_SERVICE_ACCOUNT cuando existe o el entorno de credenciales del servidor; devuelve getMessaging(). Solo lo llama el tramo autorizado de envío. No deben incluirse credenciales de servicio en el cliente.
 
-**Handler `module.exports(req,res)` — línea 21.** Después de OPTIONS, si hubo fallo de inicialización responde 500 con su mensaje. Lee `title`, `message`, `is_alarm` de query o cuerpo con prioridad de query y valores iniciales `Alerta General`, cadena vacía y `false`. Fija el tema **`barinas_global`**; no lee ni respeta `req.body.topic`. Forma un payload de **datos** de FCM, no la propiedad `notification`:
+**readSupabaseConfig(env)** busca SUPABASE_URL o VITE_SUPABASE_URL y una clave pública en SUPABASE_PUBLISHABLE_KEY, SUPABASE_ANON_KEY o VITE_SUPABASE_ANON_KEY. Exige HTTPS salvo localhost y rechaza claves secretas o JWT con rol distinto de anon. Devuelve {url,key} o null. Configurar variables con sus nombres correctos es necesario para el servidor aunque el cliente web tenga su propia conexión.
 
-```json
-{
-  "data": {
-    "title": "Título ilustrativo",
-    "message": "Mensaje ilustrativo",
-    "is_alarm": "false"
-  },
-  "topic": "barinas_global"
-}
-```
+**hasSameOrigin(req)** admite clientes sin Origin que aún deberán autenticarse. Si hay Origin, verifica protocolo, host/puerto y representación exacta frente al host solicitado; permite HTTP solo en contexto local. Devuelve boolean. No confía en CORS como autorización.
 
-Invoca `messaging.send(payload)` y responde 200 `{success:true,messageId:response}`. Ante excepción registra el objeto y devuelve 500 `{error:error.message}`. La conversión explícita `String(isAlarm)` asegura una cadena para ese campo; los otros campos no se normalizan ni limitan en este código y pueden fallar ante tipos no admitidos por FCM.
+**parsePayload(body)** admite objeto JSON o cadena JSON limitada. Solo acepta title, message, is_alarm y block; rechaza la petición con400 si contiene campos extra como topic. Título/mensaje deben ser cadenas no vacías después de trim, máximo 120/2000 caracteres; rechaza controles no permitidos y exige is_alarm booleano y block A/B/C/D cuando están presentes. Limita el bloque data serializado a 3500 bytes y la entrada JSON de texto a 8192. Devuelve {data,block,topic} o null; is_alarm viaja a FCM como cadena. Sin block, topic es barinas_global; con bloque permitido usa block_A/B/C/D. Los paneles actuales solo ofrecen audiencia global.
 
-**Quién la llama:** `AdminPortal.handleSendBroadcast` y la prueba de alarma del panel clásico. El navegador solicita al servidor; es el servidor con Firebase Admin quien autoriza técnicamente la emisión frente a FCM. El destinatario Android debe estar suscrito al tema y procesar el mensaje de datos; un 200 de esta función no confirma que todos los dispositivos lo hayan recibido o mostrado.
+**createHandler({createClientImpl,getMessagingImpl,env,logger}={})** devuelve la función asíncrona **sendPushAlert(req,res)**. Las dependencias inyectadas permiten pruebas sin servicios. La secuencia del handler es:
 
-Ejemplo documental de la intención del formulario, **sin ejecutarlo**:
+1. Marca no-store, Vary Origin y Allow POST, OPTIONS; rechaza otros métodos con 405.
+2. Rechaza otro origen con 403. OPTIONS válido devuelve 204 sin Auth, cuota o Firebase.
+3. Exige una sola cabecera Authorization Bearer; no acepta credenciales por query. Configuración incompleta produce 503.
+4. Crea cliente Supabase sin persistencia/autorrenovación, con el JWT de la petición; getUser verifica identidad. Exige is_admin() === true y deniega con 401/403 o 503 ante indisponibilidad.
+5. Exige Content-Type JSON (415) y payload válido (400).
+6. Reclama **claim_push_alert({p_block})**. PostgreSQL aplica cuota durable entre instancias y vuelve a comprobar permisos. Un rechazo por frecuencia responde 429 con Retry-After 60; un fallo de cuota responde 503 y no se reemplaza por un contador local permisivo.
+7. Solo entonces obtiene Firebase y ejecuta send con data y topic. Responde 200 {success:true,messageId} o 502 genérico si falla la entrega.
 
-```http
+La cuota de la migración limita a un aviso por administrador en 60 s y uno global en 30 s. La reclamación es previa al proveedor: un intento fallido puede consumir el intervalo. No es confirmación de entrega a teléfonos; únicamente confirma la aceptación del proveedor cuando responde éxito. Los errores de autorización/proveedor no devuelven sus detalles privados.
+
+Ejemplo ilustrativo que **no se ejecutó**:
+
+~~~http
 POST /api/sendPushAlert
+Authorization: Bearer <token-vigente-de-una-sesion-administrativa>
 Content-Type: application/json
 
-{"title":"Aviso de prueba documental","message":"Este ejemplo no se envió","is_alarm":false}
-```
+{"title":"Aviso documental","message":"Este mensaje no se envio","is_alarm":false}
+~~~
 
-Ejemplo de forma de respuesta: `{"success":true,"messageId":"identificador-ficticio-de-mensaje"}`. El identificador es ilustrativo.
+Respuesta de forma: {"success":true,"messageId":"identificador-ficticio"}. Una solicitud sin identidad obtiene 401 y no alcanza Firebase. Las funciones de lectura mensual/predicción siguen siendo públicas; los controles estrictos de este apartado no deben atribuirse automáticamente a ellas.
 
-**Límites de seguridad actuales:** no valida sesión, rol, token, origen confiable, método de escritura, tamaño ni cuota; un GET también alcanza `messaging.send`. No se debe confundir el formulario protegido visualmente con un endpoint autorizado. Para una corrección de mantenimiento haría falta exigir identidad/rol en este handler, POST obligatorio, validación del payload, límites y registro del emisor; cambiar solo CORS o esconder un botón no aporta esa autorización.
+La puesta en servicio exige revisar/aplicar la migración versionada y preparar identidad/rol, variables Supabase y credenciales FCM en el entorno. Este capítulo acredita comportamiento local y pruebas simuladas; no una migración o despliegue efectuados por el cliente. Las instrucciones de operación y sus comprobaciones corresponden al capítulo 06.
+
 
 ## 9. Prerender, compilación y alojamiento
 
 ### 9.1 `scripts/blog-prerender.mjs`: por qué existe
 
-Fuente: [blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:1>), 272 líneas.
+Fuente: [blog-prerender.mjs](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/scripts/blog-prerender.mjs#L1), 272 líneas.
 
 Un lector sin JavaScript solo recibiría el contenedor vacío de la aplicación. Este plugin de Vite toma `dist/index.html` después de compilar y genera el índice y los cinco artículos con texto real, metadatos y JSON-LD, usando los mismos datos que React. También crea el sitemap. Se ejecuta en la máquina de compilación y escribe archivos; **no es una API ni una tarea programada del servidor**.
 
@@ -845,7 +855,7 @@ No atrapa errores de disco en un `try/catch` propio: un fallo puede interrumpir 
 
 ### 9.5 `vite.config.mjs`
 
-Fuente: [vite.config.mjs](<E:/LUZ BARINAS/admin-web/vite.config.mjs:1>), 28 líneas. No declara una función propia por nombre.
+Fuente: [vite.config.mjs](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/vite.config.mjs#L1), 28 líneas. No declara una función propia por nombre.
 
 Configura una variable de entorno de advertencia, importa `defineConfig`, plugins React/Tailwind, utilidades de ruta y `blogPrerender`. Obtiene `__dirname` con `fileURLToPath(new URL('.',import.meta.url))`. El objeto exportado por defecto de `defineConfig` incorpora tres plugins: `react()`, `tailwindcss()`, `blogPrerender()`.
 
@@ -855,7 +865,7 @@ No define variables `VITE_*` para centralizar la conexión Supabase del sitio ni
 
 ### 9.6 `package.json`
 
-Fuente: [package.json](<E:/LUZ BARINAS/admin-web/package.json:1>), 27 líneas. Es metadato/configuración, sin funciones.
+Fuente: [package.json](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/package.json), 27 líneas. Es metadato/configuración, sin funciones.
 
 Declara el paquete privado `luz-barinas-admin-web`, versión 1.0.0 y descripción del portal. Ese nombre no determina el repositorio remoto: el remoto web local verificado para el proyecto apunta a `https://github.com/Ralag/pac-barinas.git`.
 
@@ -867,11 +877,11 @@ Declara el paquete privado `luz-barinas-admin-web`, versión 1.0.0 y descripció
 
 Dependencias de ejecución: Supabase JS, Firebase Admin, Leaflet, Lucide React, React y React DOM. Las de desarrollo incluyen Vite, plugin React, Tailwind/plugin Vite, PostCSS y Autoprefixer. Firebase Admin pertenece a las APIs, no debe ejecutarse con credenciales de servicio en el navegador. Leaflet puede estar en el paquete aunque el mapa clásico lo cargue desde CDN; no significa que las páginas React utilicen un mapa.
 
-Las versiones declaradas usan rangos `^`; `package-lock.json` fija una resolución de instalación y debe conservarse para reproducibilidad. No existen scripts `test`, `lint` ni `typecheck` en este manifiesto. Este manual no consultó avisos externos de vulnerabilidades ni garantiza la seguridad de las versiones instaladas.
+Las versiones declaradas usan rangos `^`; `package-lock.json` fija una resolución de instalación y debe conservarse para reproducibilidad. El script `test` ejecuta `node --test tests/*.test.cjs`, incluyendo pruebas de UI/controlador y backend. No existen scripts `lint` ni `typecheck`. Este manual no garantiza la seguridad de todas las dependencias por el hecho de que el build pase.
 
 ### 9.7 `vercel.json`
 
-Fuente: [vercel.json](<E:/LUZ BARINAS/admin-web/vercel.json:1>), 42 líneas. Es configuración declarativa, sin funciones.
+Fuente: [vercel.json](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/vercel.json#L1), 42 líneas. Es configuración declarativa, sin funciones.
 
 Declara framework Vite, build `npm run build` y salida `dist`. Los rewrites se evalúan en el orden escrito:
 
@@ -889,7 +899,7 @@ No contiene por sí mismo usuarios ni permisos administrativos. No se examinó l
 
 ### 9.8 `firebase.json`
 
-Fuente: [firebase.json](<E:/LUZ BARINAS/admin-web/firebase.json:1>), 16 líneas. Configuración de Hosting alternativa, sin funciones.
+Fuente: [firebase.json](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/firebase.json#L1), 16 líneas. Configuración de Hosting alternativa, sin funciones.
 
 Establece `hosting.public='.'`, excluye `firebase.json`, archivos ocultos y `node_modules`, y reescribe cualquier ruta a `/index.html`. No define funciones Firebase ni las mismas rutas particulares de Vercel. Si se usa tal como está, publica desde la carpeta fuente en vez de limitarse a `dist`; podría incluir documentos, scripts y otros archivos que no forman parte de la salida deseada. No se comprobó un Hosting Firebase activo.
 
@@ -897,7 +907,7 @@ No conviene tratar `firebase deploy` y Vercel como procedimientos equivalentes: 
 
 ## 10. Recetas de mantenimiento y verificación
 
-Estas secuencias explican dónde actuar y qué comportamiento revisar. No describen cambios efectuados en el producto durante la redacción del manual.
+Estas secuencias explican dónde actuar y qué comportamiento revisar al mantener la implementación descrita. Las secciones 2.5, 6, 8.4 y 10.6 incluyen los controles y pruebas añadidos en la actualización de seguridad del 16 de octubre.
 
 ### 10.1 Cambiar un artículo o añadir otro
 
@@ -916,11 +926,11 @@ Casos de comprobación útiles: 02:59/03:00, 22:59/23:00, 00:00 dentro de turno 
 
 ### 10.3 Evitar perder asignaciones al publicar
 
-Antes de unificar guardados, identificar el contrato completo de `pac_schedule`: no basta con `matrixRows` y `slots` si otra pantalla conserva `sectorsA-D`. El formulario React reemplaza el JSON; el panel clásico guarda más propiedades. Para mantenimiento se debe decidir una fuente de asignaciones —campos del cronograma o registros `sectors`— y preservar coherencia. Una prueba de publicación debe incluir un campo adicional preexistente y dos editores con versiones distintas para comprobar que no se borra o pisa información silenciosamente.
+Ambos paneles conservan ahora el documento PAC válido cargado y lo mezclan al construir la publicación. No basta con guardar matrixRows y slots si otras propiedades forman parte del contrato. Se mantiene la deuda de concurrencia entre editores y de fuentes de asignación —listas del cronograma y registros sectors—. Las altas/bajas locales React no se publican automáticamente. Una prueba debe incluir campos adicionales preexistentes y dos versiones de edición para detectar sobrescrituras.
 
 ### 10.4 Distinguir éxito visual de operación confirmada
 
-Revisar `{data,error}` de Supabase, no solo excepciones. `ContactSection`, `fetchAdminData`, `loadRemoteDonations` y `fetchTelemetryFromSupabase` omiten parte de ese control; `pingApi` omite `res.ok`. Probar fallas simuladas permite confirmar que no aparece un mensaje de entrega/sincronización cuando la operación fue rechazada. No se necesita enviar reportes reales ni alertas globales para esas pruebas.
+Revisar `{data,error}` de Supabase, no solo excepciones. ContactSection, loadRemoteDonations y fetchTelemetryFromSupabase todavía omiten parte de ese control. fetchAdminData y pingApi ya comprueban respectivamente los errores de consulta y res.ok. El clásico conserva otros procedimientos de escritura pendientes de esa revisión, documentados en el capítulo 05. Las pruebas simuladas evitan enviar reportes o alertas reales.
 
 ### 10.5 Almacenamiento, red y datos: mapa de referencia
 
@@ -930,7 +940,7 @@ Revisar `{data,error}` de Supabase, no solo excepciones. `ContactSection`, `fetc
 | Caché pública | `sessionStorage.pac_telemetry_cache_v1` | `useTelemetry`; nunca sustituye una política de servidor. |
 | Tema TV | `localStorage.pac_kiosk_theme` | Contenedor TV. |
 | Bloque local TV | `localStorage.pac_kiosk_block` | Contenedor TV. |
-| Acceso administrativo visual | Marcador `localStorage.luz_admin_session` | Ambos paneles; no es una sesión autenticada de servicio. |
+| Acceso administrativo | Sesión SDK Supabase, getUser e is_admin | Núcleo compartido; no consulta la bandera heredada del navegador. |
 | Matriz/franjas | `app_config/pac_schedule` | Paneles escriben; hook y APIs leen. |
 | Cuentas de aportes | `app_config/donations_config` | Paneles escriben; sección pública y app leen. |
 | Reportes ciudadanos | `citizen_reports` | Sitio muestra; Android/otros clientes aportan según sus flujos. |
@@ -938,127 +948,113 @@ Revisar `{data,error}` de Supabase, no solo excepciones. `ContactSection`, `fetc
 | Solicitudes de ubicaciones | `community_locations` en modelo versionado | El panel React intenta incorrectamente otra tabla. |
 | Mensaje de contacto | `citizen_feedback` intentada por el formulario | `ContactSection`; esquema remoto no comprobado. |
 | Contenido de blog | Archivos locales del repositorio | Autores editan; React y prerender leen. |
-| Emisión push | Solicitud HTTP → servidor → FCM | Handler `sendPushAlert`; no hay persistencia de auditoría en el archivo. |
+| Emisión push | Bearer → usuario/rol → claim_push_alert durable → FCM | Handler sendPushAlert; los registros de cuota se gestionan en SQL y no representan confirmaciones de entrega. |
 
-### 10.6 Verificaciones locales que respaldan la lectura
+### 10.6 Pruebas locales de regresión
 
-Durante la revisión previa se ejecutaron comprobaciones aisladas en memoria, sustituyendo Supabase/Firebase por objetos simulados y sin llamadas de red:
+Fuentes: [admin-ui.test.cjs](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/tests/admin-ui.test.cjs) y [sendPushAlert.test.cjs](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/tests/sendPushAlert.test.cjs). Se ejecutan con **npm test** y no contactan Supabase, Firebase ni otros servicios.
 
-- Handler de push con GET y sin identidad: invocó el envío simulado una vez y respondió 200.
-- Predicción con hora 01:00 de Caracas y franja 23:00–03:00: devolvió un comienzo a 22 horas, omitiendo el corte que había empezado ayer.
-- Lógica clásica de lectura PAC simulada con error: llamó publicación automática y mostró conexión. Se documenta en el capítulo del panel clásico, no se corrige aquí.
-- Una etiqueta HTML inocua en nombre de solicitud del panel clásico llegó sin escape al render. Su análisis detallado corresponde al capítulo clásico.
+La ejecución local de cierre pasó **75/75 pruebas**, de las cuales 25 verifican UI/controlador/PAC/aprobaciones y 50 la función de envío. Los contratos comprobados incluyen bandera falsa sin acceso, token almacenado rechazado por Auth, rol false aunque metadatos digan admin, RPC ausente, expiración/renovación, Bearer vigente, revocación antes del envío, 401/403, salida de sesión y reintento tras fallo de red. La carga PAC fallida no escribe y conserva la copia anterior; una publicación fallida se propaga.
 
-Son evidencias de comportamiento del código local bajo condiciones controladas, no pruebas de explotación, disponibilidad, permisos activos o recepción de notificaciones en producción. La redacción de este capítulo solo añadió documentación; no alteró código de producto, configuración ni datos externos.
+Los fixtures de XSS pasan texto HTML inocuo hostil por las funciones reales de propuestas, feed, fichas, tabla, kanban, clusters y popup Leaflet. Comprueban escape de texto/atributos y conservación de data-admin-action, y que el dispatcher entrega el ID original a la función. Son pruebas Node con DOM simulado: no certifican todas las combinaciones de navegador, accesibilidad o red. El build real de Vite también se ejecuta, sin desplegar.
+
+Helpers de las pruebas UI:
+
+| Nombre exacto | Contrato y papel |
+|---|---|
+| session(token,expiry) | Devuelve una sesión ficticia con vencimiento controlado; sus tokens solo existen en memoria de prueba. |
+| fakeClient(settings) | Devuelve cliente Auth/RPC simulado, llamadas observadas y controles de rol/evento. Puede forzar sesión ausente, error de red o renovación. |
+| fakeNode() | Crea un nodo mínimo con HTML, atributos/estado y appendChild para comprobar salida del render. No ejecuta HTML ni simula todo un navegador. |
+| legacyContext() | Construye VM con esos nodos y servicios ficticios y carga el JavaScript clásico real; sus timers de prueba no mantienen abierto Node. |
+| extractFunction(name) | Analiza el clásico con parseAst, localiza la función declarada y devuelve código/nodo para ejecutar un caso aislado. No reimplementa el comportamiento que se comprueba. |
+| approvalFixture({pacFailure,loaded,insertFailure}) | Extiende la VM con UUID local fijo, almacenamiento en Map y registro de INSERT/upsert/DELETE/publicación. Puede denegar inserción o publicación y retirar el PAC cargado. Sustituye solo dependencias y render periférico; ejecuta aprobación, fusión, selección de origen y helper de inserción reales. Devuelve contexto, writes y alerts. |
+| setApprovalFields(context,id) | Escribe los valores editados del formulario ficticio para una solicitud; retorna undefined. Permite comprobar la función real sin duplicar la lectura de campos en el escenario. |
+
+En las pruebas del backend, **fixture(overrides)** crea handler por inyección, petición/respuesta y registro de dependencias simuladas. **noDelivery(f)** exige que no se haya inicializado Firebase ni llamado send. Los casos cubren método, origen, JWT, rol, payload, límites de tamaño/controles, cuota durable y mensajes de error sin detalles privados. Los callbacks anónimos de test son escenarios, no funciones de producción.
+
+Los objetos simulados también declaran métodos con nombre que el inventario registra. Su alcance es exclusivamente la prueba:
+
+| Método o callback exacto y ámbito | Parámetros, retorno y efecto simulado |
+|---|---|
+| `authListener` de `fakeClient` | Comienza como callback vacío; `onAuthStateChange(callback)` lo sustituye y `emit(event)` lo invoca con evento/sesión. La versión vacía creada por `unsubscribe()` deja de notificar, sin servicios externos. |
+| `unsubscribe()` | Retorna undefined y reemplaza authListener por una función vacía. Comprueba que la limpieza del controlador no siga recibiendo eventos del fixture. |
+| `rpc(name)` de `fakeClient` | Registra el nombre llamado; resuelve `{data:role}` o un error simulado. `setRole(value)` cambia ese Boolean para probar revocación antes del envío. No escribe una tabla de roles real. |
+| `getItem()` | El primer caso devuelve una bandera local falsa a propósito; el contexto clásico devuelve null. Ninguna variante concede acceso: permite comprobar que el controlador exige Auth y RPC. |
+| `add()`, `remove()` y `toggle()` de classList | Retornan undefined y aceptan cualquier argumento de presentación; no calculan CSS ni demuestran el aspecto visual del componente. |
+| `setAttribute()` | Stub vacío de fakeNode. Permite ejecutar el render que toca atributos, pero la comprobación de escape examina el HTML generado y no un árbol DOM de navegador. |
+| `querySelector()` | En fakeNode y document retorna null. No localiza nodos reales; los escenarios proporcionan por separado los controles que necesitan verificar. |
+| `appendChild(child)` | Añade el nodo ficticio a children y permite inspeccionar el HTML producido en cada fila/tarjeta. |
+| `addEventListener()` y `querySelectorAll()` | El primero no registra listeners reales y el segundo devuelve []; las funciones objetivo se invocan explícitamente. Por ello estas pruebas no prueban el arranque ni la navegación en un navegador. |
+| `getElementById(id)` y `createElement` | Mantienen un nodo ficticio por ID y crean fakeNode; permiten observar cambios de innerHTML/textContent y listas children. No consultan el documento de la máquina. |
+| `log()`, `warn()`, `error()` y `alert()` | Callbacks vacíos en VM que evitan salida o diálogos durante fallos previstos. No ocultan el resultado de las aserciones de node:test. |
+| `setInterval(...args)` | Crea el timer de Node y llama unref() para que el intervalo heredado de telemetría no mantenga abierta la prueba. Su callback sigue siendo el código original. |
+| `from()`, `select()` y `eq()` de fixtures PAC | Devuelven un objeto de consulta encadenable sin red. `single()` resuelve el error de lectura o el config_value del caso; las distintas declaraciones prueban ausencia, forma vacía y valores inválidos. |
+| `upsert()` de fixtures PAC | Incrementa writes y, en el caso de publicación, resuelve un error simulado. Permite exigir cero escrituras al leer y exactamente una escritura fallida al publicar. |
+| `publishPacSchedule()` del contexto de lectura | Incrementa writes si el loader intentase una publicación indebida; no se llama en el caso correcto. Es distinto de la función real de publicación que otro caso extrae y ejecuta. |
+| `updateSyncStatus(value)` | Añade el estado a statuses. La lectura fallida debe registrar únicamente offline y conservar matriz/configuración anteriores. |
+| `divIcon(options)` y `marker()` | La primera devuelve sus opciones; la segunda devuelve un objeto de marcador simulado con `bindPopup(html)`, que captura el popup y retorna un objeto. No descargan tiles ni instalan Leaflet. |
+| `clearLayers()` y `addLayer()` | Stubs vacíos del grupo de marcadores, suficientes para ejecutar la creación real del popup y comprobar su texto escapado. No demuestran la posición visual del mapa. |
+| `editSector(value)` del escenario delegado | Registra el argumento en seen. Comprueba que handleAdminAction transmite el ID original como dato, incluidas comillas/caracteres HTML, sin interpretarlo como código. |
+| `closest()` y `preventDefault()` del evento delegado | closest devuelve el control preparado; preventDefault es vacío. El dispatcher real decide evento/tipo/acción, pero la propagación DOM no se simula por completo. |
+| `rpc(name,args)` del fixture backend | Registra nombre y argumentos; devuelve por separado el permiso is_admin y la reserva claim_push_alert o simula rechazo/error. Verifica orden y bloqueo sin conexión PostgreSQL. |
+| `createClientImpl(url,key,options)` y `getMessagingImpl()` | Sustituyen SDK y proveedor por objetos registrados. Su auth.getUser(token), send(payload) y callbacks de error resuelven solo datos locales configurados por el caso. |
+| `setHeader(name,value)`, `status(code)`, `json(body)`, `end()` y `run()` | Simulan la respuesta HTTP y la ejecución del handler; almacenan cabeceras/código/cuerpo para aserciones. Retornar el objeto de respuesta permite las cadenas del handler, sin abrir un puerto HTTP. |
+| `randomUUID()` y `setItem(key,value)` de approvalFixture | Devuelven un UUID determinista de prueba y escriben en Map, respectivamente. El producto usa crypto.randomUUID del navegador; el fixture no consume aleatoriedad ni almacenamiento del usuario. |
+| `hideActiveBroadcast()` del caso de error de avisos | Sustituye el render con una marca booleana. La prueba exige que no se llame cuando Supabase rechaza guardar/retirar el aviso, y comprueba que el formulario mantiene el texto sin anunciar éxito. |
+| `insert(payload)`, `delete()` y `eq(key,value)` de approvalFixture | Registran operación/tabla/payload o filtro exacto y devuelven resultados locales. La colisión simulada hace fallar INSERT y permite exigir que no haya upsert ni DELETE de la solicitud. |
+
+No se aplicó una migración ni se emitió una notificación mediante estas pruebas. El despliegue, preparación del administrador y permisos efectivos deben verificarse por el responsable del entorno.
+
+Las regresiones de aprobación comprueban que un ID ciudadano igual al de un sector oficial no lo sobrescribe; los nuevos sectores reciben ID administrativo y se insertan. Los clusters distinguen origen fijado localmente, incluso si una propuesta trae un campo _source falso; no borran sectores por ID ciudadano o por nombre. Se exige PAC cargado antes de mutar y se conserva la cola ante fallo de publicación. Las pruebas de avisos comprueban que un error Supabase no oculta el aviso ni borra el formulario. El límite transaccional de estas secuencias se explica en el capítulo 05.
+
 
 ## 11. Índice de funciones y cobertura
 
-El índice siguiente enumera las declaraciones nombradas de este ámbito detectadas por el inventario AST común, con archivo y línea. `exports` identifica el handler anónimo asignado a `module.exports`, no una función que el código haya bautizado con ese nombre. Los callbacks anónimos de efectos, temporizadores, `map/filter/reduce`, formularios y botones se explican en el bloque de su componente; no se inventa un nombre de API para cada uno.
+El índice agrupa por archivo los nombres exactos del inventario AST y los helpers de regresión añadidos en este cierre. Las fichas anteriores explican sus contratos; los métodos simulados tienen su tabla específica en 10.6. Las líneas y hashes actualizados se consultan en [07-indice-funciones.md](07-indice-funciones.md) e [inventario-funciones.json](inventario-funciones.json). Una repetición del mismo nombre en un objeto de prueba no representa una API nueva.
 
-Las exportaciones `default` de los cinco artículos son objetos, y `defineConfig(...)` exporta configuración. `index.html`, `main.jsx`, `index.css`, `supabase.js` y los JSON no añaden funciones nombradas propias, pero están cubiertos por sus apartados. Los cálculos `useMemo` relevantes también se describen aunque el inventario no los cuente como declaraciones de función con nombre.
+Los handlers anónimos exportados por las consultas se denominan exports por su asignación CommonJS. Los cinco artículos exportan objetos anónimos, no funciones. El wrapper src/lib/adminAuth.js exporta el controlador adminAuth. index.html, main.jsx, index.css, supabase.js, los JSON y la configuración Vite quedan cubiertos en sus apartados aunque no añadan declaraciones con nombre. Los callbacks anónimos de efectos, temporizadores, formularios y map/filter se explican dentro de la función que los registra.
 
-| Archivo de origen | Función / ámbito | Línea |
-|---|---|---:|
-| [api/getMonthlyWeeks.js](<E:/LUZ BARINAS/admin-web/api/getMonthlyWeeks.js:7>) | `exports` | 7 |
-| [api/getOutagePrediction.js](<E:/LUZ BARINAS/admin-web/api/getOutagePrediction.js:17>) | `getDayIndex` | 17 |
-| [api/getOutagePrediction.js](<E:/LUZ BARINAS/admin-web/api/getOutagePrediction.js:21>) | `exports` | 21 |
-| [api/sendPushAlert.js](<E:/LUZ BARINAS/admin-web/api/sendPushAlert.js:21>) | `exports` | 21 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:28>) | `esc` | 28 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:35>) | `jsonLdTag` | 35 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:38>) | `upsertTag` | 38 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:42>) | `setMeta` | 42 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:47>) | `applyHead` | 47 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:63>) | `injectRoot` | 63 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:87>) | `articleMarkup` | 87 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:118>) | `blogIndexMarkup` | 118 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:140>) | `breadcrumb` | 140 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:148>) | `sitemapXml` | 148 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:173>) | `blogPrerender` | 173 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:178>) | `blogPrerender.configResolved` | 178 |
-| [scripts/blog-prerender.mjs](<E:/LUZ BARINAS/admin-web/scripts/blog-prerender.mjs:181>) | `blogPrerender.closeBundle` | 181 |
-| [src/App.jsx](<E:/LUZ BARINAS/admin-web/src/App.jsx:17>) | `App` | 17 |
-| [src/App.jsx](<E:/LUZ BARINAS/admin-web/src/App.jsx:19>) | `App.getInitialRoute` | 19 |
-| [src/App.jsx](<E:/LUZ BARINAS/admin-web/src/App.jsx:39>) | `App.handlePopState` | 39 |
-| [src/App.jsx](<E:/LUZ BARINAS/admin-web/src/App.jsx:47>) | `App.navigate` | 47 |
-| [src/components/blog/ArticleCover.jsx](<E:/LUZ BARINAS/admin-web/src/components/blog/ArticleCover.jsx:13>) | `ArticleCover` | 13 |
-| [src/components/blog/EditorialDisclaimer.jsx](<E:/LUZ BARINAS/admin-web/src/components/blog/EditorialDisclaimer.jsx:6>) | `EditorialDisclaimer` | 6 |
-| [src/components/BlogPreviewSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/BlogPreviewSection.jsx:6>) | `BlogPreviewSection` | 6 |
-| [src/components/BlogPreviewSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/BlogPreviewSection.jsx:9>) | `BlogPreviewSection.navigateTo` | 9 |
-| [src/components/ContactSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/ContactSection.jsx:5>) | `ContactSection` | 5 |
-| [src/components/ContactSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/ContactSection.jsx:15>) | `ContactSection.handleSubmit` | 15 |
-| [src/components/DonationsSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/DonationsSection.jsx:5>) | `DonationsSection` | 5 |
-| [src/components/DonationsSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/DonationsSection.jsx:18>) | `DonationsSection.loadRemoteDonations` | 18 |
-| [src/components/DonationsSection.jsx](<E:/LUZ BARINAS/admin-web/src/components/DonationsSection.jsx:39>) | `DonationsSection.copyToClipboard` | 39 |
-| [src/components/Features.jsx](<E:/LUZ BARINAS/admin-web/src/components/Features.jsx:4>) | `Features` | 4 |
-| [src/components/Footer.jsx](<E:/LUZ BARINAS/admin-web/src/components/Footer.jsx:4>) | `Footer` | 4 |
-| [src/components/Footer.jsx](<E:/LUZ BARINAS/admin-web/src/components/Footer.jsx:5>) | `Footer.navigateTo` | 5 |
-| [src/components/Hero.jsx](<E:/LUZ BARINAS/admin-web/src/components/Hero.jsx:4>) | `Hero` | 4 |
-| [src/components/Navbar.jsx](<E:/LUZ BARINAS/admin-web/src/components/Navbar.jsx:4>) | `Navbar` | 4 |
-| [src/components/Navbar.jsx](<E:/LUZ BARINAS/admin-web/src/components/Navbar.jsx:7>) | `Navbar.navigateTo` | 7 |
-| [src/components/PacLiveWidget.jsx](<E:/LUZ BARINAS/admin-web/src/components/PacLiveWidget.jsx:9>) | `PacLiveWidget` | 9 |
-| [src/components/telemetry/CircuitStabilityWidget.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/CircuitStabilityWidget.jsx:5>) | `CircuitStabilityWidget` | 5 |
-| [src/components/telemetry/CircuitStabilityWidget.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/CircuitStabilityWidget.jsx:41>) | `CircuitStabilityWidget.getStatusConfig` | 41 |
-| [src/components/telemetry/CitizenReportsTicker.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/CitizenReportsTicker.jsx:5>) | `CitizenReportsTicker` | 5 |
-| [src/components/telemetry/CitizenReportsTicker.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/CitizenReportsTicker.jsx:8>) | `CitizenReportsTicker.getStatusBadge` | 8 |
-| [src/components/telemetry/LiveBlockCountdown.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/LiveBlockCountdown.jsx:4>) | `getBlockBadgeClass` | 4 |
-| [src/components/telemetry/LiveBlockCountdown.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/LiveBlockCountdown.jsx:14>) | `getBlockBgSoft` | 14 |
-| [src/components/telemetry/LiveBlockCountdown.jsx](<E:/LUZ BARINAS/admin-web/src/components/telemetry/LiveBlockCountdown.jsx:24>) | `LiveBlockCountdown` | 24 |
-| [src/data/articles.js](<E:/LUZ BARINAS/admin-web/src/data/articles.js:42>) | `stripHtml` | 42 |
-| [src/data/articles.js](<E:/LUZ BARINAS/admin-web/src/data/articles.js:49>) | `countWords` | 49 |
-| [src/data/articles.js](<E:/LUZ BARINAS/admin-web/src/data/articles.js:51>) | `enrich` | 51 |
-| [src/data/articles.js](<E:/LUZ BARINAS/admin-web/src/data/articles.js:69>) | `getArticleBySlug` | 69 |
-| [src/data/articles.js](<E:/LUZ BARINAS/admin-web/src/data/articles.js:71>) | `getRelatedArticles` | 71 |
-| [src/data/articles.js](<E:/LUZ BARINAS/admin-web/src/data/articles.js:75>) | `getTableOfContents` | 75 |
-| [src/data/articles.js](<E:/LUZ BARINAS/admin-web/src/data/articles.js:85>) | `formatDate` | 85 |
-| [src/lib/seo.js](<E:/LUZ BARINAS/admin-web/src/lib/seo.js:11>) | `upsert` | 11 |
-| [src/lib/seo.js](<E:/LUZ BARINAS/admin-web/src/lib/seo.js:30>) | `metaByName` | 30 |
-| [src/lib/seo.js](<E:/LUZ BARINAS/admin-web/src/lib/seo.js:36>) | `metaByProperty` | 36 |
-| [src/lib/seo.js](<E:/LUZ BARINAS/admin-web/src/lib/seo.js:42>) | `useDocumentMeta` | 42 |
-| [src/lib/telemetry.js](<E:/LUZ BARINAS/admin-web/src/lib/telemetry.js:10>) | `formatRelativeTime` | 10 |
-| [src/lib/telemetry.js](<E:/LUZ BARINAS/admin-web/src/lib/telemetry.js:30>) | `calculatePacTime` | 30 |
-| [src/lib/telemetry.js](<E:/LUZ BARINAS/admin-web/src/lib/telemetry.js:114>) | `processCircuitsSummary` | 114 |
-| [src/lib/telemetry.js](<E:/LUZ BARINAS/admin-web/src/lib/telemetry.js:181>) | `fetchTelemetryFromSupabase` | 181 |
-| [src/lib/telemetry.js](<E:/LUZ BARINAS/admin-web/src/lib/telemetry.js:235>) | `useTelemetry` | 235 |
-| [src/lib/telemetry.js](<E:/LUZ BARINAS/admin-web/src/lib/telemetry.js:262>) | `useTelemetry.refresh` | 262 |
-| [src/lib/telemetry.js](<E:/LUZ BARINAS/admin-web/src/lib/telemetry.js:297>) | `useTelemetry.handleVisibilityChange` | 297 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:13>) | `AdminPortal` | 13 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:74>) | `AdminPortal.fetchAdminData` | 74 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:140>) | `AdminPortal.handleLogin` | 140 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:152>) | `AdminPortal.handleLogout` | 152 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:159>) | `AdminPortal.cycleCell` | 159 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:175>) | `AdminPortal.handleSavePac` | 175 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:201>) | `AdminPortal.handleSaveDonations` | 201 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:222>) | `AdminPortal.handleAddSector` | 222 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:232>) | `AdminPortal.handleRemoveSector` | 232 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:240>) | `AdminPortal.handleSendBroadcast` | 240 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:264>) | `AdminPortal.pingApi` | 264 |
-| [src/pages/AdminPortal.jsx](<E:/LUZ BARINAS/admin-web/src/pages/AdminPortal.jsx:345>) | `AdminPortal.getBadgeClass` | 345 |
-| [src/pages/Blog.jsx](<E:/LUZ BARINAS/admin-web/src/pages/Blog.jsx:8>) | `Blog` | 8 |
-| [src/pages/Blog.jsx](<E:/LUZ BARINAS/admin-web/src/pages/Blog.jsx:43>) | `Blog.open` | 43 |
-| [src/pages/BlogPost.jsx](<E:/LUZ BARINAS/admin-web/src/pages/BlogPost.jsx:15>) | `BlogPost` | 15 |
-| [src/pages/BlogPost.jsx](<E:/LUZ BARINAS/admin-web/src/pages/BlogPost.jsx:60>) | `BlogPost.handleContentClick` | 60 |
-| [src/pages/BlogPost.jsx](<E:/LUZ BARINAS/admin-web/src/pages/BlogPost.jsx:70>) | `BlogPost.go` | 70 |
-| [src/pages/DeveloperInfo.jsx](<E:/LUZ BARINAS/admin-web/src/pages/DeveloperInfo.jsx:4>) | `DeveloperInfo` | 4 |
-| [src/pages/LandingPage.jsx](<E:/LUZ BARINAS/admin-web/src/pages/LandingPage.jsx:9>) | `LandingPage` | 9 |
-| [src/pages/PrivacyPolicy.jsx](<E:/LUZ BARINAS/admin-web/src/pages/PrivacyPolicy.jsx:4>) | `PrivacyPolicy` | 4 |
-| [src/pages/RefundPolicy.jsx](<E:/LUZ BARINAS/admin-web/src/pages/RefundPolicy.jsx:4>) | `RefundPolicy` | 4 |
-| [src/pages/TermsConditions.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TermsConditions.jsx:4>) | `TermsConditions` | 4 |
-| [src/pages/Transparencia.jsx](<E:/LUZ BARINAS/admin-web/src/pages/Transparencia.jsx:4>) | `Transparencia` | 4 |
-| [src/pages/tv/AppTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/AppTheme.jsx:16>) | `AppTheme` | 16 |
-| [src/pages/tv/AppTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/AppTheme.jsx:31>) | `AppTheme.getAppBlockColor` | 31 |
-| [src/pages/tv/LightTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/LightTheme.jsx:12>) | `LightTheme` | 12 |
-| [src/pages/tv/MercuryTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/MercuryTheme.jsx:11>) | `MercuryTheme` | 11 |
-| [src/pages/tv/PerformanceTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/PerformanceTheme.jsx:12>) | `PerformanceTheme` | 12 |
-| [src/pages/tv/RadarTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/RadarTheme.jsx:11>) | `RadarTheme` | 11 |
-| [src/pages/tv/WebTheme.jsx](<E:/LUZ BARINAS/admin-web/src/pages/tv/WebTheme.jsx:14>) | `WebTheme` | 14 |
-| [src/pages/TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:96>) | `TvKioskMode` | 96 |
-| [src/pages/TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:119>) | `TvKioskMode.handleSelectTheme` | 119 |
-| [src/pages/TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:141>) | `TvKioskMode.handleSelectBlock` | 141 |
-| [src/pages/TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:151>) | `TvKioskMode.toggleFullscreen` | 151 |
-| [src/pages/TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:167>) | `TvKioskMode.handleFsChange` | 167 |
-| [src/pages/TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:181>) | `TvKioskMode.requestWakeLock` | 181 |
-| [src/pages/TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:192>) | `TvKioskMode.handleVisibility` | 192 |
-| [src/pages/TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:210>) | `TvKioskMode.handleKeyDown` | 210 |
-| [src/pages/TvKioskMode.jsx](<E:/LUZ BARINAS/admin-web/src/pages/TvKioskMode.jsx:265>) | `TvKioskMode.getCaracasClock` | 265 |
+| Archivo de origen | Funciones y ámbitos nominales |
+|---|---|
+| [api/getMonthlyWeeks.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/api/getMonthlyWeeks.js) | `exports` |
+| [api/getOutagePrediction.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/api/getOutagePrediction.js) | `getDayIndex`, `exports` |
+| [api/sendPushAlert.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/api/sendPushAlert.js) | `getFirebaseMessaging`, `readSupabaseConfig`, `hasSameOrigin`, `parsePayload`, `createHandler`, `createHandler.sendPushAlert` |
+| [public/admin-security.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/public/admin-security.js) | `installAdminSecurity`, `adminSecurityFactory`, `adminSecurityFactory.escapeHtml`, `adminSecurityFactory.normalizeBlock`, `adminSecurityFactory.accessError`, `adminSecurityFactory.createAdminAuth`, `adminSecurityFactory.createAdminAuth.publish`, `adminSecurityFactory.createAdminAuth.clearTimer`, `adminSecurityFactory.createAdminAuth.verifiedSession`, `adminSecurityFactory.createAdminAuth.requireAdmin`, `adminSecurityFactory.createAdminAuth.handleVisibility`, `adminSecurityFactory.createAdminAuth.subscribe`, `adminSecurityFactory.createAdminAuth.signIn`, `adminSecurityFactory.createAdminAuth.signOut`, `adminSecurityFactory.createAdminAuth.postJson`, `adminSecurityFactory.createAdminAuth.getState`, `adminSecurityFactory.readPacSchedule` |
+| [scripts/blog-prerender.mjs](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/scripts/blog-prerender.mjs) | `esc`, `jsonLdTag`, `upsertTag`, `setMeta`, `applyHead`, `injectRoot`, `articleMarkup`, `blogIndexMarkup`, `breadcrumb`, `sitemapXml`, `blogPrerender`, `blogPrerender.configResolved`, `blogPrerender.closeBundle` |
+| [src/App.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/App.jsx) | `App`, `App.getInitialRoute`, `App.handlePopState`, `App.navigate` |
+| [src/components/blog/ArticleCover.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/blog/ArticleCover.jsx) | `ArticleCover` |
+| [src/components/blog/EditorialDisclaimer.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/blog/EditorialDisclaimer.jsx) | `EditorialDisclaimer` |
+| [src/components/BlogPreviewSection.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/BlogPreviewSection.jsx) | `BlogPreviewSection`, `BlogPreviewSection.navigateTo` |
+| [src/components/ContactSection.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/ContactSection.jsx) | `ContactSection`, `ContactSection.handleSubmit` |
+| [src/components/DonationsSection.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/DonationsSection.jsx) | `DonationsSection`, `DonationsSection.loadRemoteDonations`, `DonationsSection.copyToClipboard` |
+| [src/components/Features.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/Features.jsx) | `Features` |
+| [src/components/Footer.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/Footer.jsx) | `Footer`, `Footer.navigateTo` |
+| [src/components/Hero.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/Hero.jsx) | `Hero` |
+| [src/components/Navbar.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/Navbar.jsx) | `Navbar`, `Navbar.navigateTo` |
+| [src/components/PacLiveWidget.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/PacLiveWidget.jsx) | `PacLiveWidget` |
+| [src/components/telemetry/CircuitStabilityWidget.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/telemetry/CircuitStabilityWidget.jsx) | `CircuitStabilityWidget`, `CircuitStabilityWidget.getStatusConfig` |
+| [src/components/telemetry/CitizenReportsTicker.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/telemetry/CitizenReportsTicker.jsx) | `CitizenReportsTicker`, `CitizenReportsTicker.getStatusBadge` |
+| [src/components/telemetry/LiveBlockCountdown.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/telemetry/LiveBlockCountdown.jsx) | `getBlockBadgeClass`, `getBlockBgSoft`, `LiveBlockCountdown` |
+| [src/data/articles.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/data/articles.js) | `stripHtml`, `countWords`, `enrich`, `getArticleBySlug`, `getRelatedArticles`, `getTableOfContents`, `formatDate` |
+| [src/lib/seo.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/lib/seo.js) | `upsert`, `metaByName`, `metaByProperty`, `useDocumentMeta` |
+| [src/lib/telemetry.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/lib/telemetry.js) | `formatRelativeTime`, `calculatePacTime`, `processCircuitsSummary`, `fetchTelemetryFromSupabase`, `useTelemetry`, `useTelemetry.refresh`, `useTelemetry.handleVisibilityChange` |
+| [src/pages/AdminPortal.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/AdminPortal.jsx) | `AdminPortal`, `AdminPortal.fetchAdminData`, `AdminPortal.handleLogin`, `AdminPortal.handleLogout`, `AdminPortal.cycleCell`, `AdminPortal.handleSavePac`, `AdminPortal.handleSaveDonations`, `AdminPortal.handleAddSector`, `AdminPortal.handleRemoveSector`, `AdminPortal.handleSendBroadcast`, `AdminPortal.pingApi`, `AdminPortal.getBadgeClass` |
+| [src/pages/Blog.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/Blog.jsx) | `Blog`, `Blog.open` |
+| [src/pages/BlogPost.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/BlogPost.jsx) | `BlogPost`, `BlogPost.handleContentClick`, `BlogPost.go` |
+| [src/pages/DeveloperInfo.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/DeveloperInfo.jsx) | `DeveloperInfo` |
+| [src/pages/LandingPage.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/LandingPage.jsx) | `LandingPage` |
+| [src/pages/PrivacyPolicy.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/PrivacyPolicy.jsx) | `PrivacyPolicy` |
+| [src/pages/RefundPolicy.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/RefundPolicy.jsx) | `RefundPolicy` |
+| [src/pages/TermsConditions.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/TermsConditions.jsx) | `TermsConditions` |
+| [src/pages/Transparencia.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/Transparencia.jsx) | `Transparencia` |
+| [src/pages/tv/AppTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/AppTheme.jsx) | `AppTheme`, `AppTheme.getAppBlockColor` |
+| [src/pages/tv/LightTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/LightTheme.jsx) | `LightTheme` |
+| [src/pages/tv/MercuryTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/MercuryTheme.jsx) | `MercuryTheme` |
+| [src/pages/tv/PerformanceTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/PerformanceTheme.jsx) | `PerformanceTheme` |
+| [src/pages/tv/RadarTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/RadarTheme.jsx) | `RadarTheme` |
+| [src/pages/tv/WebTheme.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/tv/WebTheme.jsx) | `WebTheme` |
+| [src/pages/TvKioskMode.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/pages/TvKioskMode.jsx) | `TvKioskMode`, `TvKioskMode.handleSelectTheme`, `TvKioskMode.handleSelectBlock`, `TvKioskMode.toggleFullscreen`, `TvKioskMode.handleFsChange`, `TvKioskMode.requestWakeLock`, `TvKioskMode.handleVisibility`, `TvKioskMode.handleKeyDown`, `TvKioskMode.getCaracasClock` |
+| [tests/admin-ui.test.cjs](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/tests/admin-ui.test.cjs) | `session`, `fakeClient`, `fakeClient.authListener`, `fakeClient.getSession`, `fakeClient.getUser`, `fakeClient.refreshSession`, `fakeClient.signInWithPassword`, `fakeClient.signOut`, `fakeClient.onAuthStateChange`, `fakeClient.onAuthStateChange.unsubscribe`, `fakeClient.onAuthStateChange.unsubscribe.authListener`, `fakeClient.rpc`, `fakeClient.setRole`, `fakeClient.emit`, `getItem`, `now`, `fetch`, `fetch.json`, `fakeNode`, `fakeNode.add`, `fakeNode.remove`, `fakeNode.toggle`, `fakeNode.appendChild`, `fakeNode.setAttribute`, `fakeNode.querySelector`, `legacyContext`, `legacyContext.addEventListener`, `legacyContext.querySelectorAll`, `legacyContext.querySelector`, `legacyContext.getElementById`, `legacyContext.log`, `legacyContext.warn`, `legacyContext.error`, `legacyContext.setInterval`, `legacyContext.alert`, `legacyContext.confirm`, `legacyContext.getItem`, `legacyContext.createClient`, `extractFunction`, `select`, `eq`, `single`, `upsert`, `from`, `publishPacSchedule`, `updateSyncStatus`, `getElementById`, `requireAdmin`, `alert`, `error`, `divIcon`, `marker`, `marker.bindPopup`, `clearLayers`, `addLayer`, `editSector`, `closest`, `preventDefault`, `approvalFixture`, `setApprovalFields`, `approvalFixture.randomUUID`, `approvalFixture.getItem`, `approvalFixture.setItem`, `approvalFixture.insert`, `approvalFixture.upsert`, `approvalFixture.delete`, `approvalFixture.eq` |
+| [tests/sendPushAlert.test.cjs](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/tests/sendPushAlert.test.cjs) | `fixture`, `fixture.error`, `fixture.createClientImpl`, `fixture.createClientImpl.getUser`, `fixture.createClientImpl.rpc`, `fixture.getMessagingImpl`, `fixture.getMessagingImpl.send`, `fixture.setHeader`, `fixture.status`, `fixture.json`, `fixture.end`, `fixture.run`, `noDelivery` |
 
-**Cobertura comprobada:** 101 declaraciones nombradas del inventario AST de este capítulo, incluidos tres handlers asignados a `module.exports`; además, los **50 archivos** del alcance, incluidos los archivos sin funciones, y los callbacks relevantes descritos en cada apartado. Se verificó que las 152 referencias a fuentes locales apuntan a archivos existentes. El inventario global y su alcance se encuentran en `inventario-funciones.json` y `07-indice-funciones.md`.
+La cobertura incluye los archivos sin funciones y las exportaciones default anónimas descritas en el texto. El inventario global ofrece una verificación mecánica de presencia y referencias, que complementa la explicación funcional; las pruebas locales y su alcance se describen en 10.6.

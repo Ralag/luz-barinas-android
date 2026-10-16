@@ -1,8 +1,8 @@
 # PAC Barinas: documentación del sistema
 
-**Versión documental: 15 de octubre de 2026.** Esta guía describe el código y la configuración presentes en la carpeta de trabajo. Distingue capacidades implementadas, componentes disponibles sin conexión a la navegación y trabajo pendiente. No certifica qué revisión está publicada, permisos efectivos de servidores, disponibilidad de Google Play ni funcionamiento de servicios en producción.
+**Versión documental: 16 de octubre de 2026.** Esta guía describe el código de ambos repositorios después de la primera corrección de seguridad y alertas por bloque. El [registro de cambios y verificaciones](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md) distingue código, pruebas y activación remota. Publicar código no acredita su distribución en Google Play.
 
-La referencia Android es **1.3.1, versionCode 7**. Los commits de referencia al comenzar la actualización documental fueron **c890853** en Android y **19a76ce** en web; también se examinó el contenido local disponible. Esta actualización reemplaza la descripción histórica y no implica que los problemas identificados hayan sido corregidos.
+La referencia Android sigue siendo **1.3.1, versionCode 7**; todavía no se ha emitido una nueva versión del binario. Los commits c890853 en Android y 19a76ce en web corresponden al análisis inicial. Los defectos corregidos se identifican expresamente; el trabajo restante figura en la tabla de mantenimiento.
 
 ## Índice
 
@@ -118,9 +118,9 @@ Los temas comparten datos. El tema App imita Material 3, pero sus textos de bate
 
 La navegación interna a /admin puede montar **AdminPortal React**; una solicitud directa o recarga de /admin se reescribe a **admin.html**, el panel clásico. El comportamiento cambia según cómo se llega a la misma dirección.
 
-React ofrece matriz, lista de sectores, reportes, donaciones, push y diagnóstico. Sus altas/bajas de sectores solo cambian memoria; consulta nombres de tabla/campos incompatibles con el esquema entregado. Guardar la matriz reemplaza config_value y omite sectorsA–D. Su selector de audiencia push tampoco limita el envío: la API usa el tema global.
+React ofrece matriz, sectores, reportes, donaciones, push y diagnóstico. Guardar la matriz conserva el documento PAC cargado y sus asignaciones sectorsA–D; las altas/bajas del gestor de sectores solo modifican memoria. Persisten contratos de datos pendientes de corregir. Ambos formularios push envían audiencia global; el endpoint admite block opcional, que las interfaces actuales no exponen. Android todavía no recibe esos temas FCM.
 
-El clásico incorpora edición de franjas, proyección mensual, telemetría, bloques, directorio/mapa, propuestas, agrupación de duplicados, validación Nominatim, avisos, consola y donaciones. La fuente distribuida es public/app.js; la copia app.js raíz presenta diferencias. Ambos paneles usan acceso visual en el navegador, sin identidad administrativa comprobada por el servidor.
+El clásico incorpora franjas, proyección mensual, telemetría, bloques, directorio/mapa, propuestas, duplicados, Nominatim, avisos, consola y donaciones. public/app.js y app.js raíz están sincronizados. Ambos paneles comparten admin-security.js: Supabase Auth, getUser() y comprobación is_admin(). Un marcador local o una contraseña embebida ya no concede acceso. El clásico escapa textos remotos y usa acciones delegadas para las propuestas.
 
 ## 6. Datos y contratos compartidos
 
@@ -136,7 +136,7 @@ Room abre luz_barinas.db, versión 3:
 
 La migración 2→3 añade isCommunity local y observation en pendientes. Hay fallback destructivo para rutas no cubiertas y exportSchema está desactivado. Una migración remota no actualiza Room automáticamente.
 
-Las preferencias se separan entre luz_barinas_user_prefs —dirección, selección, perfiles y tema—, pac_schedule_prefs —matriz, franjas, listas y versión—, pac_alert_settings —anticipación, notificación, sirena, retorno y vibración— y cloud_sync_prefs —marcas de configuración/avisos recibidos—. El navegador usa sessionStorage para caché y localStorage para tema/bloque TV y el marcador visual del panel.
+Las preferencias se separan entre luz_barinas_user_prefs —dirección, selección, perfiles y tema—, pac_schedule_prefs —matriz, franjas, listas y versión—, pac_alert_settings —opciones de alertas—, pac_alert_deliveries —deduplicación— y cloud_sync_prefs —marcas remotas—. El navegador utiliza almacenamiento local para caché, tema y sesión administrada por Supabase; un valor local no concede el rol administrador.
 
 ### Esquema remoto versionado
 
@@ -147,11 +147,11 @@ Las preferencias se separan entre luz_barinas_user_prefs —dirección, selecci�
 | community_locations | Propuestas con identidad, nombre, territorio, block/circuitCode, datos de estado, submittedAt y ampliaciones geográficas. |
 | app_config | config_key y config_value JSONB; configuración común por documento. |
 
-Las mayúsculas de algunos campos son parte del contrato. created_at, reportedAtMillis, voltageObserved y community_sectors no aparecen en ese esquema. isCommunity enviado por algunos clientes tampoco se crea en la migración remota examinada. No se encontraron triggers que agreguen automáticamente todos los reportes en porcentajes o contadores.
+Las mayúsculas son parte del contrato. created_at, reportedAtMillis, voltageObserved y community_sectors no pertenecen a ese contrato. La migración v3 añade sectors.isCommunity, citizen_reports.observation, el registro privado admin_users y el control privado push_alert_limits. No hay un trigger versionado que agregue todos los reportes en porcentajes.
 
 app_config contiene pac_schedule, broadcast_notice, donations_config, barinas_geography y version; donations_url es un formato heredado. pac_schedule incluye versión, marca temporal, slots y matrixRows con cells, más listas sectorsA–D cuando el productor las conserva. Los timestamps difieren entre productores: milisegundos en clásico y updatedAt ISO en React con version numérica.
 
-Los scripts activan RLS, pero permiten lectura/escrituras anónimas amplias. El alcance efectivo depende también de grants y configuración desplegada, no inspeccionados aquí. La publicación Realtime versionada añade sectors y app_config; escuchar otras tablas requiere configuración adicional. No se presentan estos scripts como una instalación segura ya validada.
+La migración v3 elimina políticas heredadas y revoca permisos amplios antes de conceder los mínimos necesarios. El público conserva lectura de sectores/configuración/reportes e inserción validada de reportes/propuestas. Solo los administradores habilitados modifican sectores/configuración y moderan. Las propuestas no se leen anónimamente. admin_users y push_alert_limits permanecen privados. Realtime contempla las cuatro tablas operativas. La inspección remota previa confirmó escrituras públicas y permisos incluso de TRUNCATE; el registro de cambios indica la activación y verificación posterior.
 
 ### APIs web
 
@@ -159,9 +159,9 @@ Los scripts activan RLS, pero permiten lectura/escrituras anónimas amplias. El 
 |---|---|---|
 | /api/getMonthlyWeeks | monthName, totalDays | Cuatro grupos de semanas con matrices rotadas. |
 | /api/getOutagePrediction | sectorId | Ventana estimada, duración, confianza, explicación y horas restantes. |
-| /api/sendPushAlert | title, message, is_alarm | Solicita FCM global y responde con éxito/identificador o error. |
+| /api/sendPushAlert | Bearer JWT, title, message, is_alarm, block opcional | POST administrativo; verifica identidad/rol/contenido/cuota antes de solicitar FCM al tema elegido. |
 
-Los nombres reales de predicción son nextEstimatedStartMillis y nextEstimatedEndMillis; no devuelve isCurrentlyActive como campo público. Los handlers responden OPTIONS, pero no restringen los demás métodos ni comprueban autorización administrativa. Las APIs de lectura usan caché compartida: un cambio remoto puede tardar en reflejarse.
+Los nombres reales de predicción son nextEstimatedStartMillis y nextEstimatedEndMillis. Las APIs de lectura conservan caché compartida. sendPushAlert restringe método y origen, verifica sesión y rol, valida campos/tamaños y aplica una espera global de 30 segundos y por administrador de 60 segundos mediante bloqueo transaccional PostgreSQL. Firebase se inicializa después de las comprobaciones.
 
 ## 7. Reglas PAC y estimación ciudadana
 
@@ -173,7 +173,7 @@ En Android, OutagePredictionEngine combina una ventana teórica con duración me
 
 No hay entrenamiento ni calibración estadística de esas cifras. Repeticiones, fechas de envío tardías y concentración de reportes pueden alterar la estimación. El final calculado puede diferir del final real de una franja personalizada. La API JavaScript utiliza una variante más simple y fija cuatro horas.
 
-Los casos de medianoche, franjas iniciadas ayer, cambio de mes, listas vacías y zonas horarias no son uniformes entre capas. Algunas búsquedas devuelven una ventana de respaldo incluso sin programación válida. Para interpretar la pantalla se debe conservar la separación entre turno previsto, información ciudadana y estimación.
+Las alarmas Android usan findScheduledWindowForBlock: busca desde ayer, calcula la rotación con la fecha de inicio en Caracas, excluye el instante final y devuelve null sin programación. PacBlock acepta A–D y «Bloque X», sin extraer la B de BLOQUE. El contrato predictivo heredado findNextWindowForBlock aún ofrece una estimación de respaldo; las alarmas no lo utilizan. Queda unificar las variantes web/API y el motor ciudadano.
 
 ## 8. Flujos de sincronización y propuestas
 
@@ -183,13 +183,13 @@ Un reporte desde Dashboard pasa por ViewModel y EnergyRepository.submitReport: s
 
 Actualmente esas rutas no comparten una idempotencia remota completa. La confirmación inmediata puede elegir el último pendiente en vez del evento original; el uploader usa hora de envío y el worker puede aplicar otra vez cambios de contadores. Por tanto, guardar localmente no equivale a entrega única confirmada.
 
-Una comunidad propuesta se envía a community_locations. El panel clásico permite revisar/editar, agrupar variantes y consultar geocodificación antes de crear o actualizar el sector. La salida de bandeja se representa mediante eliminación, sin un historial formal de decisiones. La aprobación agrupa varias operaciones y no es una transacción remota única. Su publicación PAC captura errores sin propagarlos al llamador: esperar esa función no confirma éxito para una aprobación o fusión posterior. En otro camino clásico, añadir un sector al bloque construye un upsert sin despacharlo, aunque sí publica el PAC. La función Android de publicar PAC conserva un retorno de éxito sin escritura real.
+Una propuesta se envía únicamente a community_locations; Android dejó de publicar sectores directamente. El administrador revisa y publica. La eliminación de la propuesta representa su salida de bandeja, sin historial formal de decisiones ni transacción única de aprobación. La publicación PAC clásica propaga errores y una lectura fallida conserva el horario anterior, sin guardar respaldos. La función Android de publicar PAC todavía devuelve éxito sin escritura real.
 
 ## 9. Notificaciones y actualización
 
 Las alertas operativas Android son **locales**. PacAlarmScheduler utiliza AlarmManager para anticipación, comprobación de inicio y retorno previsto; PacAlarmReceiver muestra notificaciones y puede activar PacAlarmPlayer. NotificationActionReceiver convierte respuestas rápidas en pendientes y trabajo de sincronización. PredictiveNotificationWorker se agenda cada 30 minutos con flexibilidad de 15 y consulta horarios; no ejecuta el motor ciudadano completo.
 
-El permiso de notificaciones se solicita en versiones que lo requieren. El sonido/vibración dependen de ajustes, canales y condiciones del sistema. El retorno avisado es el final programado, no una medición de que volvió la energía. Un cambio remoto de horario no garantiza reprogramación inmediata en todos los caminos, y un proceso frío puede no haber cargado el PAC persistido.
+El permiso de notificaciones se solicita donde corresponde. Scheduler, receiver y worker cargan el PAC persistido; el resolver obtiene de Room el bloque del sector del perfil activo y repara preferencias antiguas. Cambiar perfil, ajustes u horario remoto cancela y recalcula alarmas; el receiver descarta intents de otra selección o ventana. AlarmManager y worker comparten deduplicación persistente. Sin permiso de alarmas exactas se agenda una aproximación sujeta a Android. El retorno señala el final previsto, no una medición eléctrica.
 
 broadcast_notice llega por sincronización y puede producir un banner/notificación local. Esto es distinto de FCM. Aunque sendPushAlert usa Firebase Admin en servidor, el Android revisado no incluye dependencia Firebase Messaging, servicio receptor propio ni suscripción al tema global. No está acreditado el recorrido de push a app cerrada descrito históricamente.
 
@@ -197,7 +197,7 @@ AppUpdater consulta la última release de GitHub y compara nombres de versión, 
 
 ## 10. Configuración, construcción y publicación
 
-Gradle usa un único módulo :app. El wrapper declara Gradle 9.3.1; el catálogo fija herramientas y bibliotecas. Android usa Kotlin/Compose, Room, WorkManager, Glance, Supabase/Ktor, publicidad y contratos Retrofit residuales. La firma depende de variables KEYSTORE_PATH, STORE_PASSWORD, KEY_ALIAS y KEY_PASSWORD con respaldos locales actuales; incluso debug usa la firma release configurada. No se documentan sus valores.
+Gradle usa el módulo :app y wrapper 9.3.1. Release toma contraseñas exclusivamente de STORE_PASSWORD y KEY_PASSWORD; KEYSTORE_PATH y KEY_ALIAS seleccionan archivo y alias. Debug usa su firma estándar y no exige el keystore de publicación. Las contraseñas retiradas del código deben rotarse según el procedimiento de firma.
 
 Para preparar Android se necesita SDK 36, JVM compatible, dependencias y directorios de caché escribibles. Compilar debug no valida minificación/firma de release. Publicar requiere incrementar versión, generar artefacto firmado y verificar el canal; esta documentación no construyó ni publicó una versión nueva.
 
@@ -207,24 +207,24 @@ firebase.json aún publica desde la carpeta fuente con public="."; no equivale a
 
 ## 11. Pruebas y estado de mantenimiento
 
-Existen pruebas Android: motor predictivo, recurso de nombre, inserción/consulta Room, captura Robolectric/Roborazzi y contexto instrumentado del paquete. Su existencia corrige la afirmación histórica de ausencia de tests. No constituyen cobertura completa de migraciones, horarios, offline, permisos o integración. El test predictivo usa reloj real y supuestos sensibles a la ventana activa.
+Existen pruebas Android para motor, Room, recursos, captura Robolectric/Roborazzi y contexto instrumentado. Esta corrección fija el reloj del test predictivo y añade regresiones para bloques, madrugada, mes, zona horaria, preferencias, perfiles, cancelación y deduplicación. El registro de cambios detalla qué se ejecutó.
 
-No se validó una ejecución completa de la suite en esta actualización; un intento previo quedó limitado por la preparación de caché Gradle. No corresponde declarar tests aprobados ni fallidos a partir de un error de arranque. La web no declara scripts test/lint/typecheck en su manifiesto. Las comprobaciones locales con servicios simulados no sustituyen una prueba de producción.
+La web aprobó75 pruebas Node y build; el fixture de políticas pasó en PostgreSQL16 de GitHub. Android aprobó16 tests y lintDebug sin errores, con76 advertencias pendientes. Ambos repositorios incorporan GitHub Actions y conservan reportes. El fallo de caché Gradle local no altera esas ejecuciones. El [registro de cambios](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md) enlaza resultados y distingue pruebas de despliegue real.
 
 | Área pendiente | Estado actual y trabajo necesario |
 |---|---|
-| Identidad y permisos | Sustituir acceso visual por autenticación/roles de servidor y restringir RLS; no se ha aplicado. |
-| Emisión de alertas | Proteger sendPushAlert, validar método/payload/cuota y resolver la recepción FCM Android. |
-| Textos remotos | Escapar contenido del panel clásico y del mapa; limitar navegación/puentes. |
+| Identidad y permisos | Auth y RLS v3 implementados; mantener registro de administradores y revisar nuevas tablas/policies. |
+| Emisión de alertas | Endpoint protegido y audiencia por bloque corregida; falta recepción FCM Android y suscripción a temas. |
+| Textos remotos | Panel clásico escapado; queda revisar mapa Android y navegación/puente. |
 | Integridad de reportes | ID estable, fecha original, confirmación precisa e idempotencia; separar transporte de contadores. |
-| Horarios y alarmas | Unificar regla temporal, madrugada/mes/zona, duración y rearmado con PAC persistido. |
-| Doble administración | Unificar rutas/contratos; conservar campos completos y persistir sectores React. |
-| Estado de carga | Comprobar errores Supabase/HTTP y evitar éxito aparente o sobrescritura tras lectura fallida. |
+| Horarios y alarmas | Alarmas Android corregidas; queda unificar motores predictivos y variantes web/API. |
+| Doble administración | Unificar rutas/contratos, persistir sectores React y controlar concurrencia al guardar JSON PAC. |
+| Estado de carga | Lectura/publicación PAC clásica corregida; revisar formularios y otras operaciones con éxito aparente. |
 | Esquema y evolución | Resolver campos/tablas divergentes, migraciones, restricciones y respaldo/recuperación. |
 | Estimaciones y presentación | Evaluar confianza, diferenciar datos reales de respaldos y actualizar textos legales/promocionales. |
 | Distribución y calidad | Coordinar GitHub/Play, revisar Firebase heredado y ejecutar pruebas reproducibles. |
 
-Esta tabla registra trabajo abierto; actualizar documentos no lo corrige. Los permisos y operaciones reales del servidor requieren una revisión específica del entorno antes de afirmar su estado.
+Esta tabla describe el trabajo restante tras la primera corrección. Consultar el registro de cambios y la guía de activación para conocer la revisión y permisos efectivos.
 
 ## 12. Manual del código
 

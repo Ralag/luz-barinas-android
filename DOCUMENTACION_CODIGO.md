@@ -1,8 +1,8 @@
 # Manual del código de PAC Barinas
 
-**Edición:** 15 de octubre de 2026. **Propósito:** comprender y mantener el código propio de la app, las páginas, los paneles y el servidor sin depender de una IA.
+**Edición:** 16 de octubre de 2026. **Propósito:** comprender y mantener el código propio de la app, las páginas, los paneles y el servidor sin depender de una IA.
 
-Este manual complementa la [documentación actual del sistema](DOCUMENTACION_SISTEMA.md). Describe el comportamiento encontrado, incluidos defectos, funciones vacías, contratos residuales y operaciones que todavía no cumplen lo que su nombre anuncia. La actualización documental no modifica esos comportamientos.
+Este manual complementa la [documentación actual del sistema](DOCUMENTACION_SISTEMA.md). Incluye las correcciones de seguridad y alertas por bloque, además de los defectos y contratos pendientes. El [registro de cambios](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md) distingue implementación, validación y activación remota.
 
 ## Empieza aquí
 
@@ -45,9 +45,9 @@ Cuando una operación solo altera memoria, está señalado. Cuando devuelve éxi
 
 Incluye el código propio de app/src, admin-web/src, api, scripts, panel clásico, mapa inline, configuración y utilidades de mantenimiento presentes. Se excluye explicar por función el interior de dependencias como AndroidX, React, Supabase y Leaflet, los archivos generados, cachés, node_modules y skills ajenos al producto. Sí se explica la forma en que el proyecto los utiliza.
 
-El inventario inicial detecta **563 declaraciones** en **124 archivos**, incluyendo ambas copias clásicas de app.js. Por ello ese número no representa 563 operaciones únicas de negocio. Algunos archivos contienen solo constantes, modelos, contenido o efectos superiores y también están explicados. Los handlers exportados anónimos de las API se describen por su archivo aunque no tengan nombre propio.
+El inventario actualizado detecta **750 declaraciones** en **133 archivos**, incluidas ambas copias clásicas y los dobles con nombre de las pruebas de seguridad. No representan 750 operaciones únicas de negocio. Los archivos con constantes/modelos/efectos superiores también se explican. Los scripts locales de mantenimiento fuera de Git se identifican expresamente y pueden no existir en un clon.
 
-Los enlaces a fuentes utilizan el workspace actual o rutas reconocibles del repositorio. Las líneas corresponden al corte del código; regenerar índice al modificarlo. Para lectura de ambas aplicaciones se presupone la disposición conjunta descrita en la documentación del sistema.
+Los enlaces de fuentes versionadas apuntan a revisiones concretas de GitHub para funcionar desde ambos repositorios. El índice conserva las líneas exactas del código local leído; regenerarlo al modificar fuentes. Para ejecutar la verificación conjunta se presupone la disposición descrita en la documentación del sistema.
 
 ## Mantener el manual
 

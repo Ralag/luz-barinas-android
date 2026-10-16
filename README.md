@@ -6,7 +6,7 @@
 
 Aplicación Android y plataforma web para consultar el Plan de Administración de Carga, relacionar sectores con bloques y colaborar mediante reportes del estado eléctrico.
 
-**Estado documentado:** 15 de octubre de 2026. Android declara **1.3.1 / versionCode 7**, Android7.0/API24 o superior. Las referencias históricas a «2.0» no sustituyen la versión del binario declarada en Gradle.
+**Estado documentado:** 16 de octubre de 2026. Android declara **1.3.1 / versionCode 7**, Android7.0/API24 o superior. Esta corrección de código no emite un nuevo binario comercial.
 
 ## Documentación
 
@@ -14,6 +14,8 @@ Aplicación Android y plataforma web para consultar el Plan de Administración d
 - [Manual detallado del código](DOCUMENTACION_CODIGO.md): guía de aprendizaje y siete capítulos, con explicación por archivo/función, flujos, contratos y mantenimiento.
 - [Índice de funciones](docs/codigo/07-indice-funciones.md): nombres, archivos y líneas para encontrar cada declaración.
 - [Análisis técnico previo](ANALISIS_SISTEMA_PAC_BARINAS_2026-10-15.md): hallazgos y prioridades que motivaron la actualización documental.
+- [Cambios de seguridad y alertas](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md): correcciones, pruebas y activación remota.
+- [Activación de acceso seguro](docs/ACTIVACION_SEGURIDAD.md): cuenta administradora, RLS y configuración del servidor.
 
 ## Componentes
 
@@ -25,9 +27,9 @@ Aplicación Android y plataforma web para consultar el Plan de Administración d
 
 ## Límites actuales
 
-La documentación distingue lo implementado de lo incompleto. Hay problemas pendientes de autorización, normalización de bloques, sincronización/fecha de reportes, horarios nocturnos y persistencia administrativa. Los porcentajes predictivos no son probabilidades calibradas. El Android actual no integra recepción FCM y su actualizador abre Google Play; no descarga/instala APK como describían documentos anteriores.
+La primera corrección incorpora Supabase Auth, permisos administrativos, protección del endpoint push, escape del panel clásico y alarmas Android por perfil/bloque con medianoche y carga persistida. Quedan problemas de sincronización/fecha de reportes, persistencia del panel React y uniformidad predictiva. Los porcentajes no son probabilidades calibradas. Android aún no recibe FCM y el actualizador abre Google Play.
 
-Consultar la documentación antes de utilizar seeds o scripts patch/update: pueden sobrescribir datos o código. Actualizar los documentos no ha corregido esos defectos.
+Consultar la documentación antes de utilizar seeds o scripts patch/update: pueden sobrescribir datos o código. Los cambios aplicados y su verificación figuran en el registro de cambios.
 
 ## Organización y desarrollo
 

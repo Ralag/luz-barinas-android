@@ -1,14 +1,14 @@
 # 05. Panel clásico: HTML, JavaScript y administración
 
-**Corte del código:** 15 de octubre de 2026. Este capítulo explica `admin-web/admin.html`, `admin-web/public/app.js`, su copia `admin-web/app.js` y las hojas de estilo clásicas. Las líneas indicadas corresponden a `public/app.js`, salvo indicación contraria. El [índice de funciones](07-indice-funciones.md) permite localizar cada declaración.
+**Actualización del código:** 16 de octubre de 2026. Este capítulo explica `admin-web/admin.html`, `admin-web/public/app.js`, su copia `admin-web/app.js` y las hojas de estilo clásicas. Los números históricos pueden desplazarse; el [índice de funciones](07-indice-funciones.md) permite localizar las declaraciones vigentes. La autenticación, escape y lectura PAC se reforzaron en fuente; esto no acredita despliegue ni permisos efectivos del servidor.
 
 ## 1. Qué aplicación es esta y qué archivos carga
 
-El panel clásico es una página HTML con nueve pestañas. El navegador carga `admin.html`, estilos, Tailwind por CDN, Leaflet y su extensión de calor, el SDK web de Supabase y finalmente `app.js`. Cada `id` del HTML es un punto que JavaScript busca mediante `getElementById`. Los atributos `onclick`, `onchange` y `onsubmit` llaman funciones visibles en el ámbito global del navegador.
+El panel clásico es una página HTML con nueve pestañas. Carga estilos, Tailwind por CDN, Leaflet/calor, SDK Supabase, **/admin-security.js** y **/app.js**, con rutas absolutas para recargas bajo /admin. Los controles estáticos conservan callbacks conocidos; las acciones que transportan datos ciudadanos usan ahora atributos data-* y delegación DOM, sin interpolar nombres o IDs en JavaScript ejecutable.
 
 Vite construye `admin.html` como entrada adicional y copia `public/app.js` a la salida. Por eso la copia distribuida como `dist/app.js` procede de `public/app.js`. El archivo `admin-web/app.js` también existe y sirve al abrir la carpeta por ciertos servidores simples, pero no es la fuente de la copia estática de Vite. No se debe corregir solamente esa copia raíz esperando que cambie el panel compilado.
 
-Las dos copias tienen las mismas funciones, con cuatro diferencias observadas: `renderCitizenReportsFeed` en `public` reconoce también `FALLA_IRREGULAR`; `updateBarinasMapMarkers`, `renderWikipediaCardsView` y `renderDetailedTableView` usan `-` como bloque ausente en `public`, mientras la raíz asume C. Los índices y las explicaciones siguientes cubren ambas, con esas diferencias explícitas.
+Las copias raíz y public/app.js están sincronizadas y una prueba exige igualdad exacta. Conservan reconocimiento de FALLA_IRREGULAR y bloque ausente representado como guion. No se deben mantener variantes de seguridad distintas en cada copia.
 
 `public/styles.css` define variables de fondo, superficie, texto, colores de bloques/estados, scrollbar, paneles, modales y clases usadas por las tablas. El HTML contiene además utilidades Tailwind y estilos propios. Cambiar una variable CSS no modifica colores escritos directamente en clases o plantillas JavaScript.
 
@@ -28,11 +28,13 @@ Las dos copias tienen las mismas funciones, con cuatro diferencias observadas: `
 | `detectedClusters` | Grupos propuestos por similitud de nombres | Se reconstruyen al cambiar directorio/solicitudes. |
 | `osmCache` | Resultados de búsquedas geográficas | `Map` en memoria; se pierde al recargar. |
 | Filtros/vista/mapa | Variables `telemetryFilter`, `reportFeedFilter`, `masterFilter*`, `mapFilterBlock`, `directoryViewMode`, capas Leaflet | Estado de interfaz, no configuración global remota. |
-| `luz_admin_session` | Bandera de acceso | `localStorage`; no es una sesión autenticada en servidor. |
+| `adminAuth` | Controlador compartido Supabase Auth/getUser/is_admin | Estado del permiso verificado; el SDK gestiona su sesión. La bandera heredada no se consulta. |
+| `loadedPacConfig` | Último documento PAC validado | Memoria; se mezcla al publicar para conservar campos adicionales. |
+| `adminSyncActive`, `authUnsubscribe` | Inicio/limpieza de sincronización y escucha de acceso | Evitan reabrir canales por cada renovación y ocultan administración al perder permiso. |
 | `pac_community_overrides` | Clasificación manual por ID o nombre | Solo ese navegador; puede diferir de otros administradores. |
 | `pac_deleted_sector_ids` | IDs que ese navegador deja de mostrar | Ocultar localmente no demuestra que el borrado remoto funcionó. |
 
-Al llegar `DOMContentLoaded`, `checkAuth` decide qué contenedor mostrar. Si hay acceso local, llama a `initFirebaseSync`, que a pesar de su nombre trabaja con **Supabase**. Realiza lecturas iniciales y suscribe canales. Ante un evento, vuelve a consultar la tabla y reconstruye las vistas; no aplica solo el cambio recibido. Un temporizador independiente actualiza la franja activa cada 30 segundos.
+Al llegar DOMContentLoaded, checkAuth se suscribe al permiso y registra listeners de acciones. Solo un estado admin verificado abre el panel e inicia initFirebaseSync —nombre histórico de Supabase— y precarga donaciones. Ante pérdida de acceso oculta panel y modales, invalida el documento publicable y retira canales. Los eventos Realtime siguen provocando relecturas completas. Un temporizador independiente actualiza la franja activa cada 30 segundos.
 
 ## 3. Páginas internas y acciones disponibles
 
@@ -46,7 +48,7 @@ Al llegar `DOMContentLoaded`, `checkAuth` decide qué contenedor mostrar. Si hay
 | `tabReportsFeed` | Últimos reportes y estadísticas sobre esos 50 | Filtros y actualización; no constituye agregación histórica completa. |
 | `tabBroadcast` | Aviso activo y formulario | Publicar/desactivar aviso en configuración; envío FCM se hace con otro botón/API. |
 | `tabVercelConsole` | Feed construido con reportes y ping | No obtiene logs reales de la plataforma Vercel. |
-| `tabDonations` | Campos PayPal, Binance y Pago Móvil | `saveDonationConfig`; la carga inicial no está conectada. |
+| `tabDonations` | Campos PayPal, Binance y Pago Móvil | saveDonationConfig; loadDonationUrl se llama al abrir la sesión autorizada. |
 
 ## 4. Contratos comunes de las funciones
 
@@ -54,23 +56,35 @@ Salvo que una ficha indique retorno explícito, una función normal devuelve `un
 
 Las llamadas Supabase suelen devolver `{ data, error }`. En varios procedimientos de este panel solo hay `try/catch`: eso no convierte automáticamente un `error` devuelto en una excepción. Por esa razón algunas fichas advierten que el mensaje mostrado no confirma una escritura.
 
+### 4.1 Texto no confiable, atributos y acciones
+
+El panel importa `escapeHtml`, `normalizeBlock`, `readPacSchedule` y `createAdminAuth` del [núcleo compartido](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/public/admin-security.js), explicado función por función en el [capítulo 04](04-web-react-y-api.md#25-publicadmin-securityjs-y-srclibadminauthjs-autenticación-compartida). `escapeHtml(value)` convierte caracteres con significado HTML en entidades. Se aplica al texto y a los valores de atributos entre comillas: nombres, notas, observaciones, ID, ubicación, circuito, estados y errores de consulta. El ID original permanece en memoria; el navegador lo recupera decodificado mediante `dataset`.
+
+Las plantillas de `initVercelLogsSync`, `renderMatrixTable`, `renderMonthlyProjection`, `renderTelemetryList`, `renderBlockKanban`, `renderTypoClusters`, `renderOsmResult`, `renderCommunityTable`, `renderCitizenReportsFeed`, `updateBarinasMapMarkers`, `renderWikipediaCardsView`, `renderDetailedTableView` y `checkSchemaCacheStatus` representan esos valores como texto o atributos escapados. Los bloques usados para clases/etiquetas pasan por `normalizeBlock(value)`, que admite A–D y usa `-` para otros valores. Las opciones de municipio y parroquia también escapan sus etiquetas y valores.
+
+Los botones y selects que antes componían código con nombres o ID ahora declaran `data-admin-action` y atributos de datos. `handleAdminAction(event)` recibe click/change del documento y despacha una lista fija de callbacks. No se evalúa una cadena como JavaScript; una comilla en un nombre no altera el manejador. La función valida también coordenadas numéricas antes de enfocar el mapa. Las acciones estáticas y los índices numéricos de la matriz conservan sus manejadores existentes.
+
+Esto conserva las funciones del panel; no introduce un saneador que elimine controles. Siguen existiendo `innerHTML` para estructura estática y plantillas con datos escapados, dependencias CDN y algunos manejadores inline de acciones estáticas. No hay una CSP completa ni una prueba de navegador que cubra todas las integraciones externas. La autorización de filas sigue correspondiendo a RLS y la del envío a la API, aunque alguien invoque una función desde la consola.
+
 ## 5. Acceso, navegación, conexión y lecturas
 
 | Función y línea | Entradas, resultado, pasos y relación con el sistema |
 |---|---|
-| `checkAuth()` · 102 | Lee la bandera `luz_admin_session`. Muestra panel o formulario y, en el primer caso, inicia sincronización. Sin sesión enfoca el campo después de 100 ms. La llama DOMContentLoaded. No consulta una identidad remota. |
-| `handleLogin(event)` · 117 | Lee el campo, recorta y convierte a minúsculas, compara con alternativas incrustadas, guarda bandera local y arranca sync; si falla muestra error. No se reproducen aquí esas contraseñas. No genera token administrativo. |
-| `handleLogout()` · 136 | Borra la bandera y recarga la página. La recarga reinicia memoria y conexiones del documento. No revoca una sesión de Supabase porque este mecanismo no la crea. |
+| `checkAuth()` | Instala una sola suscripción de adminAuth a renderAdminAccess y devuelve requireAdmin(). DOMContentLoaded la llama y maneja el rechazo; una bandera local falsa no abre el panel. |
+| `renderAdminAccess(state)` | Recibe estado verificado; muestra panel o formulario, botón ocupado, error accesible y posibilidad de cerrar cuenta sin rol. Inicia sync/donaciones una vez por acceso; al perderlo oculta modales, borra loadedPacConfig y retira canales. No modifica roles. |
+| `handleLogin(event)` | Async: previene formulario, entrega correo/contraseña exacta al controlador, limpia contraseña tras éxito y muestra error mediante textContent. No hay contraseñas maestras en fuente. |
+| `handleLogout()` | Async: llama cierre local del SDK por adminAuth; la UI se cierra antes de esperar red. Comunica error si no finaliza; no afirma revocación instantánea de JWT en otros servicios. |
+| `handleAdminAction(event)` | Listener de click/change. Busca data-admin-action y requiere estado admin; solo SELECT usa change. Resuelve una lista fija de operaciones y pasa dataset como datos originales, no como código. Valida lat/lon numéricas para enfoque; espera la operación y comunica errores. Las funciones RLS/API vuelven a proteger las escrituras. |
 | `switchTab(tabId)` · 142 | Oculta todos los `.tab-content`, quita selección y muestra el `id` elegido. Al abrir directorio difiere 60 ms la inicialización de mapa/render; al abrir reportes repinta feed. La invocan botones HTML. No cambia la URL ni usa React. |
-| `initVercelLogsSync()` · 171 | Busca 20 reportes y escucha INSERT para añadir filas a la consola. Usa los nombres `reportedAtMillis` y `voltageObserved`, diferentes del esquema remoto actual, y concatena datos en HTML. No son logs de Vercel. La inicia `initFirebaseSync`. |
+| `initVercelLogsSync()` · 171 | Busca 20 reportes y escucha INSERT para consola. Conserva nombres heredados reportedAtMillis/voltageObserved, pendientes de unificar; ahora escapa nombre/valores antes del HTML. No son logs de Vercel. |
 | `clearVercelConsole()` · 220 | Reemplaza el contenido local de la consola por una frase de limpieza. No borra reportes ni registros en servidores. |
 | `pingVercelApi()` · 225 | Llama por GET a `/api/getMonthlyWeeks?monthName=Test&totalDays=30`, representa éxito HTTP o detalle de error. Es una petición real al servidor cuando la usa un administrador; no mide todos los componentes del sistema. |
 | `updateSyncStatus(status, message=null)` · 247 | Cambia texto y punto de color según connected/syncing/offline. Devuelve sin actuar si no encuentra los nodos. Es presentación; el estado conectado no prueba por sí solo la recepción de todos los canales. |
-| `initConnectionMonitor()` · 265 | Instala listeners online/offline y muestra desconexión si `navigator.onLine` es falso. Al volver online llama a `retryFirebaseConnection`. No reinicia automáticamente todas las lecturas de datos. |
-| `retryFirebaseConnection()` · 279 | Comprueba con `single()` si puede leer el PAC, lanza el `error` si existe y pinta conectado/desconectado. Nombre heredado; usa Supabase y no Firebase. El botón HTML llama por error a `retrySupabaseConnection`, que no existe. |
-| `initFirebaseSync()` · 291 | Inicializa monitor, consola, cinco lecturas locales y sus canales. Las invoca sin esperar una finalización conjunta; puede haber actualizaciones en distinto orden. No llama a `loadDonationUrl`. Si se ejecuta repetidamente puede instalar conexiones/listeners otra vez. |
-| `fetchPac()` · 295, local | Lee `app_config/pac_schedule`; acepta `matrixRows[].cells` o `matrix`, reconstruye slots con defaults y sustituye listas presentes. Repinta matriz, proyección y kanban. Si falla la lectura llama a `publishPacSchedule(true)` y después marca conexión exitosa: una lectura fallida puede provocar escritura. |
-| `fetchSectors()` · 335, local | Lee todos los sectores; si la tabla está vacía invoca la carga de catálogo. Excluye IDs ocultos en este navegador, calcula contadores y repinta vistas/filtros/mapa. La llaman inicialización y eventos de `sectors`. Un borrado local puede disimular un fallo remoto. |
+| `initConnectionMonitor()` · 265 | Instala una sola vez listeners online/offline. Al volver online solo comprueba conexión si el estado sigue siendo admin. No reinicia todas las lecturas. |
+| `retryFirebaseConnection()` · 279 | Comprueba lectura PAC, lanza error si existe y muestra conectado/desconectado. El botón ahora llama esta función correcta. Es comprobación de una lectura, no garantía de todos los canales. |
+| `initFirebaseSync()` · 291 | Inicia monitor, consola y cinco lecturas/canales después de acceso verificado. No espera una finalización conjunta; adminSyncActive evita duplicarlo en renovaciones. renderAdminAccess carga donaciones por separado. |
+| `fetchPac()`, local | Usa readPacSchedule del núcleo, valida antes de sustituir memoria y loadedPacConfig, repinta y solo después marca lectura correcta. Ante fallo conserva la copia previa y muestra offline/error: no publica ni siembra para recuperarse. |
+| `fetchSectors()`, local | Lee sectores, incluidos cero resultados sin seed automático. Excluye IDs ocultos, calcula contadores y repinta. La carga de catálogo sigue como operación explícita; el filtro local de IDs aún puede disimular un borrado remoto fallido. |
 | `fetchCommunity()` · 385, local | Lee propuestas, reemplaza `communityList`, ajusta badges y ejecuta tabla/clustering. No cambia aprobaciones; requiere publicación Realtime para actualizarse por eventos. |
 | `fetchCitizen()` · 413, local y `window` | Lee 50 reportes recientes por `timestamp`, reemplaza memoria y renderiza el feed. Se expone en `window.fetchCitizen` para el botón de actualizar. No usa el campo local de Room `reportedAtMillis`. |
 | `fetchBroadcast()` · 429, local | Lee aviso; si está activo lo representa, si no lo oculta. Ante lectura fallida también lo oculta, por lo que oculto no distingue desactivación de error. |
@@ -100,10 +114,10 @@ La proyección divide el mes en 1–7, 8–14, 15–21 y 22–fin. Rota filas co
 | `openSchemeConfigModal(defaultMode='DOUBLE_8H')` · 866 | Precarga radios, bloques y duración 4; simple activa A/B/C/D, doble A/B/C y desmarca D. Abre modal sin escritura. |
 | `closeSchemeConfigModal()` · 891 | Oculta modal de configuración. |
 | `onSchemeModeChanged()` · 895 | Ajusta checkboxes al alternar radio. En doble marca A/B/C pero no desmarca expresamente D en esta función. Lee DOM y no modifica matriz aún. |
-| `handleApplySchemeConfig(event)` · 909 | Valida al menos un bloque, crea slots de 4/6/8h, ordena bloques empezando por el elegido y construye matriz. Simple asigna una vez por día con desplazamiento; doble usa parejas de filas. Publica y muestra texto de éxito sin esperar comprobar la publicación final. |
+| `handleApplySchemeConfig(event)` · 909 | Valida bloques, crea franjas 4/6/8h y matriz simple/parejas. La confirmación de éxito está encadenada a la promesa de publicación y no aparece cuando rechaza. No implica acuse de los dispositivos. |
 | `applySingleTurnPreset()` · 983 | Abre el configurador con SINGLE_4H; no aplica inmediatamente una matriz. |
 | `applyDoubleTurnPreset()` · 987 | Abre el configurador con DOUBLE_8H; mismo criterio. |
-| `publishPacSchedule(silent=false)` · 991 | Deshabilita botón, construye JSON completo, hace upsert de una fila `app_config`, comprueba su error y restaura botón en finally. Silencioso elimina solo aviso de éxito. El catch informa pero no relanza ni retorna estado: la promesa resuelve undefined incluso al fallar. Por ello un llamador que haga await puede seguir y anunciar éxito. No espera confirmaciones de cada teléfono. |
+| `publishPacSchedule(silent=false)` | Exige requireAdmin y documento PAC cargado válido; mezcla sus campos con matriz/franjas/listas y versión nueva. Comprueba upsert, actualiza loadedPacConfig y retorna true. Catch informa y **relanza**; finally restaura botón. Los await de aprobación/fusión ya no continúan tras ese fallo y las llamadas de UI manejan el rechazo. No aporta concurrencia/transacción entre operaciones previas. |
 
 ### Algoritmo de `setCellBlock`, explicado paso a paso
 
@@ -139,8 +153,8 @@ Aplicar el PAC a sectores representa una decisión administrativa basada en un h
 | `updateTelemetryActiveCut()` · 1198 | Consume el resultado anterior y actualiza bloque/etiqueta del resumen. Se ejecuta por intervalo de 30 s y tras lecturas/ediciones; no modifica sectores. |
 | `applyActivePacCutToSectors()` · 1216 | Tras confirmar recorre sectores: omite averías, marca sin luz al bloque teórico activo y NORMAL al resto. Envía updates secuenciales y cambia memoria. No comprueba cada `{error}`; una respuesta de éxito visual puede ser parcial. |
 | `setTelemetryFilter(filter)` · 1259 | Guarda filtro ALL/bloque/IRREGULAR, ajusta clases y repinta. No filtra en servidor. |
-| `renderTelemetryList()` · 1276 | Filtra por nombre/circuito y bloque/tipo, construye filas con estado, voltaje y botones de update. Define y expone el helper `isSectorCommunity`; si retorna antes por no haber filas, esa exposición puede no ocurrir todavía. |
-| `isSectorCommunity(s)` · 1306, local expuesta | Devuelve Boolean: overrides por ID, por nombre, campo `isCommunity` y finalmente prefijos del ID. `Boolean('false')` sería true si el servidor entregara texto en lugar de Boolean. Su contrato esperado es dato tipado. |
+| `renderTelemetryList()` | Filtra por nombre/circuito y bloque/tipo, construye filas escapadas con estado, voltaje y acciones delegadas. Usa el helper global `isSectorCommunity`; no es necesario abrir esta vista antes que el directorio o mapa. |
+| `isSectorCommunity(s)` | Helper global disponible desde el arranque. Devuelve Boolean: overrides por ID, por nombre, campo `isCommunity` y finalmente prefijos del ID. `Boolean('false')` sería true si el servidor entregara texto en lugar de Boolean. Su contrato esperado es dato tipado. |
 | `updateSectorStatus(sectorId,newStatus,voltage)` · 1385 | Actualiza tres campos y timestamp por ID. No cambia contadores ni comprueba error devuelto; normalmente la recarga Realtime repinta la fila. |
 | `resetAllTelemetryToNormal()` · 1398 | Pide confirmación y actualiza todos a NORMAL/118/porcentaje 0/contador 0. La frase «limpiar reportes» no equivale a DELETE de `citizen_reports`: el cuerpo solo modifica `sectors`. |
 | `setAllSectorsStatus(status)` · 1420 | Confirma y recorre todas las filas, fijando voltaje 118 si NORMAL y 0 en otro caso. Conserva contadores. No es una operación atómica. |
@@ -163,12 +177,13 @@ El clustering es una heurística textual local. No demuestra que dos sectores se
 | `computeLevenshteinSimilarity(s1,s2)` · 1607 | Devuelve `1 - distancia/max(longitudes)`. Dos cadenas vacías dan 1. |
 | `computeTokenJaccardSimilarity(tokens1,tokens2)` · 1613 | Devuelve tamaño intersección/unión de conjuntos; no cuenta repetición de palabras. Dos conjuntos vacíos dan 1. |
 | `computeSectorSimilarity(nameA,nameB)` · 1624 | Normaliza, devuelve 1 si iguales, 0 si alguno vacío, 0.85 en cierta inclusión de subcadena; de lo contrario mezcla 40% Levenshtein y 60% Jaccard. El resultado es similitud textual, no probabilidad geográfica. |
-| `analyzeTypoClusters()` · 1648 | Combina sectores/propuestas, compara cada candidato con siguientes y agrupa si similitud ≥0.68 y IDs distintos. Marca visitados, sugiere nombre largo y datos disponibles, actualiza badge/render. Comparación cuadrática; no es agrupación transitiva completa. |
+| `analyzeTypoClusters()` | Combina sectores/propuestas etiquetando cada copia con `_source` según la lista de origen; esa etiqueta sustituye cualquier campo del dato remoto. Compara candidatos y agrupa si similitud ≥0.68. Visitados usa origen+ID, por lo que un ID de propuesta igual al de un sector no confunde sus identidades. Sugiere nombre/datos y actualiza badge/render. Comparación cuadrática; no es agrupación transitiva completa. |
 | `updateClusterBadge(count)` · 1714 | Escribe conteo si existe badge. No recalcula grupos. |
 | `toggleClusteringPanel()` · 1719 | Alterna visibilidad; al abrir vuelve a analizar y desplaza la página al panel. |
-| `renderTypoClusters()` · 1729 | Construye tarjetas con variantes y campos canónicos editables, bloque/parroquia sugeridos y botón de fusión. Usa plantillas HTML; no constituye saneamiento de datos. |
+| `renderTypoClusters()` | Construye tarjetas con variantes y campos canónicos editables, bloque/parroquia sugeridos y botón de fusión. Escapa datos y atributos; la acción usa data-admin-action. La similitud textual sigue requiriendo revisión humana. |
 | `upsertSectorSafe(sectorPayload)` · 1808 | Promesa con `{data,error:null,fallbackUsed}` o excepción. Intenta upsert completo; si identifica error de columnas/caché reintenta solo campos base y omite territorio/notas/coordenadas/clasificación. Un fallback exitoso es guardado parcial. |
-| `mergeAndApproveCluster(clusterId)` · 1853 | Busca grupo, toma inputs, elige primer ID, reúne notas/barrio/coordenadas y guarda consolidado. Después oculta IDs duplicados localmente, intenta borrarlos y solicitudes, actualiza cuatro listas, repinta y publica. No es transacción: un fallo intermedio deja cambios parciales. No reasigna aquí reportes históricos a un ID canónico. |
+| `insertApprovedCommunitySector(sectorPayload)` | Async: exige administración y crypto.randomUUID disponible, genera un ID nuevo con prefijo admin_ que sustituye cualquier id del payload y hace INSERT en sectors. Comprueba error y devuelve el objeto insertado, o rechaza. Una colisión falla: nunca actualiza una fila existente. Lo llaman aprobación individual y fusión sin sector establecido; no usa fallback parcial de esquema. |
+| `mergeAndApproveCluster(clusterId)` | Busca grupo/inputs y exige rol y PAC cargado antes de mutar. Separa activeItems de pendingItems por origen fijado localmente. Si hay sector establecido, su ID es el target del upsert explícito; si todas son propuestas, crea ID mediante insertApprovedCommunitySector. Solo los duplicados provenientes de sectors pueden borrarse de sectors, por ID exacto; no borra por nombre ni usa ID de propuesta como sector. Actualiza memoria/PAC y únicamente después de publicar elimina solicitudes por ID de community_locations. Comprueba errores de borrado y no anuncia éxito tras fallo. No es transacción ni reasigna reportes históricos. |
 
 Para mantener esta parte hay que revisar también la integridad de referencias: fusionar sectores modifica filas del directorio y nombres en PAC, mientras los reportes existentes conservan sus `sectorId`. Un cambio de nombre no debe confundirse con cambiar identidad.
 
@@ -180,8 +195,8 @@ Para mantener esta parte hay que revisar también la integridad de referencias: 
 | `renderOsmResult(safeId,result)` · 2047 | Representa enlace/coordenadas si found; si no, «Sin match exacto». `safeId` identifica el nodo `osm_badge_*`. No consulta red. |
 | `validateMasterSectorsWithOSM()` · 2067 | Selecciona sectores sin coordenadas o primeros diez si todos tienen; confirma, consulta cada uno y usa centro municipal como fallback. Guarda con `upsertSectorSafe`, espera 1.1 s entre sectores y muestra conteos. El fallback no es ubicación precisa. No hay transacción global. |
 | `validateAllWithOSM()` · 2155 | Alias async que retorna el resultado de `validateMasterSectorsWithOSM`; conserva compatibilidad con llamadas antiguas. |
-| `renderCommunityTable()` · 2160 | Crea filas con campos editables y botones aprobar/rechazar/buscar OSM, usando `submittedAt` para fecha. Escapa apóstrofos para ciertos atributos, lo cual no sanea HTML completo. |
-| `approveCommunityLocation(id)` · 2228 | Lee edición desde DOM, normaliza bloque, actualiza listas/override, guarda sector activo con flag comunitario y elimina solicitud comprobando su error. Actualiza memoria y publica. Es una secuencia parcial, no una aprobación atómica garantizada. |
+| `renderCommunityTable()` | Crea filas editables con fecha `submittedAt`. Escapa ID, nombre, notas y valores de inputs; aprobar/rechazar/buscar OSM usan acciones delegadas con el ID original como dato. No inserta código procedente de la propuesta ciudadana. |
+| `approveCommunityLocation(id)` | El parámetro identifica exclusivamente la solicitud. Exige rol y PAC cargado antes de leer campos/mutar. Lee edición/bloque y crea un sector mediante insertApprovedCommunitySector, con ID generado por el administrador distinto al ciudadano. Actualiza listas/override con ese nuevo ID, espera publicación PAC y después borra la solicitud original comprobando error. Un fallo de inserción o publicación conserva la cola y muestra error. La operación sigue siendo parcial, sin transacción entre las tres escrituras. |
 | `rejectCommunityLocation(id)` · 2331 | Confirma, hace DELETE de solicitud, comprueba error, la quita de memoria y actualiza clusters. No elimina un sector activo que Android hubiera insertado previamente. |
 
 ## 11. Avisos, reportes, catálogo y donaciones
@@ -190,14 +205,14 @@ Para mantener esta parte hay que revisar también la integridad de referencias: 
 |---|---|
 | `renderActiveBroadcast(notice)` · 2349 | Muestra título/mensaje con `textContent`, fecha y colores INFO/WARNING/EMERGENCY. No comprueba active: el llamador lo decide. No envía push. |
 | `hideActiveBroadcast()` · 2391 | Oculta contenedor local; no desactiva aviso en servidor. |
-| `handleDismissBroadcast()` · 2396 | Tras confirmar hace upsert con active false y timestamp, luego oculta y avisa. No comprueba `{error}` y reemplaza el JSON con un contenido reducido. |
-| `handleSendBroadcast(event)` · 2415 | Lee título/mensaje/nivel, escribe aviso activo y limpia inputs. No llama la función FCM; la entrega en app depende de lectura/suscripción Realtime. No verifica `{error}`. |
-| `testGlobalPushAlert()` · 2442 | Confirma y envía POST JSON a `/api/sendPushAlert`; comprueba HTTP y `success`. Muestra messageId y restaura botón en camino normal. En excepción puede dejar el botón con texto «Enviando». La app actual carece del cliente FCM descrito antiguamente. |
+| `handleDismissBroadcast()` | Tras confirmar exige administración y hace upsert con active false/timestamp, comprobando error antes de ocultar o avisar. Si falla mantiene visible el aviso y comunica error. Reemplaza el JSON con un contenido reducido. |
+| `handleSendBroadcast(event)` | Lee título/mensaje/nivel, exige administración y escribe aviso activo. Comprueba error antes del éxito y de limpiar inputs; si falla conserva el borrador. No llama FCM: su lectura/suscripción pertenece al flujo de avisos en configuración. |
+| `testGlobalPushAlert()` | Confirma un aviso global y llama `adminAuth.postJson('/api/sendPushAlert', {title,message,is_alarm:true})`. El controlador valida identidad/rol y adjunta el Bearer vigente. Comprueba `success`, muestra `messageId` o el error HTTP y siempre restaura el botón en `finally`. No envía `block` ni `topic`: la audiencia es global. Las cuotas y la autorización definitiva se comprueban en servidor. |
 | `setReportFeedFilter(filter)` · 2479 | Guarda ALL/NORMAL/OUTAGE/IRREGULAR, ajusta estilos y llama render. |
-| `renderCitizenReportsFeed()` · 2495 | Cuenta categorías sobre los 50 cargados, filtra por tipo y texto de sector/ID/observación y crea tarjetas. Usa timestamp remoto. Las observaciones se interpolan como HTML; deben tratarse como entrada no confiable. La versión raíz no reconoce FALLA_IRREGULAR en las mismas condiciones. |
+| `renderCitizenReportsFeed()` | Cuenta categorías sobre los 50 cargados, filtra por tipo y texto de sector/ID/observación y crea tarjetas. Usa timestamp remoto y escapa las observaciones y nombres antes del HTML. Las copias raíz/public son idénticas y reconocen también FALLA_IRREGULAR. |
 | `seedAllBarinasCatalog()` · 2796 | Escribe geografía, recorre catálogo embebido y publica PAC. Introduce estados/contadores predeterminados como 18/95 o 3/0. Puede sobrescribir filas con IDs iguales y no comprueba cada error devuelto. Es una operación de datos, no un botón inocuo de refresco. |
 | `saveDonationConfig()` · 2847 | Lee cinco campos y hace upsert `donations_config`, comprobando error. Cambia instrucciones de pago, no procesa una transacción financiera. |
-| `loadDonationUrl()` · 2862 | Lee esa configuración y precarga inputs presentes. Captura errores sin mostrarlos. El nombre es antiguo y actualmente no se encontró llamada de inicialización: entrar a la pestaña no garantiza precarga. |
+| `loadDonationUrl()` | Lee `donations_config` y precarga inputs presentes. `renderAdminAccess` la llama al abrir la sesión autorizada. Conserva el nombre antiguo y todavía captura errores sin mostrarlos. |
 
 Los arrays `BARINAS_MUNICIPALITIES` y `MASTER_BARINAS_SECTORS` son datos embebidos: territorio, circuitos y estados usados por el seed y formularios. No se actualizan automáticamente desde una fuente oficial. Las etiquetas «oficial» o «en vivo» del HTML no certifican por sí mismas el origen ni la vigencia.
 
@@ -222,7 +237,7 @@ Los arrays `BARINAS_MUNICIPALITIES` y `MASTER_BARINAS_SECTORS` son datos embebid
 | `setDirectoryViewMode(mode)` · 3283 | Guarda cards/table, cambia botones y repinta. |
 | `renderGeneralSectorsMaster()` · 3299 | Calcula contadores globales, filtra por bloque, territorio, tipo y texto en varios campos, ordena por nombre y delega en cards/table. El conteo de municipios usa 12 como sustituto si resulta cero. |
 | `renderWikipediaCardsView(list,container)` · 3379 | Recibe lista ya filtrada y nodo; construye fichas con clasificación, estado, territorio, mapa, notas y acciones. Calcula coordenadas con el helper; no es una integración con Wikipedia. |
-| `renderDetailedTableView(list,container)` · 3500 | Misma lista/destino; produce tabla compacta con enlaces/acciones. Ambas vistas interpolan datos en HTML y comparten riesgos de escape. |
+| `renderDetailedTableView(list,container)` | Misma lista/destino; produce tabla compacta con enlaces/acciones. Ambas vistas escapan datos ciudadanos y atributos; editar, borrar y enfocar usan datos y callbacks delegados. El mapa sigue usando coordenadas reales o aproximadas según el helper. |
 
 ## 13. Alta, edición y borrado de sectores
 
@@ -244,14 +259,14 @@ Los arrays `BARINAS_MUNICIPALITIES` y `MASTER_BARINAS_SECTORS` son datos embebid
 | `openDbMigrationHelper()` · 3958 | Muestra modal y llama la comprobación de columnas. No ejecuta SQL por sí misma. |
 | `closeDbMigrationHelper()` · 3966 | Oculta asistente. |
 | `checkSchemaCacheStatus()` · 3971 | Hace SELECT limitado de ciertas columnas y representa diagnóstico. El mensaje «100% sincronizados» solo prueba esa consulta; no comprueba isCommunity, políticas, Realtime ni integridad completa. |
-| `copyMigrationSql()` · 4031 | Copia texto SQL al portapapeles o abre prompt de fallback. El texto agrega columnas, sanea algunos datos, recarga PostgREST y además propone FOR ALL TO anon. No se debe ejecutar como receta segura: amplía permisos y no crea todas las columnas usadas. |
+| `copyMigrationSql()` | Async: copia únicamente la referencia `supabase_migration_v3_admin_security.sql` o abre un prompt como alternativa al portapapeles. El asistente indica aplicación manual por el responsable de base de datos. No contiene una política anónima de escritura ni ejecuta SQL. La migración, el alta administrativa y las variables de servidor se explican en el capítulo 06. |
 | `runClientSideLegacyMigration()` · 4082 | Confirma, recorre sectores cargados y rellena territorio/notes/barrio cuando detecta algunos faltantes, guardando con upsert seguro. No crea columnas ni recarga caché. Su condición no detecta todos los casos de nulos/vacíos. |
 
 ## 15. Eventos sin nombre y conexiones entre vistas
 
 Los callbacks de `forEach`, `map`, `filter`, `.then`, Realtime y listeners se entienden dentro de la función que los registra. No son procesos permanentes en servidor. Los de render capturan el elemento/índice actual; los de Realtime vuelven a consultar; los de online/offline actualizan presentación. `window.*` permite llamar funciones desde atributos HTML, pero expone operaciones en el navegador y no aporta autorización.
 
-`setInterval(updateTelemetryActiveCut,30000)` vive mientras el documento está abierto. `DOMContentLoaded` inicia acceso. Los formularios/editables dependen de IDs acordados entre HTML y JS; cambiar uno exige actualizar ambos. El defecto del botón de reconexión muestra el efecto de romper ese contrato.
+`setInterval(updateTelemetryActiveCut,30000)` vive mientras el documento está abierto. `DOMContentLoaded` inicia acceso y registra la delegación de click/change. Los formularios/editables dependen de IDs acordados entre HTML y JS; cambiar uno exige actualizar ambos. El botón de reconexión llama ahora a `retryFirebaseConnection`.
 
 ## 16. Ejemplos para mantenerlo sin adivinar
 
@@ -263,8 +278,14 @@ Los callbacks de `forEach`, `map`, `filter`, `.then`, Realtime y listeners se en
 
 **Cambiar mapa:** diferenciar fuente de coordenadas (`getSectorCoordinates`), capas (`applyBasemap`) y representación (`updateBarinasMapMarkers`). El centro municipal y el hash son aproximaciones; no tratarlos como límites reales de un circuito.
 
-**Modificar donaciones:** `saveDonationConfig` escribe los cinco campos; el Android lee `donations_config`. La función de precarga existe pero no se llama. Cambiar el formulario no cambia automáticamente su carga inicial.
+**Modificar donaciones:** `saveDonationConfig` escribe los cinco campos; Android lee `donations_config`. `renderAdminAccess` inicia la precarga mediante `loadDonationUrl`. Al añadir un campo, actualizar tanto guardado como carga y consumidores; que el input exista no garantiza su persistencia.
 
 ## 17. Cobertura y límites
 
-Este capítulo describe todas las declaraciones propias detectadas en ambas copias de `app.js`, incluidos los cinco fetch locales, el helper de clasificación y callbacks `onclick`. Las funciones vacías y los parámetros sin uso se mantienen documentados como tales. Las bibliotecas CDN/Leaflet/Supabase son dependencias: se explica cómo se invocan, sin reproducir su implementación interna. Las limitaciones descritas siguen presentes; esta entrega modifica documentación, no el comportamiento del producto.
+Este capítulo describe las declaraciones propias de ambas copias idénticas de `app.js`, incluidos los cinco fetch locales, el helper global de clasificación y callbacks `onclick`. El capítulo 04 documenta las funciones del núcleo compartido y las pruebas. Las funciones vacías y los parámetros sin uso se mantienen descritos como tales; las dependencias CDN/Leaflet/Supabase se explican desde sus llamadas, sin reproducir su implementación interna.
+
+Las pruebas locales de [admin-ui.test.cjs](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/tests/admin-ui.test.cjs) ejercitan autenticación, expiración, revocación de rol, Bearer renovado, lectura PAC sin escrituras, rechazo de publicación fallida, cargas HTML inertes y acciones delegadas. Usan SDK y DOM simulados, no un navegador real ni servicios activos. `npm test` ejecuta también las pruebas del endpoint; el registro de cierre figura en el capítulo 04. La compilación no despliega el producto.
+
+Los cambios implementados cierran el acceso local por contraseña incrustada, retiran las escrituras de recuperación tras fallar una lectura y propagan el fallo al publicar. Aún requieren seguimiento el tratamiento de `{error}` en otras operaciones heredadas, la atomicidad de aprobaciones/fusiones/borrados, las coordenadas aproximadas y la concurrencia al sustituir un JSON PAC completo. La protección en producción depende de las políticas y configuración del servidor, cuyo estado no se certifica en este capítulo.
+
+Una aprobación puede insertar el sector y luego fallar al publicar o retirar la propuesta. La solicitud permanece disponible cuando falla la publicación; el sector recién creado puede existir ya. Antes de repetir, revisar directorio y PAC para evitar duplicados. La fusión puede modificar un target o borrar duplicados establecidos antes de un fallo posterior. Convertir estos pasos en una operación transaccional con idempotencia requiere un contrato de servidor adicional; no se simula una reversión automática en el cliente.

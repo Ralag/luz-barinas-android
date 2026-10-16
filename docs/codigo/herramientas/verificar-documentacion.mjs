@@ -9,7 +9,8 @@ const root = fs.existsSync(path.join(localRoot, 'app/src')) ? localRoot : path.r
 const web = path.join(root, 'admin-web');
 const docdir = path.join(root, 'docs/codigo');
 const issues = [];
-const report = { coverage: {}, checkedLinks: 0, checkedMarkdown: 0, mirroredFiles: 0 };
+const report = { coverage: {}, checkedLinks: 0, checkedMarkdown: 0, mirroredFiles: 0, mirroredSources: 0 };
+const sharedSources = ['supabase_schema.sql', 'supabase_migration_v3_admin_security.sql', 'missing_policies.sql', 'tests/sql/admin_security.sql'].map(n => path.join(root, n));
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     const absolute = path.join(dir, entry.name);
@@ -18,10 +19,11 @@ function walk(dir) {
 }
 const documentFiles = [
   ...['DOCUMENTACION_SISTEMA.md', 'DOCUMENTACION_CODIGO.md', 'ANALISIS_SISTEMA_PAC_BARINAS_2026-10-15.md'].map(n => path.join(root, n)),
+  ...['ACTIVACION_SEGURIDAD.md', 'CAMBIOS_SEGURIDAD_Y_ALERTAS.md'].map(n => path.join(root, 'docs', n)).filter(fs.existsSync),
   ...walk(docdir)
 ];
 function syncCopies() {
-  for (const source of documentFiles) {
+  for (const source of [...documentFiles, ...sharedSources]) {
     const target = path.join(web, path.relative(root, source));
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.copyFileSync(source, target);
@@ -31,7 +33,7 @@ if (process.argv.includes('--sincronizar')) syncCopies();
 const inventory = JSON.parse(fs.readFileSync(path.join(docdir, 'inventario-funciones.json'), 'utf8'));
 for (const entry of inventory.files) {
   const file = path.join(root, entry.file);
-  if (!fs.existsSync(file)) { issues.push(`Fuente inventariada ausente: ${entry.file}`); continue; }
+  if (!fs.existsSync(file)) { if (!entry.localOnly) issues.push(`Fuente inventariada ausente: ${entry.file}`); continue; }
   const actual = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
   if (entry.sha256 !== actual) issues.push(`Fuente modificada desde el inventario; revisar explicación y regenerar: ${entry.file}`);
 }
@@ -90,6 +92,11 @@ for (const source of documentFiles) {
   if (!fs.existsSync(target)) { issues.push(`Falta copia web ${path.relative(root, source)}`); continue; }
   if (!fs.readFileSync(source).equals(fs.readFileSync(target))) issues.push(`Copia web diferente: ${path.relative(root, source)}`);
   report.mirroredFiles++;
+}
+for (const source of sharedSources) {
+  const target = path.join(web, path.relative(root, source));
+  if (!fs.existsSync(target) || !fs.readFileSync(source).equals(fs.readFileSync(target))) issues.push(`Fuente compartida web diferente: ${path.relative(root, source)}`);
+  else report.mirroredSources++;
 }
 report.issues = issues;
 console.log(JSON.stringify(report, null, 2));

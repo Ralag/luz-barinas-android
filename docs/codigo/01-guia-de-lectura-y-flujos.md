@@ -147,7 +147,7 @@ Los componentes de telemetría consultan Supabase y hacen refrescos. Sus timers/
 
 Una fila identifica una franja y una columna un día. Los bloques son letras, `-` indica sin corte. El desplazamiento mensual es 0 para días1–7, 1 para8–14, 2 para15–21 y3 para22–fin. Se aplica al índice de fila y reinicia al cambiar mes. No debe describirse como una rotación continua independiente de la fecha.
 
-Para una franja23–03, el final pertenece al día siguiente. A la01:00 hay que revisar el inicio de ayer para saber si sigue activa. La búsqueda actual no lo hace correctamente. También hay un fallback que inventa una ventana cuando no encuentra bloque; «sin programación» debería representarse explícitamente al corregirlo.
+Para una franja23–03, el final pertenece al día siguiente. Las alarmas Android ya revisan el inicio de ayer mediante findScheduledWindowForBlock: devuelve null sin programación, usa Caracas y excluye el instante final. PacBlock.normalize valida el bloque completo y PacAlertTargetResolver.resolve obtiene la asignación del perfil activo de Room. findNextWindowForBlock conserva un respaldo predictivo y no se usa para alarmas. Queda unificar web/API.
 
 El ajuste ciudadano cuenta reportes sin luz por hora y puede mover el próximo inicio al pico detectado. Los porcentajes actuales provienen de reglas; para convertirlos en probabilidades hace falta medir aciertos sobre datos independientes.
 

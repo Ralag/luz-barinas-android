@@ -28,7 +28,7 @@ La documentación se edita en el repositorio Android y se mantiene como copia en
 | `android` | namespace `com.example`; applicationId `com.ralag.pacbarinas`; minSdk24, compile/target36; versionName1.3.1 y versionCode7. Namespace organiza clases/R; applicationId identifica la aplicación instalada. |
 | `compileOptions` | Compatibilidad Java11 del código. No especifica por sí sola la versión de JVM necesaria para ejecutar todas las herramientas actuales. |
 | `buildFeatures` | Activa Compose y generación de BuildConfig. La app consulta DEBUG, APPLICATION_ID y VERSION_* generados. |
-| `signingConfigs` | Lee KEYSTORE_PATH, STORE_PASSWORD, KEY_ALIAS y KEY_PASSWORD con respaldos locales actuales. No se reproducen contraseñas. El debug también usa la firma release configurada. |
+| `signingConfigs` | Release toma STORE_PASSWORD y KEY_PASSWORD exclusivamente del entorno. KEYSTORE_PATH y KEY_ALIAS seleccionan archivo/alias. Debug utiliza su firma estándar. |
 | `buildTypes.release` | Minificación R8, reducción de recursos, reglas ProGuard y firma. La ejecución debug no prueba que R8 conserve todas las clases necesarias. |
 | `testOptions` | Incluye recursos Android y valores por defecto para tests, ajusta java.library.path. Permite Robolectric/Roborazzi; no demuestra que las pruebas se hayan ejecutado. |
 | `androidComponents.onVariants` | Recorre salidas y renombra APK como `PAC-BARINAS-v<version>-<variant>.apk`, usando una clase interna de AGP. |
@@ -51,13 +51,14 @@ Versiones relevantes declaradas: AGP9.1.1, Kotlin2.2.10, KSP2.3.5, Compose BOM20
 | Variables de firma | Gradle | Seleccionan archivo/alias/contraseñas de firma; necesarias para continuidad de actualizaciones. |
 | IDs AdMob | Build, `.env.example` y componentes de anuncios | Identifican aplicación/unidades publicitarias; no son contraseñas de administrador. La configuración actual debe leerse completa. |
 | `.env.example` | Plugin secrets como defaults | Contiene mezcla de IDs de producción/test aunque su comentario general diga prueba. No asumir que copiarlo convierte todo a entorno de desarrollo. |
-| Contraseñas de panel | Lógica cliente actual | Son un defecto documentado. La guía no vuelve a publicarlas ni las presenta como control seguro. |
+| Credenciales del panel | Supabase Auth | Correo/contraseña personales; getUser verifica identidad e is_admin consulta el registro privado. Sin contraseña embebida. |
+| SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY o SUPABASE_ANON_KEY | sendPushAlert servidor | Requeridas; admite alias VITE_ de URL/anon. Usar clave pública, nunca service_role/sb_secret. Sin configuración devuelve503. |
 
 No se copian valores de cuenta de servicio, contraseñas de firma ni de panel a este manual. El archivo keystore local está ignorado; su presencia local no demuestra exposición en Git.
 
 ## 4. Esquema remoto Supabase: campos y diferencias
 
-Los scripts describen una instalación posible; no son una lectura de la base desplegada. El esquema inicial no utiliza `CREATE TABLE IF NOT EXISTS` y las altas en la publicación pueden fallar si ya se aplicaron. No debe repetirse entero como reparación genérica.
+supabase_schema.sql prepara una instalación vacía y supabase_migration_v3_admin_security.sql actualiza las tablas existentes sin borrar datos. La inspección remota previa confirmó 119 sectores, 5 configuraciones, 2643 reportes y 19 propuestas con escritura pública. La [guía de activación](../ACTIVACION_SEGURIDAD.md) explica Auth/roles y el [registro de cambios](../CAMBIOS_SEGURIDAD_Y_ALERTAS.md) identifica el estado remoto. No repetir el esquema completo sobre producción.
 
 ### `sectors`
 
@@ -70,7 +71,8 @@ Los scripts describen una instalación posible; no son una lectura de la base de
 | `voltage` | FLOAT8 predeterminado118. Es un valor informado/asignado, no prueba de sensor. |
 | `confirmedReportsCount` | INT inicial0. Contador almacenado; no hay trigger de agregación definido en estos SQL. |
 | `withoutPowerPercentage` | INT inicial0. No tiene CHECK0–100 en los scripts. |
-| `rotationBlock` | TEXT. Código de bloque; existen variantes textuales en clientes. |
+| `rotationBlock` | TEXT. Código de bloque; Android normaliza A–D y Bloque X. |
+| `isCommunity` | BOOLEAN NOT NULL DEFAULT false, añadido en v3; completa DTO y clasificación comunitaria. |
 | `estado`, `municipio`, `parroquia`, `sector`, `barrio` | Datos territoriales; defaults y nulabilidad difieren entre esquema inicial y migración. |
 | `lastUpdatedMillis` | BIGINT, epoch milisegundos. Default SQL con now; los clientes pueden enviarlo. |
 | `notes`, `lat`, `lon` | Añadidos por migración v2. Notas y coordenadas simples; no se almacenan polígonos como los de Room. |
@@ -107,24 +109,38 @@ La falta de ID compartido entre Room y remoto permite duplicación. El cliente a
 | Bloque SQL | Efecto real |
 |---|---|
 | ENABLE ROW LEVEL SECURITY | Activa evaluación de políticas por tabla. No significa que sus reglas sean restrictivas. |
-| Policies sectors/app_config | SELECT, INSERT y UPDATE con condiciones true. Si existen grants correspondientes, permite acceso público a esas operaciones. |
-| Policies citizen_reports/community_locations | SELECT e INSERT públicos. No están declaradas aquí UPDATE/DELETE para propuestas ni DELETE sectores. |
-| Publicación `supabase_realtime` | Solo añade `sectors` y `app_config`. Las escuchas de otras tablas requieren configuración adicional no reproducida en estos scripts. |
+| Grants y policies v3 | Revoca ALL de PUBLIC/anon/authenticated, elimina políticas heredadas y concede solo operaciones necesarias. Lectura pública de sectores/config/reportes; propuestas privadas; escrituras administrativas sujetas a is_admin. |
+| Inserciones ciudadanas | citizen_reports y community_locations aceptan INSERT público con validación de texto, bloque, voltaje, fecha y coordenadas. No concede UPDATE/DELETE/TRUNCATE anónimos. |
+| Publicación `supabase_realtime` | Incluye sectors, app_config, citizen_reports y community_locations sin duplicar miembros existentes. Las políticas siguen controlando visibilidad. |
 | ALTER finales del esquema | Repite ADD COLUMN IF NOT EXISTS para algunas columnas y observation. Evita error por columna existente; no corrige todos sus tipos/defaults/restricciones previos. |
 | Migración v2 | Añade territorio/notas/coordenadas, rellena algunos nulos y envía NOTIFY a PostgREST. No instala un motor predictivo ni agregación. |
 | WHERE del saneamiento | Considera algunos IS NULL, no todos los vacíos/notes nulas prometidos. Una fila excluida no se beneficia del COALESCE del SET. |
 | NOTIFY reload schema/config | Solicita refrescar caché/config del servicio. No crea columnas ni concede permisos. |
 | SELECT final | Mensaje de finalización del script; no es prueba de todos los flujos clientes. |
-| `missing_policies.sql` | Texto con escapes/comillas rotos, no receta SQL ejecutable válida. Su intención también abre cambios/borrados públicos. |
-| SQL generado por `copyMigrationSql` | Es distinto de la migración versionada: añade FOR ALL TO anon. No recomendarlo como reparación segura. |
+| `missing_policies.sql` | Script retirado: informa qué migración v3 utilizar y no modifica permisos ni restaura escrituras anónimas. |
+| `copyMigrationSql` | Muestra instrucciones para usar el archivo v3 revisado; ya no genera FOR ALL TO anon ni SQL que abra la base. |
 
-No hay funciones SQL propias, triggers, índices secundarios remotos ni una estrategia de backups/rollback completa definidos en los archivos examinados. La base real podría tener cambios manuales; se necesita inspeccionarla para afirmar su estado. Antes de una futura migración: conocer esquema/grants/policies reales, preparar copia y cambio reversible, probar instalación y datos existentes en un entorno separado y comprobar operaciones permitidas/denegadas. Esta entrega no aplica esas acciones.
+Las funciones SQL v3 is_admin() y claim_push_alert(p_block) se explican abajo. No hay triggers de agregación automática ni estrategia completa de backups/rollback del negocio. No restaurar políticas públicas para resolver fallos de login: comprobar Auth, registro administrador y entorno servidor. El fixture de seguridad se ejecuta solo en una base vacía aislada.
+
+### Funciones y tablas privadas v3
+
+`admin_users(user_id, enabled, created_at)` referencia auth.users y solo se administra desde una conexión privilegiada. No permite al navegador consultar ni modificar su registro. `is_admin()` es SQL STABLE SECURITY DEFINER, con search_path vacío y referencias calificadas: compara auth.uid() con un registro habilitado. Devuelve boolean; no recibe correo, UUID ni rol del cliente. Solo authenticated tiene EXECUTE. Las policies usan `(SELECT public.is_admin())` para evitar evaluaciones innecesarias por fila. Una cuenta Auth válida sin registro habilitado sigue sin ser administradora.
+
+`push_alert_limits(scope,last_claim_at)` guarda el último intento autorizado global y por usuario. `claim_push_alert(p_block DEFAULT NULL)` verifica primero is_admin, rechaza bloques ajenos a A–D y toma un advisory lock transaccional global. Usa clock_timestamp después del bloqueo, devuelve false si hubo una reserva global en30s o del usuario en60s, y en otro caso actualiza ambas filas con INSERT ON CONFLICT y devuelve true. La reserva también se consume cuando Firebase falla; los clientes no pueden reiniciarla. El bloque valida audiencia, pero no abre una cuota independiente por bloque. Las funciones pertenecen a postgres, revocan EXECUTE de PUBLIC/anon y nunca confían en user_metadata.
+
+La migración es transaccional, añade columnas ausentes, marca como comunitarios IDs con prefijos reconocidos y crea índices de reportes por timestamp y sector/timestamp. Es repetible; no crea cuentas ni asigna el primer administrador. Para eso se usa la guía de activación con una cuenta Auth verificada. El cliente no puede aprobarse por correo.
+
+### Pruebas SQL y automatización
+
+`tests/sql/admin_security.sql` crea roles/esquema Auth mínimos en PostgreSQL vacío; instala el esquema, simula políticas antiguas y ejecuta v3 dos veces. Sus aserciones comprueban privilegios reales al cambiar anon/authenticated y claims JWT: lectura pública, inserción válida/inválida, denegación de cambios a no administradores/deshabilitados, CRUD de administrador, registro privado y cuota/revocación. Los auxiliares test_support ejecutan operaciones esperadas y abortan ante un resultado distinto. No envía alertas ni usa cuentas reales. Ejecutar desde la raíz de cualquiera de los dos repositorios con `psql -X -v ON_ERROR_STOP=1 -f tests/sql/admin_security.sql` exclusivamente en una base de pruebas vacía.
+
+`.github/workflows/verify-web.yml` ejecuta npm ci/test/build con Node22 y otro job con PostgreSQL16 para ese fixture. `.github/workflows/verify-android.yml` prepara Java21 y SDK36 y ejecuta testDebugUnitTest/lintDebug; conserva reportes. Las ramas main y codex/** y las solicitudes de cambios activan los checks. No despliegan APK ni incluyen contraseñas de firma.
 
 ## 6. Persistencia local y compatibilidad
 
 Room v3 contiene `sectors`, `pending_reports` y `outage_records`; sus campos/mapeos/consultas están en capítulo02. `MIGRATION_2_3` agrega isCommunity local y observation a pendientes. Esto no crea isCommunity remoto. Se registra solo esa migración y hay fallback destructivo: una ruta ausente puede borrar tablas. `exportSchema=false` impide conservar automáticamente el historial JSON de esquemas para pruebas de migración.
 
-SharedPreferences guarda el PAC y configuración; Room guarda sectores y reportes. Editar uno no garantiza actualizar el otro. La carga del horario se hace actualmente desde el ViewModel; receivers/workers no pueden asumir que ocurrió en un proceso recién creado.
+SharedPreferences guarda PAC/configuración y Room sectores/reportes. Scheduler, receiver y worker cargan el PAC persistido antes de calcular alarmas, incluso en un proceso nuevo. El resolver consulta Room para reparar el bloque guardado y separar Casa/Trabajo. Editar una capa no garantiza sincronizar la otra.
 
 Las reglas backup/extraction son plantillas con secciones comentadas y la aplicación permite backup. No hay una selección granular completa configurada. `file_paths.xml` conserva rutas para FileProvider aunque el flujo actual de actualización abre Play; su presencia no demuestra instalación de APK activa.
 
@@ -201,7 +217,7 @@ Las funciones escritas dentro de strings de esos parches son **texto que se pret
 
 ### Android
 
-Abrir la raíz en Android Studio, disponer del SDK36 y del JDK compatible con la versión de herramientas. El gradle wrapper usa su propia versión declarada. Para desarrollo/pruebas hay que resolver también la firma debug actual, que depende del keystore release configurado. No copiar contraseñas de un documento como método de gestión.
+Abrir la raíz en Android Studio con SDK36 y JDK compatible. Debug usa la firma estándar y no requiere credenciales de publicación; release necesita variables externas. Rotar las contraseñas retiradas del código sin perder la continuidad de firma.
 
 Pruebas locales que un mantenedor puede lanzar, cuando su entorno esté preparado:
 
@@ -210,13 +226,13 @@ Pruebas locales que un mantenedor puede lanzar, cuando su entorno esté preparad
 .\gradlew.bat :app:lintDebug
 ```
 
-En la revisión anterior el primer comando con offline/no-daemon no pudo arrancar porque GRADLE_USER_HOME resolvía a una ubicación no escribible. Eso es fallo de preparación del entorno, no resultado de tests. Verificar SDK, JVM y directorio de caché antes de atribuir un fallo de arranque al producto. No se generó una versión release en esta tarea.
+Los intentos locales tuvieron problemas de caché y dependencias offline. La [verificación GitHub de 7a81b07](https://github.com/Ralag/luz-barinas-android/actions/runs/38904594403) sí completó testDebugUnitTest y lintDebug:16 tests aprobados, ningún fallo/error/omitido y76 advertencias lint sin errores. Verificar SDK/JVM/caché antes de atribuir fallos de arranque al producto. No se generó ni publicó release.
 
 Para distribución, el procedimiento habitual del proyecto es Android Studio → Generate Signed Bundle/APK, con credenciales gestionadas fuera de los documentos. Incrementar versionCode y versionName cuando se publique un binario nuevo. El actualizador compara GitHub pero abre Google Play: publicar solo en GitHub puede anunciar una versión aún no disponible en el destino. Hay que definir y comprobar un canal coherente antes de emitir una actualización obligatoria.
 
 ### Web
 
-Desde `admin-web`, `npm ci` instala lo fijado en package-lock, `npm run dev` inicia Vite, `npm run build` genera dist y el blog, y `npm run preview` sirve la salida. Esas órdenes son instrucciones para mantenimiento; no se ejecutaron como parte de la redacción. El servidor Vite no implementa por sí solo las Vercel Functions de `api/`.
+Desde admin-web, npm ci instala el lockfile, npm test ejecuta pruebas de seguridad sin red, npm run dev inicia Vite, npm run build genera dist/blog y npm run preview sirve la salida. Vite no implementa las Vercel Functions de api/. El registro distingue pruebas locales y checks de GitHub.
 
 Vercel utiliza npm run build, publica dist, aplica rewrites y headers del archivo vercel.json. Firebase Hosting conserva una configuración heredada public='.'; no es equivalente ni se verificó un despliegue allí. El comportamiento de `/admin` debe probarse tanto navegando como recargando.
 
@@ -234,6 +250,8 @@ El primer script genera el índice/JSON de funciones y examina código propio; e
 `inventario.mjs` importa `parseAst` del Rolldown instalado. `walk(dir,accept)` recorre archivos locales; `relative(p)` normaliza rutas; `chapter(file)` asigna cada fuente a un capítulo; `lineAt(source,offset)` calcula línea; `add(...)` registra un símbolo sin duplicar misma identidad; `parseJavaScript(file,source,offset)` analiza sintaxis y su función interna `visit` recorre el árbol para encontrar declaraciones, arrows asignadas, métodos/callbacks nombrados. Kotlin/Python se reconocen mediante patrones de declaración; no hay inferencia completa de tipos. También analiza scripts inline propios del mapa/HTML. Escribe JSON y Markdown y retorna error si un archivo JS no se pudo analizar.
 
 El inventario guarda también SHA-256 y cantidad de líneas de cada fuente. `verificar-documentacion.mjs` usa su propio `walk(dir)` para listar documentos; `syncCopies()` copia archivos documentales a web si se pasa `--sincronizar`; `headingIds(content)` obtiene anclas de encabezados Markdown ignorando bloques de código y distingue títulos repetidos. El código de nivel superior lee inventario, detecta fuentes cuyo hash cambió, busca nombres en las explicaciones antes de índices finales, verifica enlaces y números de línea, detecta patrones de credenciales, compara copias byte a byte y emite un informe JSON. Si encuentra problemas finaliza con código1. Copiar no elimina fuentes ni cambia operaciones del producto. El flag de sincronización está pensado para la disposición conjunta de repositorios de este workspace.
+
+El inventario consulta git ls-files en ambos repositorios para marcar localOnly en las utilidades presentes fuera de Git. El verificador tolera su ausencia en un clon y sigue verificando sus hashes si existen. Incluye admin-security.js y tests CJS de seguridad. La sincronización copia también la guía de activación, el registro de cambios y las cuatro fuentes SQL compartidas; el informe comprueba su igualdad. Los enlaces de código versionado apuntan a commits concretos de GitHub; los scripts locales sin seguimiento se identifican sin ofrecer enlaces inexistentes.
 
 La comprobación de cobertura es estructural: que un nombre aparezca en el capítulo no prueba que su explicación sea correcta. Las explicaciones se redactaron leyendo código y se revisan con esa limitación. Al agregar archivos, revisar también que estén incluidos en el alcance del inventario.
 
