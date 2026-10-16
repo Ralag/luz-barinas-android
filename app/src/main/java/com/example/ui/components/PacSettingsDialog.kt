@@ -194,7 +194,8 @@ fun PacSettingsDialog(
                             }
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "${nextWindow.dayName} • ${nextWindow.timeLabel}",
+                                text = nextWindow?.let { "${it.dayName} • ${it.timeLabel}" }
+                                    ?: "Sin cortes programados para tu bloque",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.onSurface

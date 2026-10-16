@@ -16,8 +16,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ExampleUnitTest {
-  @Before fun restoreSchedule() { PacScheduleData.applyDoubleTurnPreset() }
-  @After fun resetSchedule() { PacScheduleData.applyDoubleTurnPreset() }
+  @Before
+  fun restoreSchedule() { PacScheduleData.applyDoubleTurnPreset() }
+  @After
+  fun resetSchedule() { PacScheduleData.applyDoubleTurnPreset() }
 
   @Test
   fun `test modular arithmetic outage prediction engine`() = kotlinx.coroutines.test.runTest {

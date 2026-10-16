@@ -39,7 +39,9 @@ class PacAlertsPersistenceTest {
         set(2026, Calendar.OCTOBER, 5, 0, 0, 0)
     }.timeInMillis
 
-    @Before fun setUp() = runBlocking(Dispatchers.IO) {
+    @Before
+
+    fun setUp() = runBlocking(Dispatchers.IO) {
         context = ApplicationProvider.getApplicationContext()
         database = AppDatabase.getInstance(context)
         database.clearAllTables()
@@ -50,7 +52,9 @@ class PacAlertsPersistenceTest {
         PacScheduleData.applyDoubleTurnPreset()
     }
 
-    @After fun tearDown() {
+    @After
+
+    fun tearDown() {
         PacAlarmScheduler.cancelAlarms(context)
         PacScheduleData.applyDoubleTurnPreset()
     }
@@ -69,7 +73,9 @@ class PacAlertsPersistenceTest {
             .apply()
     }
 
-    @Test fun repairsLegacyCachedBlockFromTheSelectedRoomSector() = runBlocking(Dispatchers.IO) {
+    @Test
+
+    fun repairsLegacyCachedBlockFromTheSelectedRoomSector() = runBlocking(Dispatchers.IO) {
         insertSector("sector-c", "Bloque C")
         selectProfile("home", "sector-c")
         val result = PacAlertTargetResolver.resolve(context, database)!!
@@ -82,7 +88,9 @@ class PacAlertsPersistenceTest {
         assertNull(PacAlertTargetResolver.resolve(context, database))
     }
 
-    @Test fun coldStartLoadsPersistedScheduleBeforeArmingActualAlarmTimes() = runBlocking(Dispatchers.IO) {
+    @Test
+
+    fun coldStartLoadsPersistedScheduleBeforeArmingActualAlarmTimes() = runBlocking(Dispatchers.IO) {
         insertSector("sector-c", "Bloque C")
         selectProfile("home", "sector-c")
         PacScheduleData.activeSlots.clear()
@@ -96,7 +104,9 @@ class PacAlertsPersistenceTest {
         assertTrue(alarms.all { shadowOf(it.operation).savedIntent.getStringExtra(PacAlarmReceiver.EXTRA_BLOCK) == "C" })
     }
 
-    @Test fun changingProfileReplacesOldAlarmsAndRejectsAnAlreadyQueuedOldIntent() = runBlocking(Dispatchers.IO) {
+    @Test
+
+    fun changingProfileReplacesOldAlarmsAndRejectsAnAlreadyQueuedOldIntent() = runBlocking(Dispatchers.IO) {
         insertSector("home-a", "Bloque A")
         insertSector("work-c", "Bloque C")
         selectProfile("home", "home-a")
@@ -123,7 +133,9 @@ class PacAlertsPersistenceTest {
         assertTrue(shadowOf(manager).scheduledAlarms.isEmpty())
     }
 
-    @Test fun disabledSettingsCancelPreviouslyScheduledAlarmsAndUnscheduledDArmsNothing() = runBlocking(Dispatchers.IO) {
+    @Test
+
+    fun disabledSettingsCancelPreviouslyScheduledAlarmsAndUnscheduledDArmsNothing() = runBlocking(Dispatchers.IO) {
         insertSector("sector-a", "Bloque A")
         selectProfile("home", "sector-a")
         PacAlarmScheduler.scheduleNextAlarmAndWait(context, now)
@@ -139,7 +151,9 @@ class PacAlertsPersistenceTest {
         assertTrue(shadowOf(manager).scheduledAlarms.isEmpty())
     }
 
-    @Test fun exactAndPeriodicDeliveryShareADurableKeyButDifferentProfilesAreIndependent() {
+    @Test
+
+    fun exactAndPeriodicDeliveryShareADurableKeyButDifferentProfilesAreIndependent() {
         val home = PacAlertTarget("home", "same-sector", "Casa", "A")
         assertTrue(PacAlertNotifier.claim(context, home, now, "pre"))
         assertFalse(PacAlertNotifier.claim(context, home, now, "pre"))
@@ -147,7 +161,9 @@ class PacAlertsPersistenceTest {
         assertTrue(PacAlertNotifier.claim(context, home.copy(profile = "work"), now, "pre"))
     }
 
-    @Test fun planHonorsIndependentAlertSwitchesAndSchedulesFutureWhileCurrentCutIsActive() {
+    @Test
+
+    fun planHonorsIndependentAlertSwitchesAndSchedulesFutureWhileCurrentCutIsActive() {
         val activeAtEight = now + 8 * 3_600_000L
         val silent = PacAlertSettings(isNotificationEnabled = false, isAlarmEnabled = false, isRestoreAlarmEnabled = false)
         assertTrue(PacAlarmScheduler.buildPlan("A", silent, activeAtEight).isEmpty())

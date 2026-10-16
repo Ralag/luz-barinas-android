@@ -12,8 +12,10 @@ import java.util.GregorianCalendar
 import java.util.TimeZone
 
 class PacScheduleRegressionTest {
-    @Before fun setUp() { PacScheduleData.applyDoubleTurnPreset() }
-    @After fun tearDown() { PacScheduleData.applyDoubleTurnPreset() }
+    @Before
+    fun setUp() { PacScheduleData.applyDoubleTurnPreset() }
+    @After
+    fun tearDown() { PacScheduleData.applyDoubleTurnPreset() }
 
     private fun caracas(year: Int, month: Int, day: Int, hour: Int, minute: Int = 0): Long =
         GregorianCalendar(TimeZone.getTimeZone("America/Caracas")).apply {
@@ -21,7 +23,9 @@ class PacScheduleRegressionTest {
             set(year, month - 1, day, hour, minute, 0)
         }.timeInMillis
 
-    @Test fun normalizesEveryBlockWithoutTakingTheBOfBloque() {
+    @Test
+
+    fun normalizesEveryBlockWithoutTakingTheBOfBloque() {
         for (block in listOf("A", "B", "C", "D")) {
             assertEquals(block, PacBlock.normalize(block))
             assertEquals(block, PacBlock.normalize(" Bloque ${block.lowercase()} "))
@@ -32,7 +36,9 @@ class PacScheduleRegressionTest {
         }
     }
 
-    @Test fun findsAnActualWindowForEachOfTheFourBlocks() {
+    @Test
+
+    fun findsAnActualWindowForEachOfTheFourBlocks() {
         PacScheduleData.activeSlots.clear()
         PacScheduleData.activeSlots.addAll((0..3).map { PacSlot(it, "${8 + it}–${9 + it}", 8 + it, 9 + it) })
         PacScheduleData.activeMatrix = arrayOf("A", "B", "C", "D").map { Array(7) { _ -> it } }.toTypedArray()
@@ -45,7 +51,9 @@ class PacScheduleRegressionTest {
         }
     }
 
-    @Test fun missingAndInvalidBlocksNeverInventAnAlarmWindow() {
+    @Test
+
+    fun missingAndInvalidBlocksNeverInventAnAlarmWindow() {
         val now = caracas(2026, 10, 5, 0)
         assertNull(PacScheduleData.findScheduledWindowForBlock("D", now))
         assertNull(PacScheduleData.findScheduledWindowForBlock("unknown", now))
@@ -53,7 +61,9 @@ class PacScheduleRegressionTest {
         assertNull(PacScheduleData.findScheduledWindowForBlock("A", now))
     }
 
-    @Test fun overnightUsesThePreviousStartDateAcrossAMonthBoundaryAndHasExclusiveEnd() {
+    @Test
+
+    fun overnightUsesThePreviousStartDateAcrossAMonthBoundaryAndHasExclusiveEnd() {
         PacScheduleData.activeSlots.clear()
         PacScheduleData.activeSlots.add(PacSlot(0, "23–03", 23, 3))
         // Wednesday's A starts in September; Thursday's B starts in October.
@@ -70,7 +80,9 @@ class PacScheduleRegressionTest {
         assertEquals("-", PacScheduleData.getActiveBlockNow(window.endMillis))
     }
 
-    @Test fun choosesChronologicallyEvenWhenSlotsAreOutOfOrderAndIgnoresDeviceTimezone() {
+    @Test
+
+    fun choosesChronologicallyEvenWhenSlotsAreOutOfOrderAndIgnoresDeviceTimezone() {
         val oldTimezone = TimeZone.getDefault()
         try {
             TimeZone.setDefault(TimeZone.getTimeZone("Asia/Tokyo"))
@@ -85,7 +97,9 @@ class PacScheduleRegressionTest {
         }
     }
 
-    @Test fun malformedScheduleCannotCreateAWindow() {
+    @Test
+
+    fun malformedScheduleCannotCreateAWindow() {
         val now = caracas(2026, 10, 5, 0)
         PacScheduleData.activeMatrix = arrayOf(arrayOf("A"))
         assertNull(PacScheduleData.findScheduledWindowForBlock("A", now))
