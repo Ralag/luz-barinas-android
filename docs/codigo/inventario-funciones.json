@@ -1,4 +1,5 @@
 {
+  "hashNormalization": "LF",
   "scope": "Código propio; excluye dependencias, build/dist, código generado y skills. Callbacks anónimos se explican dentro de su función contenedora.",
   "files": [
     {
@@ -6,7 +7,7 @@
       "chapter": "06-base-de-datos-configuracion-y-operacion.md",
       "language": "HTML con JavaScript",
       "localOnly": false,
-      "sha256": "2dac6f4496aa25e162d807f92da1de5bc6ac6af020a3ed10bc1919f46e4cfdf7",
+      "sha256": "4a138ac1d8832efe36e45a78aaec170d4a523eb5b06a5ae2a33f56ba8f2246ae",
       "lines": 1768
     },
     {
@@ -278,7 +279,7 @@
       "chapter": "04-web-react-y-api.md",
       "language": "JavaScript/JSX",
       "localOnly": false,
-      "sha256": "585458583bab665e2780bdc62fe877e3f543930cf470c21853dfc3dea5f92e08",
+      "sha256": "bf7f9206627024e03745381250673bdf661dd57450817669688fd1c11ed065e0",
       "lines": 906
     },
     {
@@ -462,7 +463,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "b5f86eeab5492cf3269aecb9840d6eb5193d448386364db2205175b017bc3459",
+      "sha256": "f681a3a73c867c030991cb1877a915ede7ead3633322bb3ddbda2521e6391ec1",
       "lines": 55
     },
     {
@@ -502,7 +503,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "2bfe81518e2f80173d8ade927e4343a0d7653953dd90bb3654271c26385cb853",
+      "sha256": "7de8bb2a9e13d2f7e1ddcd41ad385b8d454bdff3952b60655ab09853f485fcfe",
       "lines": 36
     },
     {
@@ -542,7 +543,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "eb1e8b7d6fa89d47a84ae59661eddb6f1613587c0bb6ba4e90d7cfe22c290290",
+      "sha256": "805f09b783788613cff5161e590536960816e256a422cecdf82a942890288d85",
       "lines": 48
     },
     {
@@ -558,7 +559,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "e86805ce004c2b90fea6ffe182104eab8b5b2c935fca7671361784bc6c72b37c",
+      "sha256": "f5e9875418d14598773d465a3acd90967ad63d3c8004bd09cf94dfca09caa360",
       "lines": 731
     },
     {
@@ -566,7 +567,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "1b43b57fbf5eb5d81eb4d4918f811c6229ea8dc6a2707cc8b68efeec3d04cf4d",
+      "sha256": "ab22acc3f307da3f0d58cfc3c98b5ef66e2cb35cc91ccfd9b820d2b300e2d2ba",
       "lines": 62
     },
     {
@@ -598,7 +599,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "15948bd084d219a57802c08767d72af8d6a31316af023a662018a5655e976d07",
+      "sha256": "eef276a617c92ce972fa94f7d2c76828473ec206fa9317dfafbbd6c26ab61e84",
       "lines": 38
     },
     {
@@ -614,7 +615,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "4d427d488b58748979f5fdfd268457147386fbc69c386d4dac44b3c358dc91d6",
+      "sha256": "068fef118db92e85cba99084cd78dfcb4891c787f0a8c36410975845f348d653",
       "lines": 558
     },
     {
@@ -622,7 +623,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "76edef293d4e9ffc09a64e151f40b4d770f478f559bbde621e01b9710712e79c",
+      "sha256": "a1ed715e05df304718c2d441cf3b95bc00af3abf4a9646fb0dd625717b42f870",
       "lines": 384
     },
     {
@@ -638,7 +639,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "1d5a230e86446f6a9de74c8dedd02dcb22d1a6ed5d4ec7713e65455e14f8dac5",
+      "sha256": "0596249d548f02201c2adfa353d9fba1d9b274e78ccd2280f1aa7fc238fa1931",
       "lines": 231
     },
     {
@@ -646,7 +647,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "07382cddcc853d2c5623159c8f7bc35fde6b06edf4f203cd931681fcb92ec470",
+      "sha256": "a985b71a4035a8b3cdf1cd7c907d60aebc6e58427fe324dec4b6e7be40846635",
       "lines": 553
     },
     {
@@ -662,7 +663,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "a81f3e4a8fd6db2b62d5d0eb6dd455f5d16b6ea449c4274a7d29b3412df6b647",
+      "sha256": "53474029e07e98c756cd55391c91df62c1afefa8e72d3db6d2d671164aeab6de",
       "lines": 268
     },
     {
@@ -670,7 +671,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "7a3853ae09de17c7ea496d5f7d59b274c653bd46c2c73171f6f1a98828fb38e3",
+      "sha256": "d0bcd9162ae9c04787fb924d1713a553687d58c1b9c3f83f5fd107b6e9c0de14",
       "lines": 82
     },
     {
@@ -710,7 +711,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "b630a34895a0b7b4e2d02971831d886c347ae567af4621b57233a266e07a5e4d",
+      "sha256": "198c6cc2438fd4919311a8d469c15df1842dcf62ee5f7249094931e8c4b28cfe",
       "lines": 778
     },
     {
@@ -718,7 +719,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "e545837ba5431ae6dddd1107dac6eff13cc93a71fa04c365911f1117b0f646cd",
+      "sha256": "3ff00321f025ead1ae9d4be1cb8f0525ed2a5e1ec50a3039e4e17a0ec6701a1a",
       "lines": 179
     },
     {
@@ -726,7 +727,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "b84354dc08974b8534dabdaf82911b2fe70b763f264975faafcf2285e14728f3",
+      "sha256": "3ead5b9a59e535d50c8bd1b2acbc74555d1e09357ccb5e9290c4744736ae3553",
       "lines": 299
     },
     {
@@ -742,7 +743,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "c01e4295bd13fceacfa7d8ea56390d0bf0610997d8fb64e0dfb37b288cabe725",
+      "sha256": "201677116d7f3573d9e1deaf61b01aaa67f757de14299e533355756b0911ff4f",
       "lines": 287
     },
     {
@@ -750,7 +751,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "e8b8f85e4bf9d0be08ec4154efc71e849c28b5fe990a32120dfded08d60cfe93",
+      "sha256": "63d8ab072cbe62d9cb94ec5b46eed7c94d7ab0dc16300a972303e761aa90b684",
       "lines": 1019
     },
     {
@@ -758,7 +759,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "0ee7459eb3cdcc81b97ba3db967359df60fbce1de18f455d629268793a5e240c",
+      "sha256": "cbeb7cf3c8ed4fb69ea900c72576056c63dc83dba62ee677e9ac8574ccd582fe",
       "lines": 562
     },
     {
@@ -766,7 +767,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "22eb8a96385373197ff57f55d2b243e87530ccf24349ac627e7ad7d0ec2ff81f",
+      "sha256": "051a6772dcacebff535f12ba51a6eb1eea4e9c1bde76f2f0aadcf1f85705d432",
       "lines": 111
     },
     {
@@ -782,7 +783,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "fd394e30059cef6339507241f7c97ca540ccb432f5dcdf3544dd547344b00136",
+      "sha256": "af14fd7415ffce61f3802a1bd6ba1daefeda7660f82d1b98aecab6513d68a9b3",
       "lines": 151
     },
     {
@@ -798,7 +799,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "444cb72bc17b0d36e2e459b219a8a384cb323de5ad9a0a91c02bbd678ef7d1e8",
+      "sha256": "449f224f28d8b241f7abc7fb63723cf0766852e359507c47d208a313c7bb8af2",
       "lines": 972
     },
     {
@@ -870,7 +871,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "a991199240b6bb79c92c3e2d6a1dbad2aef7277ab843f062ada2cad73217017d",
+      "sha256": "4aebc2ccc63b2c62c23709ca05b008cd55f7813d910e7e00d1d7f444259c8b1f",
       "lines": 617
     },
     {
@@ -878,7 +879,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "042b3298ffbc91e2c9d49ceb148a5ef3386580fd889d90acebb2445a3fd97092",
+      "sha256": "e358ea5235c58d68e4c58f999e776be9b11864b7cbd3339471cf43e3d5459bdc",
       "lines": 92
     },
     {
@@ -902,7 +903,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "1ca18eed6a0a49fb65d85cf3a734ac05dc4c9b20844ee845d743af1dd5140395",
+      "sha256": "11b8f721a04cea776f3a00307e510a276d2517efe3a682c65948e23b3cdfa98f",
       "lines": 53
     },
     {
@@ -910,7 +911,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "ad7c2f80c847dbf6dbec132c3bcd2cfc9830689c57165dc6dc79b55e23d797c2",
+      "sha256": "215ee9c4bcc226c7d68bc62a6c75b240f969096c4fde614aa30b86d90750ce94",
       "lines": 89
     },
     {
@@ -926,7 +927,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "54e5dab483d5e503c2c661161f065a6689e871b47f4683874953f580eb96debd",
+      "sha256": "99616fbb75ed899c0fd0d5461fca379f45b3ab1316340e4f21e82fd20e658451",
       "lines": 178
     },
     {
@@ -934,7 +935,7 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "dc7198dc50d83ccfaca305e2595af0a55444f57be9bcb895608bdba2019c255d",
+      "sha256": "e2041b709ce2bd4d2cf7cbfd73212030111715400d07d059d21d9bc5d32171cb",
       "lines": 112
     },
     {
@@ -1046,7 +1047,7 @@
       "chapter": "06-base-de-datos-configuracion-y-operacion.md",
       "language": "Python",
       "localOnly": true,
-      "sha256": "b2c0ddb48d8dab46bb920cf051cf5de24b257e9fd90bf558037e80e855b64150",
+      "sha256": "02b67a2cc27c4be476e7ff4e7949f1a7fdbcd1d1eac28e8cee8ec62cb729e74b",
       "lines": 263
     },
     {
@@ -1054,7 +1055,7 @@
       "chapter": "06-base-de-datos-configuracion-y-operacion.md",
       "language": "Python",
       "localOnly": true,
-      "sha256": "af70e94487a9b2db0c08fdfc988871a47971d5d07b4e862b83f237f6efcdaac4",
+      "sha256": "c76b51eb7a6e86cbf431547b320d58535570985bc252009aba52203b87fc8b5b",
       "lines": 2
     },
     {

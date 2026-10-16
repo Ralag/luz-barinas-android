@@ -106,10 +106,10 @@ files.sort((a, b) => a.file.localeCompare(b.file));
 for (const entry of files) {
   entry.localOnly = !tracked.has(entry.file);
   const bytes = fs.readFileSync(path.join(root, entry.file));
-  entry.sha256 = createHash('sha256').update(bytes).digest('hex');
+  entry.sha256 = createHash('sha256').update(bytes.toString('utf8').replace(/\r\n/g, '\n')).digest('hex');
   entry.lines = bytes.toString('utf8').split('\n').length;
 }
-fs.writeFileSync(path.join(output, 'inventario-funciones.json'), JSON.stringify({ scope: 'Código propio; excluye dependencias, build/dist, código generado y skills. Callbacks anónimos se explican dentro de su función contenedora.', files, symbols, errors }, null, 2) + '\n');
+fs.writeFileSync(path.join(output, 'inventario-funciones.json'), JSON.stringify({ hashNormalization: 'LF', scope: 'Código propio; excluye dependencias, build/dist, código generado y skills. Callbacks anónimos se explican dentro de su función contenedora.', files, symbols, errors }, null, 2) + '\n');
 const counts = {};
 for (const entry of symbols) counts[entry.chapter] = (counts[entry.chapter] ?? 0) + 1;
 const md = ['# Índice verificable de funciones', '', 'Generado mediante `node docs/codigo/herramientas/inventario.mjs`. No sustituye las explicaciones de los capítulos: sirve para localizar declaraciones y comprobar omisiones.', '', 'El inventario reconoce declaraciones Kotlin y Python y usa el parser local de Rolldown para JavaScript/JSX. Incluye funciones locales, componentes, métodos y callbacks con nombre. Los callbacks anónimos se explican con la operación que los contiene. Excluye dependencias de terceros, código generado y archivos de salida.', '', 'Las líneas corresponden al código local leído; al cambiarlo, regenera este índice. La detección de nombres no certifica por sí sola la calidad de una explicación. Los archivos marcados como locales no están versionados y su ausencia en un clon no invalida la documentación del producto.', '', '| Capítulo | Declaraciones |', '|---|---:|', ...Object.entries(counts).sort().map(([c, n]) => `| [${c}](${c}) | ${n} |`), '', `Archivos examinados: **${files.length}**. Declaraciones identificadas: **${symbols.length}**. Errores de análisis: **${errors.length}**.`, ''];

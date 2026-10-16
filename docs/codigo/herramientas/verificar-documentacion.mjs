@@ -34,7 +34,7 @@ const inventory = JSON.parse(fs.readFileSync(path.join(docdir, 'inventario-funci
 for (const entry of inventory.files) {
   const file = path.join(root, entry.file);
   if (!fs.existsSync(file)) { if (!entry.localOnly) issues.push(`Fuente inventariada ausente: ${entry.file}`); continue; }
-  const actual = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+  const actual = createHash('sha256').update(fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n')).digest('hex');
   if (entry.sha256 !== actual) issues.push(`Fuente modificada desde el inventario; revisar explicación y regenerar: ${entry.file}`);
 }
 const chapterNames = [...new Set(inventory.symbols.map(s => s.chapter))];
