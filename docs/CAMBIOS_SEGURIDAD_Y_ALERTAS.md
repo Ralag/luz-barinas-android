@@ -47,7 +47,15 @@ SQL local: fixture completa aprobada en PostgreSQL18.6/PGlite0.5.10, 298 sentenc
 
 Android: **16 tests aprobados, cero fallos/errores/omitidos** y lintDebug completado sin errores en [GitHub Actions, revisión7a81b07](https://github.com/Ralag/luz-barinas-android/actions/runs/38904594403). Los XML descargados confirman los12 casos nuevos y4 existentes. Lint informa76 advertencias de versiones, recursos, atributos y estilo pendientes. Se añadieron regresiones de horarios/perfiles/Room/alarmas/ajustes/deduplicación y se fijó el reloj del test del motor. Además pasaron19 comprobaciones JVM de las fuentes reales. El intento Gradle offline local se detuvo por Foojay1.0.0 ausente; no altera el resultado de CI.
 
-Documentación: inventario regenerado, cobertura nominal, enlaces y copias verificadas con las herramientas de docs/codigo/herramientas. La coincidencia de nombres no sustituye la revisión del significado de las explicaciones.
+Documentación: inventario regenerado, cobertura nominal, enlaces y copias verificadas con las herramientas de docs/codigo/herramientas:750 declaraciones en133 archivos,15 copias documentales y4 fuentes SQL compartidas, sin incidencias. La comprobación también pasó con fuentes de un clon nuevo; los hashes normalizan CRLF/LF. La coincidencia de nombres no sustituye la revisión del significado de las explicaciones.
+
+## Integración y publicación web
+
+Con autorización expresa del titular, el16 de octubre de2026 se integraron las correcciones en la rama main de **cada repositorio por separado**: [web, PR1 / af8152f](https://github.com/Ralag/pac-barinas/pull/1) a las13:21UTC y [Android, PR1 / 0f2a569](https://github.com/Ralag/luz-barinas-android/pull/1) a las13:21UTC. Los repositorios mantienen su identidad, código e historial independientes.
+
+Vercel confirmó el despliegue Production del commit web af8152f. El dominio pacbarinas.site redirige a [www.pacbarinas.site](https://www.pacbarinas.site); la portada y [/admin](https://www.pacbarinas.site/admin) respondieron200, el panel contiene el campo de correo y admin-security.js sirve el verificador nuevo. Sobre ese despliegue confirmado, GET al endpoint push devolvió405, POST sin Bearer401, POST con token deliberadamente inválido401 y OPTIONS del mismo origen204. No se probaron credenciales privadas ni se enviaron avisos. Las respuestas del endpoint demuestran el rechazo de esas peticiones, no la entrega FCM ni el login interactivo del titular.
+
+Android quedó actualizado como código en GitHub, sin generar/publicar APK o versión Play. Los teléfonos todavía necesitan una distribución posterior para recibir la corrección. El registro de esta publicación es un cambio documental y no altera las fuentes del producto verificadas.
 
 ## Límites restantes
 
