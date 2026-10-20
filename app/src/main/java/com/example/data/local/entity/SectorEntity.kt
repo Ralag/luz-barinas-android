@@ -25,15 +25,11 @@ data class SectorEntity(
             if (parts.size == 2) {
                 val lat = parts[0].toDoubleOrNull()
                 val lng = parts[1].toDoubleOrNull()
-                if (lat != null && lng != null) Pair(lat, lng) else null
+                if (lat != null && lng != null && lat.isFinite() && lng.isFinite() && lat in -90.0..90.0 && lng in -180.0..180.0) Pair(lat, lng) else null
             } else null
         }
 
-        val parsedStatus = try {
-            ServiceStatus.valueOf(status)
-        } catch (e: Exception) {
-            ServiceStatus.NORMAL
-        }
+        val parsedStatus = com.example.data.model.ReportSemantics.remoteStatus(status)
 
         return Sector(
             id = id,

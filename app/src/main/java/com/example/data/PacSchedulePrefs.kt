@@ -30,17 +30,18 @@ object PacSchedulePrefs {
 
     fun saveSchedule(context: Context) {
         val prefs = getPrefs(context)
+        val snapshot = PacScheduleData.getScheduleSnapshot()
         prefs.edit {
             // Save matrix as JSON
             val matrixJson = JSONArray()
-            for (row in PacScheduleData.activeMatrix) {
+            for (row in snapshot.matrix) {
                 matrixJson.put(JSONArray(row.toList()))
             }
             putString(KEY_MATRIX, matrixJson.toString())
 
             // Save slots as JSON
             val slotsJson = JSONArray()
-            for (slot in PacScheduleData.activeSlots) {
+            for (slot in snapshot.slots) {
                 val slotObj = JSONObject()
                 slotObj.put("timeLabel", slot.timeLabel)
                 slotObj.put("startHour", slot.startHour)
@@ -50,12 +51,12 @@ object PacSchedulePrefs {
             putString(KEY_SLOTS, slotsJson.toString())
 
             // Save sector assignments
-            putStringSet(KEY_SECTORS_A, PacScheduleData.SECTORS_BLOQUE_A.toSet())
-            putStringSet(KEY_SECTORS_B, PacScheduleData.SECTORS_BLOQUE_B.toSet())
-            putStringSet(KEY_SECTORS_C, PacScheduleData.SECTORS_BLOQUE_C.toSet())
-            putStringSet(KEY_SECTORS_D, PacScheduleData.SECTORS_BLOQUE_D.toSet())
+            putStringSet(KEY_SECTORS_A, snapshot.assignments.getValue("sectorsA").toSet())
+            putStringSet(KEY_SECTORS_B, snapshot.assignments.getValue("sectorsB").toSet())
+            putStringSet(KEY_SECTORS_C, snapshot.assignments.getValue("sectorsC").toSet())
+            putStringSet(KEY_SECTORS_D, snapshot.assignments.getValue("sectorsD").toSet())
 
-            putLong(KEY_VERSION, PacScheduleData.scheduleVersion)
+            putLong(KEY_VERSION, snapshot.revision)
         }
     }
 
@@ -64,52 +65,18 @@ object PacSchedulePrefs {
         if (!prefs.contains(KEY_MATRIX)) return false
 
         return try {
-            // Load matrix
-            val matrixStr = prefs.getString(KEY_MATRIX, null) ?: return false
-            val matrixJson = JSONArray(matrixStr)
-            val newMatrix = Array(matrixJson.length()) { i ->
-                val rowJson = matrixJson.getJSONArray(i)
-                Array(rowJson.length()) { j -> rowJson.getString(j) }
+            val matrix = JSONArray(prefs.getString(KEY_MATRIX, null) ?: return false)
+            val slots = JSONArray(prefs.getString(KEY_SLOTS, null) ?: return false)
+            val obj = JSONObject().put("matrix", matrix).put("slots", slots)
+            listOf("A" to KEY_SECTORS_A, "B" to KEY_SECTORS_B, "C" to KEY_SECTORS_C, "D" to KEY_SECTORS_D).forEach { (block, key) ->
+                prefs.getStringSet(key, null)?.let { obj.put("sectors$block", JSONArray(it.sorted())) }
             }
-            PacScheduleData.activeMatrix = newMatrix
-
-            // Load slots
-            val slotsStr = prefs.getString(KEY_SLOTS, null)
-            if (slotsStr != null) {
-                val slotsJson = JSONArray(slotsStr)
-                val newSlots = mutableListOf<PacSlot>()
-                for (i in 0 until slotsJson.length()) {
-                    val obj = slotsJson.getJSONObject(i)
-                    newSlots.add(PacSlot(
-                        index = i,
-                        timeLabel = obj.getString("timeLabel"),
-                        startHour = obj.getInt("startHour"),
-                        endHour = obj.getInt("endHour")
-                    ))
-                }
-                PacScheduleData.activeSlots.clear()
-                PacScheduleData.activeSlots.addAll(newSlots)
+            val snapshot = com.example.data.model.PacScheduleSnapshot.parse(
+                kotlinx.serialization.json.Json.parseToJsonElement(obj.toString()) as kotlinx.serialization.json.JsonObject)
+            synchronized(PacScheduleData) {
+                val version = prefs.getLong(KEY_VERSION, 0L)
+                if (version >= PacScheduleData.scheduleVersion) PacScheduleData.applySnapshot(snapshot, version)
             }
-
-            // Load sector assignments
-            prefs.getStringSet(KEY_SECTORS_A, null)?.let {
-                PacScheduleData.SECTORS_BLOQUE_A.clear()
-                PacScheduleData.SECTORS_BLOQUE_A.addAll(it.sorted())
-            }
-            prefs.getStringSet(KEY_SECTORS_B, null)?.let {
-                PacScheduleData.SECTORS_BLOQUE_B.clear()
-                PacScheduleData.SECTORS_BLOQUE_B.addAll(it.sorted())
-            }
-            prefs.getStringSet(KEY_SECTORS_C, null)?.let {
-                PacScheduleData.SECTORS_BLOQUE_C.clear()
-                PacScheduleData.SECTORS_BLOQUE_C.addAll(it.sorted())
-            }
-            prefs.getStringSet(KEY_SECTORS_D, null)?.let {
-                PacScheduleData.SECTORS_BLOQUE_D.clear()
-                PacScheduleData.SECTORS_BLOQUE_D.addAll(it.sorted())
-            }
-
-            PacScheduleData.scheduleVersion = prefs.getLong(KEY_VERSION, 0L)
             true
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load PAC schedule from SharedPreferences: ${e.message}")

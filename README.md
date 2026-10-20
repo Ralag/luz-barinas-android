@@ -6,7 +6,7 @@
 
 Aplicación Android y plataforma web para consultar el Plan de Administración de Carga, relacionar sectores con bloques y colaborar mediante reportes del estado eléctrico.
 
-**Estado documentado:** 16 de octubre de 2026. Android declara **1.3.1 / versionCode 7**, Android7.0/API24 o superior. Esta corrección de código no emite un nuevo binario comercial.
+**Estado documentado:** 20 de octubre de 2026. El código Android prepara **1.4.0 / versionCode 8**, Android7.0/API24 o superior. Esta corrección de código no emite un nuevo binario comercial.
 
 ## Documentación
 
@@ -14,6 +14,8 @@ Aplicación Android y plataforma web para consultar el Plan de Administración d
 - [Manual detallado del código](DOCUMENTACION_CODIGO.md): guía de aprendizaje y siete capítulos, con explicación por archivo/función, flujos, contratos y mantenimiento.
 - [Índice de funciones](docs/codigo/07-indice-funciones.md): nombres, archivos y líneas para encontrar cada declaración.
 - [Análisis técnico previo](ANALISIS_SISTEMA_PAC_BARINAS_2026-10-15.md): hallazgos y prioridades que motivaron la actualización documental.
+- [Mapa, anuncios y sincronización](docs/CAMBIOS_MAPA_ANUNCIOS_Y_SINCRONIZACION.md): correcciones actuales y límites de distribución.
+- [Operación del gateway](docs/OPERACION_GATEWAY_SUPABASE.md): rutas compatibles, cuotas y servidor.
 - [Cambios de seguridad y alertas](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md): correcciones, pruebas y activación remota.
 - [Activación de acceso seguro](docs/ACTIVACION_SEGURIDAD.md): cuenta administradora, RLS y configuración del servidor.
 
@@ -23,11 +25,11 @@ Aplicación Android y plataforma web para consultar el Plan de Administración d
 - Horarios semanales/mensuales, reglas predictivas heurísticas, perfiles Casa/Trabajo, mapas, alertas locales y widget.
 - Supabase para datos y cambios Realtime.
 - Portal público React/Vite, blog, modo TV, páginas informativas y dos implementaciones administrativas actualmente presentes.
-- Funciones Vercel para proyección, predicción y envío FCM de servidor.
+- Gateway Supabase para consultas compatibles; Vercel conserva solo el envío administrativo FCM por decisión del titular.
 
 ## Límites actuales
 
-La primera corrección incorpora Supabase Auth, permisos administrativos, protección del endpoint push, escape del panel clásico y alarmas Android por perfil/bloque con medianoche y carga persistida. Quedan problemas de sincronización/fecha de reportes, persistencia del panel React y uniformidad predictiva. Los porcentajes no son probabilidades calibradas. Android aún no recibe FCM y el actualizador abre Google Play.
+La entrega incorpora mapa compartido, fallas irregulares, recompensa opcional de doce horas, apertura publicitaria coordinada, diálogos compactos y sincronización PAC validada. Supabase agrega reportes con fecha original e identidad estable. Persisten diferencias entre paneles, IDs antiguos sin equivalencia revisada y heurísticas predictivas. Los porcentajes no son probabilidades calibradas. Android aún no recibe FCM y el actualizador abre Google Play.
 
 Consultar la documentación antes de utilizar seeds o scripts patch/update: pueden sobrescribir datos o código. Los cambios aplicados y su verificación figuran en el registro de cambios.
 

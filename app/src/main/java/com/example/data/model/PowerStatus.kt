@@ -5,7 +5,8 @@ import androidx.compose.runtime.Immutable
 enum class ServiceStatus(val label: String, val hexColor: Long) {
     NORMAL("Servicio Normal", 0xFF10B981),
     SCHEDULED_OUTAGE("Corte Programado (PAC)", 0xFFEF4444),
-    IRREGULAR_OUTAGE("Corte Irregular (Avería)", 0xFF9333EA)
+    IRREGULAR_OUTAGE("Corte Irregular (Avería)", 0xFF9333EA),
+    UNKNOWN("Sin reporte actual", 0xFF64748B)
 }
 
 @Immutable

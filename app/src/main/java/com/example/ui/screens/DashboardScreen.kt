@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -49,6 +52,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -81,6 +86,7 @@ import java.util.TimeZone
  * Clean, Fast, Minimalist Dashboard for PAC Barinas.
  * Philosophy: Menos es mejor. All vital schedule and status info at a single glance.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DashboardScreen(
     sectors: List<Sector>,
@@ -98,11 +104,16 @@ fun DashboardScreen(
     onChangeAddressClicked: () -> Unit = {},
     onNavigateToSchedule: () -> Unit = {},
     onOpenAlarmSettings: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onWatchTutorial: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    scheduleVersion: Long = PacScheduleData.scheduleVersion
 ) {
+    val configuration = LocalConfiguration.current
+    val compactActions = configuration.screenWidthDp < 360 || configuration.fontScale > 1.3f
     var reportFeedback by remember { mutableStateOf<String?>(null) }
     var observationText by remember { mutableStateOf("") }
     var showObservationInput by remember { mutableStateOf(false) }
+    com.example.ads.AppOpenInteractionProtection(showObservationInput || observationText.isNotBlank())
 
     val userBlock = remember(selectedSector) {
         com.example.data.model.PacBlock.normalize(selectedSector?.rotationBlock) ?: ""
@@ -118,44 +129,44 @@ fun DashboardScreen(
         }
     }
 
-    // Calendar & slot calculation using local device time (recalculates every minute)
     var timeKey by remember { androidx.compose.runtime.mutableLongStateOf(System.currentTimeMillis() / 60_000L) }
     androidx.compose.runtime.LaunchedEffect(Unit) {
         while (true) {
-            kotlinx.coroutines.delay(10000L) // updates more frequently than 60s to be safe
+            kotlinx.coroutines.delay(10_000L)
             timeKey = System.currentTimeMillis() / 60_000L
         }
     }
-    val cal = remember(timeKey) { Calendar.getInstance() }
-    val currentDayIdx = remember(timeKey) { PacScheduleData.getDayIndex(cal.get(Calendar.DAY_OF_WEEK)) }
-    val currentSlotIdx = remember(timeKey) { 
-        PacScheduleData.getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE)) 
+    val now = remember(timeKey) { System.currentTimeMillis() }
+    val cal = remember(timeKey) { Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")).apply { timeInMillis = now } }
+    val currentDayIdx = PacScheduleData.getDayIndex(cal.get(Calendar.DAY_OF_WEEK))
+    val currentDayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
+    val schedule = remember(scheduleVersion) { PacScheduleData.getScheduleSnapshot() }
+    val activeWindow = remember(timeKey, scheduleVersion, userBlock) {
+        PacScheduleData.findScheduledWindowForBlock(userBlock, now)?.takeIf { it.isCurrentlyActive }
     }
-    val currentDayOfMonth = remember(timeKey) { cal.get(Calendar.DAY_OF_MONTH) }
-
-    // Check if the current slot has PAC cut for the user's block considering the exact week rotation
-    val currentSlotBlock = remember(currentSlotIdx, currentDayIdx, currentDayOfMonth, PacScheduleData.scheduleVersion) {
-        PacScheduleData.getBlockForDate(currentSlotIdx, currentDayIdx, currentDayOfMonth)
+    val nextWindow = remember(timeKey, scheduleVersion, userBlock) {
+        PacScheduleData.findScheduledWindowForBlock(userBlock, now, includeActive = false)
     }
-    val isCurrentSlotOutage = remember(currentSlotBlock, userBlock) {
-        currentSlotBlock.equals(userBlock, ignoreCase = true)
+    val currentSlotIdx = PacScheduleData.getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
+    val activeSlotStartsToday = currentSlotIdx >= 0 && schedule.slots.getOrNull(currentSlotIdx)?.let { slot ->
+        slot.startHour < slot.endHour || cal.get(Calendar.HOUR_OF_DAY) >= slot.startHour
+    } == true
+    val irregular = selectedSector?.status == ServiceStatus.IRREGULAR_OUTAGE
+    val hasPowerNow = selectedSector?.status == ServiceStatus.NORMAL
+    val liveStatusColor = when {
+        irregular -> Color(0xFF9333EA)
+        selectedSector?.status == ServiceStatus.SCHEDULED_OUTAGE -> StatusScheduledRed
+        hasPowerNow -> StatusNormalGreen
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
-    val hasPowerNow = (selectedSector?.status == ServiceStatus.NORMAL) && !isCurrentSlotOutage
-
-    // Next scheduled cut calculation based on monthly rotation
-    val nextCutSlotIdx = remember(currentSlotIdx, currentDayIdx, currentDayOfMonth, userBlock, PacScheduleData.scheduleVersion) {
-        var found = -1
-        for (offset in 1..6) {
-            val sIdx = (currentSlotIdx + offset) % 6
-            val dIdx = if (sIdx < currentSlotIdx) (currentDayIdx + 1) % 7 else currentDayIdx
-            val dayMonth = if (sIdx < currentSlotIdx) currentDayOfMonth + 1 else currentDayOfMonth
-            if (PacScheduleData.getBlockForDate(sIdx, dIdx, dayMonth).equals(userBlock, ignoreCase = true)) {
-                found = sIdx
-                break
-            }
-        }
-        found
+    val statusTitle = when {
+        irregular -> "Falla irregular reportada"
+        selectedSector?.status == ServiceStatus.SCHEDULED_OUTAGE -> "Sin luz reportado por la comunidad"
+        hasPowerNow -> "Con luz según el último reporte"
+        else -> "Sin reporte actual del servicio"
     }
+    val statusDetail = if (activeWindow != null) "PAC en curso: ${activeWindow.timeLabel}" else
+        nextWindow?.let { "Próximo PAC: ${it.dayName}, ${it.timeLabel}" } ?: "Sin cortes publicados para este bloque"
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -210,8 +221,8 @@ fun DashboardScreen(
                                         containerColor = if (activeProfile == "home") MaterialTheme.colorScheme.primary else Color.Transparent,
                                         contentColor = if (activeProfile == "home") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                                     ),
-                                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                                    modifier = Modifier.height(36.dp)
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                    modifier = Modifier.heightIn(min = 48.dp)
                                 ) {
                                     Text("🏠 Casa", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                                 }
@@ -222,8 +233,8 @@ fun DashboardScreen(
                                         containerColor = if (activeProfile == "work") MaterialTheme.colorScheme.primary else Color.Transparent,
                                         contentColor = if (activeProfile == "work") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                                     ),
-                                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                                    modifier = Modifier.height(36.dp)
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                    modifier = Modifier.heightIn(min = 48.dp)
                                 ) {
                                     Text("💼 Trabajo", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                                 }
@@ -237,7 +248,7 @@ fun DashboardScreen(
                                 onChangeAddressClicked() 
                             },
                             shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier.height(36.dp),
+                            modifier = Modifier.heightIn(min = 48.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
                             Text("💼 Agregar Ubicación de Trabajo", fontSize = 13.sp)
@@ -258,119 +269,35 @@ fun DashboardScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
-                        // Top Header: Primary Location Title & Block Chip
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                        // Reserve the entire card width for the sector name. The
+                        // original nested Row measured it before the block chip.
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = blockColor)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Tu sector", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                            TextButton(onClick = onChangeAddressClicked) { Text("Cambiar") }
+                        }
+                        Text(
+                            text = selectedSector?.name ?: userAddress ?: "Elige tu sector",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.fillMaxWidth().testTag("dashboard_sector_name")
+                        )
+                        val locationDetail = selectedSector?.circuitCode?.let { "Circuito $it" } ?: "Consulta un sector para personalizar tu horario"
+                        Text(locationDetail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(top = 8.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .background(blockColor.copy(alpha = 0.15f), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.LocationOn,
-                                        contentDescription = "Icono de ubicación",
-                                        tint = blockColor,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = selectedSector?.name ?: userAddress ?: "Barinas",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSurface,
-                                            maxLines = 1,
-                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                        )
-                                        if (selectedSector != null) {
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            if (selectedSector.isCommunity) {
-                                                Surface(
-                                                    shape = RoundedCornerShape(4.dp),
-                                                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
-                                                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f))
-                                                ) {
-                                                    Text(
-                                                        text = "Comunitario \uD83E\uDD1D",
-                                                        fontSize = 9.sp,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.tertiary,
-                                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                                                    )
-                                                }
-                                            } else {
-                                                Surface(
-                                                    shape = RoundedCornerShape(4.dp),
-                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                                                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
-                                                ) {
-                                                    Text(
-                                                        text = "Sector PAC 📋",
-                                                        fontSize = 9.sp,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                    val circuitText = "Circuito ${selectedSector?.circuitCode ?: "Don Samuel"}"
-                                    val locationDetail = if (userAddress != null && userAddress != selectedSector?.name) {
-                                        "$userAddress • $circuitText"
-                                    } else {
-                                        "$circuitText • Barinas"
-                                    }
-                                    Text(
-                                        text = locationDetail,
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                    )
-                                }
+                            Surface(shape = RoundedCornerShape(8.dp), color = blockColor.copy(alpha = 0.15f)) {
+                                Text(if (userBlock.isEmpty()) "Sin bloque asignado" else "Bloque $userBlock", style = MaterialTheme.typography.labelLarge, color = blockColor, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
                             }
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            // Block & Change button column
-                            Column(horizontalAlignment = Alignment.End) {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = blockColor.copy(alpha = 0.18f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, blockColor)
-                                ) {
-                                    Text(
-                                        text = "Bloque $userBlock",
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = blockColor,
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(6.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    modifier = Modifier.clickable(role = androidx.compose.ui.semantics.Role.Button) { onChangeAddressClicked() }
-                                ) {
-                                    Text(
-                                        text = "Cambiar",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                                    )
+                            selectedSector?.let {
+                                Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+                                    Text(if (it.isCommunity) "Comunitario" else "Sector PAC", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
                                 }
                             }
                         }
@@ -380,10 +307,10 @@ fun DashboardScreen(
                         // Live Status Banner with clean high-contrast presentation
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = if (hasPowerNow) StatusNormalGreen.copy(alpha = 0.10f) else StatusScheduledRed.copy(alpha = 0.10f),
+                            color = liveStatusColor.copy(alpha = 0.10f),
                             border = androidx.compose.foundation.BorderStroke(
                                 1.5.dp,
-                                if (hasPowerNow) StatusNormalGreen.copy(alpha = 0.45f) else StatusScheduledRed.copy(alpha = 0.45f)
+                                liveStatusColor.copy(alpha = 0.45f)
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -397,14 +324,14 @@ fun DashboardScreen(
                                     modifier = Modifier
                                         .size(38.dp)
                                         .background(
-                                            if (hasPowerNow) StatusNormalGreen else StatusScheduledRed,
+                                            liveStatusColor,
                                             CircleShape
                                         ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = if (hasPowerNow) Icons.Outlined.Bolt else Icons.Outlined.PowerOff,
-                                        contentDescription = if (hasPowerNow) "Icono de servicio eléctrico activo" else "Icono de corte de energía",
+                                        contentDescription = statusTitle,
                                         tint = Color.White,
                                         modifier = Modifier.size(22.dp)
                                     )
@@ -414,26 +341,14 @@ fun DashboardScreen(
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = if (hasPowerNow) "🟢 Turno con Servicio Estimado (Con Luz)" else "🔴 Turno de Corte Programado",
+                                        text = statusTitle,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = if (hasPowerNow) StatusNormalGreen else StatusScheduledRed
+                                        color = liveStatusColor
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = if (hasPowerNow) {
-                                            val predDetail = prediction?.algorithmDetail
-                                            if (prediction != null && prediction.hoursUntilWindow > 0.1f && predDetail != null && !predDetail.contains("Corte activo", ignoreCase = true) && !predDetail.contains("Corte en curso", ignoreCase = true)) {
-                                                val suffix = if (predDetail.contains(":")) predDetail.substringAfter(": ").trim() else (if (nextCutSlotIdx != -1) PacScheduleData.SLOTS[nextCutSlotIdx].timeLabel else "Horario en ajuste")
-                                                "Próximo corte: $suffix"
-                                            } else if (nextCutSlotIdx != -1) {
-                                                "Próximo corte estimado: ${PacScheduleData.SLOTS[nextCutSlotIdx].timeLabel}"
-                                            } else {
-                                                "Sin cortes programados en este turno"
-                                            }
-                                        } else {
-                                            "Corte en curso: Turno ${PacScheduleData.SLOTS[currentSlotIdx].timeLabel} (4 hrs)"
-                                        },
+                                        text = statusDetail,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onSurface
@@ -444,7 +359,7 @@ fun DashboardScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                    // Today's 6 PAC Time Slots
+                    // Slots beginning today; an overnight active window is described above.
                     val dayName = PacScheduleData.DAYS[currentDayIdx].name
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -453,6 +368,7 @@ fun DashboardScreen(
                     ) {
                         Text(
                             text = "Cronograma de hoy ($dayName)",
+                            modifier = Modifier.weight(1f),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -461,7 +377,7 @@ fun DashboardScreen(
                             onClick = onNavigateToSchedule,
                             contentPadding = PaddingValues(0.dp)
                         ) {
-                            Text("Ver mensual", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            Text("Ver más", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                             Spacer(modifier = Modifier.width(2.dp))
                             Icon(Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = "Ir al horario mensual", modifier = Modifier.size(14.dp))
                         }
@@ -470,10 +386,10 @@ fun DashboardScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        PacScheduleData.SLOTS.forEachIndexed { slotIdx, slot ->
-                            val blockForSlot = PacScheduleData.getBlockForDate(slotIdx, currentDayIdx, currentDayOfMonth)
+                        schedule.slots.forEachIndexed { slotIdx, slot ->
+                            val blockForSlot = schedule.matrix[(slotIdx + PacScheduleData.getWeekOffsetForDayOfMonth(currentDayOfMonth)) % schedule.matrix.size][currentDayIdx]
                             val isUserBlock = blockForSlot.equals(userBlock, ignoreCase = true)
-                            val isNow = slotIdx == currentSlotIdx
+                            val isNow = activeSlotStartsToday && slotIdx == currentSlotIdx
 
                             val slotBlockColor = when (blockForSlot) {
                                 "A" -> BlockAColor
@@ -602,7 +518,7 @@ fun DashboardScreen(
                                 modifier = Modifier.size(22.dp)
                             )
                         }
-                        Column {
+                        Column(Modifier.weight(1f)) {
                             Text(
                                 text = if (alertSettings.isAlarmEnabled) "🔔 Alarma PAC Activada" else "⏰ Alerta de Corte Programada",
                                 style = MaterialTheme.typography.titleSmall,
@@ -652,21 +568,23 @@ fun DashboardScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        maxItemsInEachRow = if (compactActions) 1 else 3
                     ) {
                         Button(
                             onClick = {
                                 val obs = observationText.trim().ifEmpty { null }
-                                onReportStatus(true, "NORMAL", 118f, obs)
+                                onReportStatus(true, "NORMAL", null, obs)
                                 reportFeedback = "¡Gracias! Reportaste servicio con luz."
                                 observationText = ""
                                 showObservationInput = false
                             },
                             modifier = Modifier
-                                .weight(1f)
-                                .height(46.dp)
+                                .then(if (compactActions) Modifier.fillMaxWidth() else Modifier.weight(1f))
+                                .heightIn(min = 48.dp)
                                 .testTag("report_power_on_button")
                                 .semantics { contentDescription = "Reportar que tengo servicio eléctrico" },
                             colors = ButtonDefaults.buttonColors(containerColor = StatusNormalGreen),
@@ -687,8 +605,8 @@ fun DashboardScreen(
                                 showObservationInput = false
                             },
                             modifier = Modifier
-                                .weight(1f)
-                                .height(46.dp)
+                                .then(if (compactActions) Modifier.fillMaxWidth() else Modifier.weight(1f))
+                                .heightIn(min = 48.dp)
                                 .testTag("report_power_off_button")
                                 .semantics { contentDescription = "Reportar que no hay servicio eléctrico" },
                             colors = ButtonDefaults.buttonColors(containerColor = StatusScheduledRed),
@@ -709,8 +627,8 @@ fun DashboardScreen(
                                 showObservationInput = false
                             },
                             modifier = Modifier
-                                .weight(1f)
-                                .height(46.dp)
+                                .then(if (compactActions) Modifier.fillMaxWidth() else Modifier.weight(1f))
+                                .heightIn(min = 48.dp)
                                 .testTag("report_irregular_fault_button")
                                 .semantics { contentDescription = "Reportar falla irregular o avería fuera de cronograma" },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9333EA)),
@@ -719,7 +637,7 @@ fun DashboardScreen(
                         ) {
                             Icon(Icons.Default.Warning, contentDescription = "Falla irregular", modifier = Modifier.size(15.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Falla Irreg.", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text("Falla irregular", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
 
@@ -826,13 +744,21 @@ fun DashboardScreen(
                 onClick = onNavigateToSchedule,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .heightIn(min = 48.dp)
                     .testTag("view_full_schedule_button"),
                 shape = RoundedCornerShape(14.dp)
             ) {
                 Icon(Icons.Outlined.CalendarMonth, contentDescription = "Horarios", modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Ver Horarios Semanales y Mensuales", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
+
+        onWatchTutorial?.let { watch ->
+            item(key = "youtube_tutorial") {
+                OutlinedButton(onClick = watch, modifier = Modifier.fillMaxWidth().testTag("dashboard_tutorial")) {
+                    Text("Ver tutorial de la aplicación")
+                }
             }
         }
 
@@ -918,7 +844,7 @@ fun BroadcastNoticeBanner(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Warning,
                         contentDescription = "Aviso informativo",
@@ -935,7 +861,7 @@ fun BroadcastNoticeBanner(
                 }
                 IconButton(
                     onClick = onDismiss,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(48.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,

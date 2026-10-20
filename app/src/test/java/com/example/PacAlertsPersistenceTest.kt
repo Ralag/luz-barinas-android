@@ -98,10 +98,23 @@ class PacAlertsPersistenceTest {
         PacScheduleData.activeMatrix = arrayOf(Array(7) { "C" })
         PacSchedulePrefs.saveSchedule(context)
         PacScheduleData.applyDoubleTurnPreset() // Fresh process memory differs from saved configuration.
+        PacScheduleData.scheduleVersion = 0L // A new process has no applied in-memory revision.
         PacAlarmScheduler.scheduleNextAlarmAndWait(context, now)
         val alarms = shadowOf(context.getSystemService(Context.ALARM_SERVICE) as AlarmManager).scheduledAlarms
         assertEquals(setOf(now + 5 * 3_600_000L - 600_000, now + 5 * 3_600_000L), alarms.map { it.triggerAtTime }.toSet())
         assertTrue(alarms.all { shadowOf(it.operation).savedIntent.getStringExtra(PacAlarmReceiver.EXTRA_BLOCK) == "C" })
+    }
+
+    @Test
+    fun olderPersistedScheduleCannotOverrideANewerInMemorySnapshot() {
+        PacScheduleData.activeSlots.clear()
+        PacScheduleData.activeSlots.add(PacSlot(0, "05–06", 5, 6))
+        PacScheduleData.activeMatrix = arrayOf(Array(7) { "C" })
+        PacSchedulePrefs.saveSchedule(context)
+        val newer = PacScheduleData.getScheduleSnapshot().copy(slots = listOf(PacSlot(0, "09–10", 9, 10)))
+        PacScheduleData.applySnapshot(newer, PacScheduleData.scheduleVersion + 1)
+        assertTrue(PacSchedulePrefs.loadSchedule(context))
+        assertEquals(9, PacScheduleData.getSlotsSnapshot().first().startHour)
     }
 
     @Test

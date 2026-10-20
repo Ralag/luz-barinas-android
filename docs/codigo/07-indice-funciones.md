@@ -8,36 +8,20 @@ Las líneas corresponden al código local leído; al cambiarlo, regenera este í
 
 | Capítulo | Declaraciones |
 |---|---:|
-| [02-android-datos-y-motor.md](02-android-datos-y-motor.md) | 113 |
-| [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md) | 131 |
-| [04-web-react-y-api.md](04-web-react-y-api.md) | 233 |
-| [05-panel-clasico.md](05-panel-clasico.md) | 266 |
-| [06-base-de-datos-configuracion-y-operacion.md](06-base-de-datos-configuracion-y-operacion.md) | 7 |
+| [../OPERACION_GATEWAY_SUPABASE.md](../OPERACION_GATEWAY_SUPABASE.md) | 31 |
+| [02-android-datos-y-motor.md](02-android-datos-y-motor.md) | 139 |
+| [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md) | 240 |
+| [04-web-react-y-api.md](04-web-react-y-api.md) | 324 |
+| [05-panel-clasico.md](05-panel-clasico.md) | 280 |
+| [06-base-de-datos-configuracion-y-operacion.md](06-base-de-datos-configuracion-y-operacion.md) | 10 |
 
-Archivos examinados: **133**. Declaraciones identificadas: **750**. Errores de análisis: **0**.
+Archivos examinados: **170**. Declaraciones identificadas: **1024**. Errores de análisis: **0**.
 
 ## admin-web/admin.html
 
 Explicación: [06-base-de-datos-configuracion-y-operacion.md](06-base-de-datos-configuracion-y-operacion.md).
 
 No contiene funciones con nombre detectables; sus constantes, configuración o efectos de nivel superior se explican en el capítulo correspondiente.
-
-## admin-web/api/getMonthlyWeeks.js
-
-Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
-
-| Función | Línea | Contexto |
-|---|---:|---|
-| `exports` | 7 | ArrowFunctionExpression |
-
-## admin-web/api/getOutagePrediction.js
-
-Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
-
-| Función | Línea | Contexto |
-|---|---:|---|
-| `getDayIndex` | 17 | FunctionDeclaration |
-| `exports` | 21 | ArrowFunctionExpression |
 
 ## admin-web/api/sendPushAlert.js
 
@@ -58,139 +42,139 @@ Explicación: [05-panel-clasico.md](05-panel-clasico.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `checkAuth` | 110 | FunctionDeclaration |
-| `renderAdminAccess` | 115 | FunctionDeclaration |
-| `handleLogin` | 139 | FunctionDeclaration |
-| `handleLogout` | 152 | FunctionDeclaration |
-| `handleAdminAction` | 162 | FunctionDeclaration |
-| `editSector` | 168 | `handleAdminAction` |
-| `deleteMasterSector` | 169 | `handleAdminAction` |
-| `approveCommunityLocation` | 170 | `handleAdminAction` |
-| `rejectCommunityLocation` | 171 | `handleAdminAction` |
-| `mergeAndApproveCluster` | 172 | `handleAdminAction` |
-| `removeSectorFromBlock` | 173 | `handleAdminAction` |
-| `reassignSector` | 174 | `handleAdminAction` |
-| `updateSectorStatus` | 175 | `handleAdminAction` |
-| `focusSectorOnMap` | 176 | `handleAdminAction` |
-| `switchTab` | 188 | FunctionDeclaration |
-| `initVercelLogsSync` | 217 | FunctionDeclaration |
-| `clearVercelConsole` | 266 | FunctionDeclaration |
-| `pingVercelApi` | 271 | FunctionDeclaration |
-| `updateSyncStatus` | 293 | FunctionDeclaration |
-| `initConnectionMonitor` | 311 | FunctionDeclaration |
-| `retryFirebaseConnection` | 327 | FunctionDeclaration |
-| `initFirebaseSync` | 339 | FunctionDeclaration |
-| `fetchPac` | 343 | `initFirebaseSync` |
-| `fetchSectors` | 383 | `initFirebaseSync` |
-| `fetchCommunity` | 429 | `initFirebaseSync` |
-| `fetchCitizen` | 457 | `initFirebaseSync` |
-| `fetchBroadcast` | 473 | `initFirebaseSync` |
-| `renderMatrixTable` | 496 | FunctionDeclaration |
-| `onclick` | 526 | `renderMatrixTable` |
-| `getBlockBadgeClass` | 558 | FunctionDeclaration |
-| `renderWeeklyAudit` | 571 | FunctionDeclaration |
-| `updateDetectedSchemeBadge` | 573 | FunctionDeclaration |
-| `openCellModal` | 598 | FunctionDeclaration |
-| `closeCellModal` | 620 | FunctionDeclaration |
-| `setCellBlock` | 625 | FunctionDeclaration |
-| `openBranchGeneratorModal` | 717 | FunctionDeclaration |
-| `closeBranchGeneratorModal` | 721 | FunctionDeclaration |
-| `handleApplyBranchScale` | 725 | FunctionDeclaration |
-| `setPacViewMode` | 795 | FunctionDeclaration |
-| `renderMonthlyProjection` | 820 | FunctionDeclaration |
-| `applyMonthlyWeekAsBase` | 892 | FunctionDeclaration |
-| `openSchemeConfigModal` | 908 | FunctionDeclaration |
-| `closeSchemeConfigModal` | 933 | FunctionDeclaration |
-| `onSchemeModeChanged` | 937 | FunctionDeclaration |
-| `handleApplySchemeConfig` | 951 | FunctionDeclaration |
-| `applySingleTurnPreset` | 1023 | FunctionDeclaration |
-| `applyDoubleTurnPreset` | 1027 | FunctionDeclaration |
-| `publishPacSchedule` | 1031 | FunctionDeclaration |
-| `openEditSlotModal` | 1083 | FunctionDeclaration |
-| `closeEditSlotModal` | 1093 | FunctionDeclaration |
-| `handleSaveSlot` | 1097 | FunctionDeclaration |
-| `openAddSlotModal` | 1115 | FunctionDeclaration |
-| `closeAddSlotModal` | 1119 | FunctionDeclaration |
-| `onNewSlotDurationChanged` | 1123 | FunctionDeclaration |
-| `onNewSlotTimeChanged` | 1133 | FunctionDeclaration |
-| `handleAddSlot` | 1144 | FunctionDeclaration |
-| `deleteSlot` | 1180 | FunctionDeclaration |
-| `getActiveBlockNow` | 1196 | FunctionDeclaration |
-| `updateTelemetryActiveCut` | 1242 | FunctionDeclaration |
-| `applyActivePacCutToSectors` | 1260 | FunctionDeclaration |
-| `setTelemetryFilter` | 1303 | FunctionDeclaration |
-| `isSectorCommunity` | 1320 | FunctionDeclaration |
-| `renderTelemetryList` | 1328 | FunctionDeclaration |
-| `updateSectorStatus` | 1430 | FunctionDeclaration |
-| `resetAllTelemetryToNormal` | 1443 | FunctionDeclaration |
-| `setAllSectorsStatus` | 1465 | FunctionDeclaration |
-| `renderBlockKanban` | 1483 | FunctionDeclaration |
-| `reassignSector` | 1531 | FunctionDeclaration |
-| `removeSectorFromBlock` | 1555 | FunctionDeclaration |
-| `openAddSectorToBlockModal` | 1567 | FunctionDeclaration |
-| `closeAddSectorModal` | 1571 | FunctionDeclaration |
-| `handleAddSectorToBlock` | 1575 | FunctionDeclaration |
-| `normalizeSectorText` | 1607 | FunctionDeclaration |
-| `getSignificantTokens` | 1623 | FunctionDeclaration |
-| `levenshteinDistance` | 1629 | FunctionDeclaration |
-| `computeLevenshteinSimilarity` | 1652 | FunctionDeclaration |
-| `computeTokenJaccardSimilarity` | 1658 | FunctionDeclaration |
-| `computeSectorSimilarity` | 1669 | FunctionDeclaration |
-| `analyzeTypoClusters` | 1693 | FunctionDeclaration |
-| `updateClusterBadge` | 1761 | FunctionDeclaration |
-| `toggleClusteringPanel` | 1766 | FunctionDeclaration |
-| `renderTypoClusters` | 1776 | FunctionDeclaration |
-| `upsertSectorSafe` | 1855 | FunctionDeclaration |
-| `insertApprovedCommunitySector` | 1900 | FunctionDeclaration |
-| `mergeAndApproveCluster` | 1910 | FunctionDeclaration |
-| `validateWithOSM` | 2050 | FunctionDeclaration |
-| `renderOsmResult` | 2105 | FunctionDeclaration |
-| `validateMasterSectorsWithOSM` | 2125 | FunctionDeclaration |
-| `validateAllWithOSM` | 2213 | FunctionDeclaration |
-| `renderCommunityTable` | 2218 | FunctionDeclaration |
-| `approveCommunityLocation` | 2286 | FunctionDeclaration |
-| `rejectCommunityLocation` | 2353 | FunctionDeclaration |
-| `renderActiveBroadcast` | 2371 | FunctionDeclaration |
-| `hideActiveBroadcast` | 2413 | FunctionDeclaration |
-| `handleDismissBroadcast` | 2418 | FunctionDeclaration |
-| `handleSendBroadcast` | 2439 | FunctionDeclaration |
-| `testGlobalPushAlert` | 2468 | FunctionDeclaration |
-| `setReportFeedFilter` | 2499 | FunctionDeclaration |
-| `renderCitizenReportsFeed` | 2515 | FunctionDeclaration |
-| `seedAllBarinasCatalog` | 2816 | FunctionDeclaration |
-| `saveDonationConfig` | 2867 | FunctionDeclaration |
-| `loadDonationUrl` | 2882 | FunctionDeclaration |
-| `handleFilterMasterTypeChange` | 2911 | FunctionDeclaration |
-| `getSectorCoordinates` | 2960 | FunctionDeclaration |
-| `applyBasemap` | 2989 | FunctionDeclaration |
-| `changeMapBasemap` | 3049 | FunctionDeclaration |
-| `initBarinasMasterMap` | 3053 | FunctionDeclaration |
-| `focusBarinasMapHome` | 3089 | FunctionDeclaration |
-| `focusSectorOnMap` | 3094 | FunctionDeclaration |
-| `updateBarinasMapMarkers` | 3115 | FunctionDeclaration |
-| `toggleMapHeatmapMode` | 3224 | FunctionDeclaration |
-| `handleMapBlockFilterChange` | 3239 | FunctionDeclaration |
-| `initMasterFilterDropdowns` | 3244 | FunctionDeclaration |
-| `handleFilterMasterMunChange` | 3269 | FunctionDeclaration |
-| `handleFilterMasterChange` | 3290 | FunctionDeclaration |
-| `handleSearchMasterInput` | 3298 | FunctionDeclaration |
-| `setDirectoryViewMode` | 3303 | FunctionDeclaration |
-| `renderGeneralSectorsMaster` | 3319 | FunctionDeclaration |
-| `renderWikipediaCardsView` | 3399 | FunctionDeclaration |
-| `renderDetailedTableView` | 3520 | FunctionDeclaration |
-| `editSector` | 3624 | FunctionDeclaration |
-| `openCreateSectorModal` | 3631 | FunctionDeclaration |
-| `onclick` | 3713 | `openCreateSectorModal` |
-| `closeCreateSectorModal` | 3751 | FunctionDeclaration |
-| `handleModalMunicipioChange` | 3756 | FunctionDeclaration |
-| `handleGeocodeForManualSector` | 3771 | FunctionDeclaration |
-| `handleSaveManualSector` | 3816 | FunctionDeclaration |
-| `deleteMasterSector` | 3920 | FunctionDeclaration |
-| `openDbMigrationHelper` | 3978 | FunctionDeclaration |
-| `closeDbMigrationHelper` | 3986 | FunctionDeclaration |
-| `checkSchemaCacheStatus` | 3991 | FunctionDeclaration |
-| `copyMigrationSql` | 4051 | FunctionDeclaration |
-| `runClientSideLegacyMigration` | 4061 | FunctionDeclaration |
+| `checkAuth` | 111 | FunctionDeclaration |
+| `renderAdminAccess` | 116 | FunctionDeclaration |
+| `handleLogin` | 140 | FunctionDeclaration |
+| `handleLogout` | 153 | FunctionDeclaration |
+| `handleAdminAction` | 163 | FunctionDeclaration |
+| `editSector` | 169 | `handleAdminAction` |
+| `deleteMasterSector` | 170 | `handleAdminAction` |
+| `approveCommunityLocation` | 171 | `handleAdminAction` |
+| `rejectCommunityLocation` | 172 | `handleAdminAction` |
+| `mergeAndApproveCluster` | 173 | `handleAdminAction` |
+| `removeSectorFromBlock` | 174 | `handleAdminAction` |
+| `reassignSector` | 175 | `handleAdminAction` |
+| `updateSectorStatus` | 176 | `handleAdminAction` |
+| `focusSectorOnMap` | 177 | `handleAdminAction` |
+| `switchTab` | 189 | FunctionDeclaration |
+| `initVercelLogsSync` | 218 | FunctionDeclaration |
+| `clearVercelConsole` | 267 | FunctionDeclaration |
+| `pingVercelApi` | 272 | FunctionDeclaration |
+| `updateSyncStatus` | 294 | FunctionDeclaration |
+| `initConnectionMonitor` | 312 | FunctionDeclaration |
+| `retryFirebaseConnection` | 328 | FunctionDeclaration |
+| `initFirebaseSync` | 340 | FunctionDeclaration |
+| `fetchPac` | 344 | `initFirebaseSync` |
+| `fetchSectors` | 375 | `initFirebaseSync` |
+| `fetchCommunity` | 421 | `initFirebaseSync` |
+| `fetchCitizen` | 449 | `initFirebaseSync` |
+| `fetchBroadcast` | 465 | `initFirebaseSync` |
+| `renderMatrixTable` | 488 | FunctionDeclaration |
+| `onclick` | 518 | `renderMatrixTable` |
+| `getBlockBadgeClass` | 550 | FunctionDeclaration |
+| `renderWeeklyAudit` | 563 | FunctionDeclaration |
+| `updateDetectedSchemeBadge` | 565 | FunctionDeclaration |
+| `openCellModal` | 590 | FunctionDeclaration |
+| `closeCellModal` | 612 | FunctionDeclaration |
+| `setCellBlock` | 617 | FunctionDeclaration |
+| `openBranchGeneratorModal` | 709 | FunctionDeclaration |
+| `closeBranchGeneratorModal` | 713 | FunctionDeclaration |
+| `handleApplyBranchScale` | 717 | FunctionDeclaration |
+| `setPacViewMode` | 787 | FunctionDeclaration |
+| `renderMonthlyProjection` | 812 | FunctionDeclaration |
+| `applyMonthlyWeekAsBase` | 884 | FunctionDeclaration |
+| `openSchemeConfigModal` | 900 | FunctionDeclaration |
+| `closeSchemeConfigModal` | 925 | FunctionDeclaration |
+| `onSchemeModeChanged` | 929 | FunctionDeclaration |
+| `handleApplySchemeConfig` | 943 | FunctionDeclaration |
+| `applySingleTurnPreset` | 1015 | FunctionDeclaration |
+| `applyDoubleTurnPreset` | 1019 | FunctionDeclaration |
+| `publishPacSchedule` | 1023 | FunctionDeclaration |
+| `openEditSlotModal` | 1079 | FunctionDeclaration |
+| `closeEditSlotModal` | 1089 | FunctionDeclaration |
+| `handleSaveSlot` | 1093 | FunctionDeclaration |
+| `openAddSlotModal` | 1111 | FunctionDeclaration |
+| `closeAddSlotModal` | 1115 | FunctionDeclaration |
+| `onNewSlotDurationChanged` | 1119 | FunctionDeclaration |
+| `onNewSlotTimeChanged` | 1129 | FunctionDeclaration |
+| `handleAddSlot` | 1140 | FunctionDeclaration |
+| `deleteSlot` | 1176 | FunctionDeclaration |
+| `getActiveBlockNow` | 1192 | FunctionDeclaration |
+| `updateTelemetryActiveCut` | 1202 | FunctionDeclaration |
+| `applyActivePacCutToSectors` | 1220 | FunctionDeclaration |
+| `setTelemetryFilter` | 1263 | FunctionDeclaration |
+| `isSectorCommunity` | 1280 | FunctionDeclaration |
+| `renderTelemetryList` | 1288 | FunctionDeclaration |
+| `updateSectorStatus` | 1390 | FunctionDeclaration |
+| `resetAllTelemetryToNormal` | 1403 | FunctionDeclaration |
+| `setAllSectorsStatus` | 1425 | FunctionDeclaration |
+| `renderBlockKanban` | 1443 | FunctionDeclaration |
+| `reassignSector` | 1491 | FunctionDeclaration |
+| `removeSectorFromBlock` | 1515 | FunctionDeclaration |
+| `openAddSectorToBlockModal` | 1527 | FunctionDeclaration |
+| `closeAddSectorModal` | 1531 | FunctionDeclaration |
+| `handleAddSectorToBlock` | 1535 | FunctionDeclaration |
+| `normalizeSectorText` | 1567 | FunctionDeclaration |
+| `getSignificantTokens` | 1583 | FunctionDeclaration |
+| `levenshteinDistance` | 1589 | FunctionDeclaration |
+| `computeLevenshteinSimilarity` | 1612 | FunctionDeclaration |
+| `computeTokenJaccardSimilarity` | 1618 | FunctionDeclaration |
+| `computeSectorSimilarity` | 1629 | FunctionDeclaration |
+| `analyzeTypoClusters` | 1653 | FunctionDeclaration |
+| `updateClusterBadge` | 1721 | FunctionDeclaration |
+| `toggleClusteringPanel` | 1726 | FunctionDeclaration |
+| `renderTypoClusters` | 1736 | FunctionDeclaration |
+| `upsertSectorSafe` | 1815 | FunctionDeclaration |
+| `insertApprovedCommunitySector` | 1860 | FunctionDeclaration |
+| `mergeAndApproveCluster` | 1870 | FunctionDeclaration |
+| `validateWithOSM` | 2010 | FunctionDeclaration |
+| `renderOsmResult` | 2065 | FunctionDeclaration |
+| `validateMasterSectorsWithOSM` | 2085 | FunctionDeclaration |
+| `validateAllWithOSM` | 2173 | FunctionDeclaration |
+| `renderCommunityTable` | 2178 | FunctionDeclaration |
+| `approveCommunityLocation` | 2246 | FunctionDeclaration |
+| `rejectCommunityLocation` | 2313 | FunctionDeclaration |
+| `renderActiveBroadcast` | 2331 | FunctionDeclaration |
+| `hideActiveBroadcast` | 2373 | FunctionDeclaration |
+| `handleDismissBroadcast` | 2378 | FunctionDeclaration |
+| `handleSendBroadcast` | 2399 | FunctionDeclaration |
+| `testGlobalPushAlert` | 2428 | FunctionDeclaration |
+| `setReportFeedFilter` | 2459 | FunctionDeclaration |
+| `renderCitizenReportsFeed` | 2475 | FunctionDeclaration |
+| `seedAllBarinasCatalog` | 2776 | FunctionDeclaration |
+| `saveDonationConfig` | 2827 | FunctionDeclaration |
+| `loadDonationUrl` | 2842 | FunctionDeclaration |
+| `handleFilterMasterTypeChange` | 2871 | FunctionDeclaration |
+| `getSectorCoordinates` | 2880 | FunctionDeclaration |
+| `applyBasemap` | 2888 | FunctionDeclaration |
+| `changeMapBasemap` | 2947 | FunctionDeclaration |
+| `initBarinasMasterMap` | 2951 | FunctionDeclaration |
+| `focusBarinasMapHome` | 2995 | FunctionDeclaration |
+| `focusSectorOnMap` | 3000 | FunctionDeclaration |
+| `updateBarinasMapMarkers` | 3023 | FunctionDeclaration |
+| `toggleMapHeatmapMode` | 3070 | FunctionDeclaration |
+| `handleMapBlockFilterChange` | 3085 | FunctionDeclaration |
+| `initMasterFilterDropdowns` | 3090 | FunctionDeclaration |
+| `handleFilterMasterMunChange` | 3115 | FunctionDeclaration |
+| `handleFilterMasterChange` | 3136 | FunctionDeclaration |
+| `handleSearchMasterInput` | 3144 | FunctionDeclaration |
+| `setDirectoryViewMode` | 3149 | FunctionDeclaration |
+| `renderGeneralSectorsMaster` | 3165 | FunctionDeclaration |
+| `renderWikipediaCardsView` | 3245 | FunctionDeclaration |
+| `renderDetailedTableView` | 3366 | FunctionDeclaration |
+| `editSector` | 3470 | FunctionDeclaration |
+| `openCreateSectorModal` | 3477 | FunctionDeclaration |
+| `onclick` | 3559 | `openCreateSectorModal` |
+| `closeCreateSectorModal` | 3597 | FunctionDeclaration |
+| `handleModalMunicipioChange` | 3602 | FunctionDeclaration |
+| `handleGeocodeForManualSector` | 3617 | FunctionDeclaration |
+| `handleSaveManualSector` | 3662 | FunctionDeclaration |
+| `deleteMasterSector` | 3766 | FunctionDeclaration |
+| `openDbMigrationHelper` | 3824 | FunctionDeclaration |
+| `closeDbMigrationHelper` | 3832 | FunctionDeclaration |
+| `checkSchemaCacheStatus` | 3837 | FunctionDeclaration |
+| `copyMigrationSql` | 3897 | FunctionDeclaration |
+| `runClientSideLegacyMigration` | 3907 | FunctionDeclaration |
 
 ## admin-web/patch_donations.js
 
@@ -228,139 +212,181 @@ Explicación: [05-panel-clasico.md](05-panel-clasico.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `checkAuth` | 110 | FunctionDeclaration |
-| `renderAdminAccess` | 115 | FunctionDeclaration |
-| `handleLogin` | 139 | FunctionDeclaration |
-| `handleLogout` | 152 | FunctionDeclaration |
-| `handleAdminAction` | 162 | FunctionDeclaration |
-| `editSector` | 168 | `handleAdminAction` |
-| `deleteMasterSector` | 169 | `handleAdminAction` |
-| `approveCommunityLocation` | 170 | `handleAdminAction` |
-| `rejectCommunityLocation` | 171 | `handleAdminAction` |
-| `mergeAndApproveCluster` | 172 | `handleAdminAction` |
-| `removeSectorFromBlock` | 173 | `handleAdminAction` |
-| `reassignSector` | 174 | `handleAdminAction` |
-| `updateSectorStatus` | 175 | `handleAdminAction` |
-| `focusSectorOnMap` | 176 | `handleAdminAction` |
-| `switchTab` | 188 | FunctionDeclaration |
-| `initVercelLogsSync` | 217 | FunctionDeclaration |
-| `clearVercelConsole` | 266 | FunctionDeclaration |
-| `pingVercelApi` | 271 | FunctionDeclaration |
-| `updateSyncStatus` | 293 | FunctionDeclaration |
-| `initConnectionMonitor` | 311 | FunctionDeclaration |
-| `retryFirebaseConnection` | 327 | FunctionDeclaration |
-| `initFirebaseSync` | 339 | FunctionDeclaration |
-| `fetchPac` | 343 | `initFirebaseSync` |
-| `fetchSectors` | 383 | `initFirebaseSync` |
-| `fetchCommunity` | 429 | `initFirebaseSync` |
-| `fetchCitizen` | 457 | `initFirebaseSync` |
-| `fetchBroadcast` | 473 | `initFirebaseSync` |
-| `renderMatrixTable` | 496 | FunctionDeclaration |
-| `onclick` | 526 | `renderMatrixTable` |
-| `getBlockBadgeClass` | 558 | FunctionDeclaration |
-| `renderWeeklyAudit` | 571 | FunctionDeclaration |
-| `updateDetectedSchemeBadge` | 573 | FunctionDeclaration |
-| `openCellModal` | 598 | FunctionDeclaration |
-| `closeCellModal` | 620 | FunctionDeclaration |
-| `setCellBlock` | 625 | FunctionDeclaration |
-| `openBranchGeneratorModal` | 717 | FunctionDeclaration |
-| `closeBranchGeneratorModal` | 721 | FunctionDeclaration |
-| `handleApplyBranchScale` | 725 | FunctionDeclaration |
-| `setPacViewMode` | 795 | FunctionDeclaration |
-| `renderMonthlyProjection` | 820 | FunctionDeclaration |
-| `applyMonthlyWeekAsBase` | 892 | FunctionDeclaration |
-| `openSchemeConfigModal` | 908 | FunctionDeclaration |
-| `closeSchemeConfigModal` | 933 | FunctionDeclaration |
-| `onSchemeModeChanged` | 937 | FunctionDeclaration |
-| `handleApplySchemeConfig` | 951 | FunctionDeclaration |
-| `applySingleTurnPreset` | 1023 | FunctionDeclaration |
-| `applyDoubleTurnPreset` | 1027 | FunctionDeclaration |
-| `publishPacSchedule` | 1031 | FunctionDeclaration |
-| `openEditSlotModal` | 1083 | FunctionDeclaration |
-| `closeEditSlotModal` | 1093 | FunctionDeclaration |
-| `handleSaveSlot` | 1097 | FunctionDeclaration |
-| `openAddSlotModal` | 1115 | FunctionDeclaration |
-| `closeAddSlotModal` | 1119 | FunctionDeclaration |
-| `onNewSlotDurationChanged` | 1123 | FunctionDeclaration |
-| `onNewSlotTimeChanged` | 1133 | FunctionDeclaration |
-| `handleAddSlot` | 1144 | FunctionDeclaration |
-| `deleteSlot` | 1180 | FunctionDeclaration |
-| `getActiveBlockNow` | 1196 | FunctionDeclaration |
-| `updateTelemetryActiveCut` | 1242 | FunctionDeclaration |
-| `applyActivePacCutToSectors` | 1260 | FunctionDeclaration |
-| `setTelemetryFilter` | 1303 | FunctionDeclaration |
-| `isSectorCommunity` | 1320 | FunctionDeclaration |
-| `renderTelemetryList` | 1328 | FunctionDeclaration |
-| `updateSectorStatus` | 1430 | FunctionDeclaration |
-| `resetAllTelemetryToNormal` | 1443 | FunctionDeclaration |
-| `setAllSectorsStatus` | 1465 | FunctionDeclaration |
-| `renderBlockKanban` | 1483 | FunctionDeclaration |
-| `reassignSector` | 1531 | FunctionDeclaration |
-| `removeSectorFromBlock` | 1555 | FunctionDeclaration |
-| `openAddSectorToBlockModal` | 1567 | FunctionDeclaration |
-| `closeAddSectorModal` | 1571 | FunctionDeclaration |
-| `handleAddSectorToBlock` | 1575 | FunctionDeclaration |
-| `normalizeSectorText` | 1607 | FunctionDeclaration |
-| `getSignificantTokens` | 1623 | FunctionDeclaration |
-| `levenshteinDistance` | 1629 | FunctionDeclaration |
-| `computeLevenshteinSimilarity` | 1652 | FunctionDeclaration |
-| `computeTokenJaccardSimilarity` | 1658 | FunctionDeclaration |
-| `computeSectorSimilarity` | 1669 | FunctionDeclaration |
-| `analyzeTypoClusters` | 1693 | FunctionDeclaration |
-| `updateClusterBadge` | 1761 | FunctionDeclaration |
-| `toggleClusteringPanel` | 1766 | FunctionDeclaration |
-| `renderTypoClusters` | 1776 | FunctionDeclaration |
-| `upsertSectorSafe` | 1855 | FunctionDeclaration |
-| `insertApprovedCommunitySector` | 1900 | FunctionDeclaration |
-| `mergeAndApproveCluster` | 1910 | FunctionDeclaration |
-| `validateWithOSM` | 2050 | FunctionDeclaration |
-| `renderOsmResult` | 2105 | FunctionDeclaration |
-| `validateMasterSectorsWithOSM` | 2125 | FunctionDeclaration |
-| `validateAllWithOSM` | 2213 | FunctionDeclaration |
-| `renderCommunityTable` | 2218 | FunctionDeclaration |
-| `approveCommunityLocation` | 2286 | FunctionDeclaration |
-| `rejectCommunityLocation` | 2353 | FunctionDeclaration |
-| `renderActiveBroadcast` | 2371 | FunctionDeclaration |
-| `hideActiveBroadcast` | 2413 | FunctionDeclaration |
-| `handleDismissBroadcast` | 2418 | FunctionDeclaration |
-| `handleSendBroadcast` | 2439 | FunctionDeclaration |
-| `testGlobalPushAlert` | 2468 | FunctionDeclaration |
-| `setReportFeedFilter` | 2499 | FunctionDeclaration |
-| `renderCitizenReportsFeed` | 2515 | FunctionDeclaration |
-| `seedAllBarinasCatalog` | 2816 | FunctionDeclaration |
-| `saveDonationConfig` | 2867 | FunctionDeclaration |
-| `loadDonationUrl` | 2882 | FunctionDeclaration |
-| `handleFilterMasterTypeChange` | 2911 | FunctionDeclaration |
-| `getSectorCoordinates` | 2960 | FunctionDeclaration |
-| `applyBasemap` | 2989 | FunctionDeclaration |
-| `changeMapBasemap` | 3049 | FunctionDeclaration |
-| `initBarinasMasterMap` | 3053 | FunctionDeclaration |
-| `focusBarinasMapHome` | 3089 | FunctionDeclaration |
-| `focusSectorOnMap` | 3094 | FunctionDeclaration |
-| `updateBarinasMapMarkers` | 3115 | FunctionDeclaration |
-| `toggleMapHeatmapMode` | 3224 | FunctionDeclaration |
-| `handleMapBlockFilterChange` | 3239 | FunctionDeclaration |
-| `initMasterFilterDropdowns` | 3244 | FunctionDeclaration |
-| `handleFilterMasterMunChange` | 3269 | FunctionDeclaration |
-| `handleFilterMasterChange` | 3290 | FunctionDeclaration |
-| `handleSearchMasterInput` | 3298 | FunctionDeclaration |
-| `setDirectoryViewMode` | 3303 | FunctionDeclaration |
-| `renderGeneralSectorsMaster` | 3319 | FunctionDeclaration |
-| `renderWikipediaCardsView` | 3399 | FunctionDeclaration |
-| `renderDetailedTableView` | 3520 | FunctionDeclaration |
-| `editSector` | 3624 | FunctionDeclaration |
-| `openCreateSectorModal` | 3631 | FunctionDeclaration |
-| `onclick` | 3713 | `openCreateSectorModal` |
-| `closeCreateSectorModal` | 3751 | FunctionDeclaration |
-| `handleModalMunicipioChange` | 3756 | FunctionDeclaration |
-| `handleGeocodeForManualSector` | 3771 | FunctionDeclaration |
-| `handleSaveManualSector` | 3816 | FunctionDeclaration |
-| `deleteMasterSector` | 3920 | FunctionDeclaration |
-| `openDbMigrationHelper` | 3978 | FunctionDeclaration |
-| `closeDbMigrationHelper` | 3986 | FunctionDeclaration |
-| `checkSchemaCacheStatus` | 3991 | FunctionDeclaration |
-| `copyMigrationSql` | 4051 | FunctionDeclaration |
-| `runClientSideLegacyMigration` | 4061 | FunctionDeclaration |
+| `checkAuth` | 111 | FunctionDeclaration |
+| `renderAdminAccess` | 116 | FunctionDeclaration |
+| `handleLogin` | 140 | FunctionDeclaration |
+| `handleLogout` | 153 | FunctionDeclaration |
+| `handleAdminAction` | 163 | FunctionDeclaration |
+| `editSector` | 169 | `handleAdminAction` |
+| `deleteMasterSector` | 170 | `handleAdminAction` |
+| `approveCommunityLocation` | 171 | `handleAdminAction` |
+| `rejectCommunityLocation` | 172 | `handleAdminAction` |
+| `mergeAndApproveCluster` | 173 | `handleAdminAction` |
+| `removeSectorFromBlock` | 174 | `handleAdminAction` |
+| `reassignSector` | 175 | `handleAdminAction` |
+| `updateSectorStatus` | 176 | `handleAdminAction` |
+| `focusSectorOnMap` | 177 | `handleAdminAction` |
+| `switchTab` | 189 | FunctionDeclaration |
+| `initVercelLogsSync` | 218 | FunctionDeclaration |
+| `clearVercelConsole` | 267 | FunctionDeclaration |
+| `pingVercelApi` | 272 | FunctionDeclaration |
+| `updateSyncStatus` | 294 | FunctionDeclaration |
+| `initConnectionMonitor` | 312 | FunctionDeclaration |
+| `retryFirebaseConnection` | 328 | FunctionDeclaration |
+| `initFirebaseSync` | 340 | FunctionDeclaration |
+| `fetchPac` | 344 | `initFirebaseSync` |
+| `fetchSectors` | 375 | `initFirebaseSync` |
+| `fetchCommunity` | 421 | `initFirebaseSync` |
+| `fetchCitizen` | 449 | `initFirebaseSync` |
+| `fetchBroadcast` | 465 | `initFirebaseSync` |
+| `renderMatrixTable` | 488 | FunctionDeclaration |
+| `onclick` | 518 | `renderMatrixTable` |
+| `getBlockBadgeClass` | 550 | FunctionDeclaration |
+| `renderWeeklyAudit` | 563 | FunctionDeclaration |
+| `updateDetectedSchemeBadge` | 565 | FunctionDeclaration |
+| `openCellModal` | 590 | FunctionDeclaration |
+| `closeCellModal` | 612 | FunctionDeclaration |
+| `setCellBlock` | 617 | FunctionDeclaration |
+| `openBranchGeneratorModal` | 709 | FunctionDeclaration |
+| `closeBranchGeneratorModal` | 713 | FunctionDeclaration |
+| `handleApplyBranchScale` | 717 | FunctionDeclaration |
+| `setPacViewMode` | 787 | FunctionDeclaration |
+| `renderMonthlyProjection` | 812 | FunctionDeclaration |
+| `applyMonthlyWeekAsBase` | 884 | FunctionDeclaration |
+| `openSchemeConfigModal` | 900 | FunctionDeclaration |
+| `closeSchemeConfigModal` | 925 | FunctionDeclaration |
+| `onSchemeModeChanged` | 929 | FunctionDeclaration |
+| `handleApplySchemeConfig` | 943 | FunctionDeclaration |
+| `applySingleTurnPreset` | 1015 | FunctionDeclaration |
+| `applyDoubleTurnPreset` | 1019 | FunctionDeclaration |
+| `publishPacSchedule` | 1023 | FunctionDeclaration |
+| `openEditSlotModal` | 1079 | FunctionDeclaration |
+| `closeEditSlotModal` | 1089 | FunctionDeclaration |
+| `handleSaveSlot` | 1093 | FunctionDeclaration |
+| `openAddSlotModal` | 1111 | FunctionDeclaration |
+| `closeAddSlotModal` | 1115 | FunctionDeclaration |
+| `onNewSlotDurationChanged` | 1119 | FunctionDeclaration |
+| `onNewSlotTimeChanged` | 1129 | FunctionDeclaration |
+| `handleAddSlot` | 1140 | FunctionDeclaration |
+| `deleteSlot` | 1176 | FunctionDeclaration |
+| `getActiveBlockNow` | 1192 | FunctionDeclaration |
+| `updateTelemetryActiveCut` | 1202 | FunctionDeclaration |
+| `applyActivePacCutToSectors` | 1220 | FunctionDeclaration |
+| `setTelemetryFilter` | 1263 | FunctionDeclaration |
+| `isSectorCommunity` | 1280 | FunctionDeclaration |
+| `renderTelemetryList` | 1288 | FunctionDeclaration |
+| `updateSectorStatus` | 1390 | FunctionDeclaration |
+| `resetAllTelemetryToNormal` | 1403 | FunctionDeclaration |
+| `setAllSectorsStatus` | 1425 | FunctionDeclaration |
+| `renderBlockKanban` | 1443 | FunctionDeclaration |
+| `reassignSector` | 1491 | FunctionDeclaration |
+| `removeSectorFromBlock` | 1515 | FunctionDeclaration |
+| `openAddSectorToBlockModal` | 1527 | FunctionDeclaration |
+| `closeAddSectorModal` | 1531 | FunctionDeclaration |
+| `handleAddSectorToBlock` | 1535 | FunctionDeclaration |
+| `normalizeSectorText` | 1567 | FunctionDeclaration |
+| `getSignificantTokens` | 1583 | FunctionDeclaration |
+| `levenshteinDistance` | 1589 | FunctionDeclaration |
+| `computeLevenshteinSimilarity` | 1612 | FunctionDeclaration |
+| `computeTokenJaccardSimilarity` | 1618 | FunctionDeclaration |
+| `computeSectorSimilarity` | 1629 | FunctionDeclaration |
+| `analyzeTypoClusters` | 1653 | FunctionDeclaration |
+| `updateClusterBadge` | 1721 | FunctionDeclaration |
+| `toggleClusteringPanel` | 1726 | FunctionDeclaration |
+| `renderTypoClusters` | 1736 | FunctionDeclaration |
+| `upsertSectorSafe` | 1815 | FunctionDeclaration |
+| `insertApprovedCommunitySector` | 1860 | FunctionDeclaration |
+| `mergeAndApproveCluster` | 1870 | FunctionDeclaration |
+| `validateWithOSM` | 2010 | FunctionDeclaration |
+| `renderOsmResult` | 2065 | FunctionDeclaration |
+| `validateMasterSectorsWithOSM` | 2085 | FunctionDeclaration |
+| `validateAllWithOSM` | 2173 | FunctionDeclaration |
+| `renderCommunityTable` | 2178 | FunctionDeclaration |
+| `approveCommunityLocation` | 2246 | FunctionDeclaration |
+| `rejectCommunityLocation` | 2313 | FunctionDeclaration |
+| `renderActiveBroadcast` | 2331 | FunctionDeclaration |
+| `hideActiveBroadcast` | 2373 | FunctionDeclaration |
+| `handleDismissBroadcast` | 2378 | FunctionDeclaration |
+| `handleSendBroadcast` | 2399 | FunctionDeclaration |
+| `testGlobalPushAlert` | 2428 | FunctionDeclaration |
+| `setReportFeedFilter` | 2459 | FunctionDeclaration |
+| `renderCitizenReportsFeed` | 2475 | FunctionDeclaration |
+| `seedAllBarinasCatalog` | 2776 | FunctionDeclaration |
+| `saveDonationConfig` | 2827 | FunctionDeclaration |
+| `loadDonationUrl` | 2842 | FunctionDeclaration |
+| `handleFilterMasterTypeChange` | 2871 | FunctionDeclaration |
+| `getSectorCoordinates` | 2880 | FunctionDeclaration |
+| `applyBasemap` | 2888 | FunctionDeclaration |
+| `changeMapBasemap` | 2947 | FunctionDeclaration |
+| `initBarinasMasterMap` | 2951 | FunctionDeclaration |
+| `focusBarinasMapHome` | 2995 | FunctionDeclaration |
+| `focusSectorOnMap` | 3000 | FunctionDeclaration |
+| `updateBarinasMapMarkers` | 3023 | FunctionDeclaration |
+| `toggleMapHeatmapMode` | 3070 | FunctionDeclaration |
+| `handleMapBlockFilterChange` | 3085 | FunctionDeclaration |
+| `initMasterFilterDropdowns` | 3090 | FunctionDeclaration |
+| `handleFilterMasterMunChange` | 3115 | FunctionDeclaration |
+| `handleFilterMasterChange` | 3136 | FunctionDeclaration |
+| `handleSearchMasterInput` | 3144 | FunctionDeclaration |
+| `setDirectoryViewMode` | 3149 | FunctionDeclaration |
+| `renderGeneralSectorsMaster` | 3165 | FunctionDeclaration |
+| `renderWikipediaCardsView` | 3245 | FunctionDeclaration |
+| `renderDetailedTableView` | 3366 | FunctionDeclaration |
+| `editSector` | 3470 | FunctionDeclaration |
+| `openCreateSectorModal` | 3477 | FunctionDeclaration |
+| `onclick` | 3559 | `openCreateSectorModal` |
+| `closeCreateSectorModal` | 3597 | FunctionDeclaration |
+| `handleModalMunicipioChange` | 3602 | FunctionDeclaration |
+| `handleGeocodeForManualSector` | 3617 | FunctionDeclaration |
+| `handleSaveManualSector` | 3662 | FunctionDeclaration |
+| `deleteMasterSector` | 3766 | FunctionDeclaration |
+| `openDbMigrationHelper` | 3824 | FunctionDeclaration |
+| `closeDbMigrationHelper` | 3832 | FunctionDeclaration |
+| `checkSchemaCacheStatus` | 3837 | FunctionDeclaration |
+| `copyMigrationSql` | 3897 | FunctionDeclaration |
+| `runClientSideLegacyMigration` | 3907 | FunctionDeclaration |
+
+## admin-web/public/pac-map-core.js
+
+Explicación: [05-panel-clasico.md](05-panel-clasico.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `installPacMapCore` | 2 | FunctionExpression |
+| `createPacMapCore` | 6 | FunctionExpression |
+| `textKey` | 32 | `createPacMapCore` |
+| `escapeHtml` | 35 | `createPacMapCore` |
+| `normalizeBlock` | 38 | `createPacMapCore` |
+| `normalizeStatus` | 42 | `createPacMapCore` |
+| `statusInfo` | 48 | `createPacMapCore` |
+| `validCoordinatePair` | 57 | `createPacMapCore` |
+| `coordinates` | 61 | `createPacMapCore` |
+| `locationGroups` | 70 | `createPacMapCore` |
+| `representativeSector` | 80 | `createPacMapCore` |
+| `markerHtml` | 83 | `createPacMapCore` |
+| `heatPoints` | 90 | `createPacMapCore` |
+| `voltageLabel` | 95 | `createPacMapCore` |
+
+## admin-web/public/pac-schedule-core.js
+
+Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `installPacScheduleCore` | 2 | FunctionExpression |
+| `pacScheduleFactory` | 6 | FunctionExpression |
+| `civilParts` | 16 | `pacScheduleFactory` |
+| `civilEpoch` | 22 | `pacScheduleFactory` |
+| `normalizeBlock` | 30 | `pacScheduleFactory` |
+| `weekOffset` | 35 | `pacScheduleFactory` |
+| `editorOffset` | 37 | `pacScheduleFactory` |
+| `nextRevision` | 39 | `pacScheduleFactory` |
+| `rotateMatrix` | 44 | `pacScheduleFactory` |
+| `validateSchedule` | 49 | `pacScheduleFactory` |
+| `windows` | 65 | `pacScheduleFactory` |
+| `findWindow` | 86 | `pacScheduleFactory` |
+| `monthlyWeeks` | 92 | `pacScheduleFactory` |
+| `pacTime` | 100 | `pacScheduleFactory` |
 
 ## admin-web/scripts/blog-prerender.mjs
 
@@ -381,6 +407,23 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 | `blogPrerender` | 173 | FunctionDeclaration |
 | `configResolved` | 178 | `blogPrerender` |
 | `closeBundle` | 181 | `blogPrerender` |
+
+## admin-web/server/legacy/getMonthlyWeeks.js
+
+Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `exports` | 7 | ArrowFunctionExpression |
+
+## admin-web/server/legacy/getOutagePrediction.js
+
+Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `getDayIndex` | 17 | FunctionDeclaration |
+| `exports` | 21 | ArrowFunctionExpression |
 
 ## admin-web/src/App.jsx
 
@@ -494,8 +537,8 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `CitizenReportsTicker` | 5 | FunctionDeclaration |
-| `getStatusBadge` | 8 | `CitizenReportsTicker` |
+| `CitizenReportsTicker` | 6 | FunctionDeclaration |
+| `getStatusBadge` | 9 | `CitizenReportsTicker` |
 
 ## admin-web/src/components/telemetry/LiveBlockCountdown.jsx
 
@@ -557,6 +600,36 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 No contiene funciones con nombre detectables; sus constantes, configuración o efectos de nivel superior se explican en el capítulo correspondiente.
 
+## admin-web/src/lib/pacScheduleCore.js
+
+Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `installPacScheduleCore` | 2 | FunctionExpression |
+| `pacScheduleFactory` | 6 | FunctionExpression |
+| `civilParts` | 16 | `pacScheduleFactory` |
+| `civilEpoch` | 22 | `pacScheduleFactory` |
+| `normalizeBlock` | 30 | `pacScheduleFactory` |
+| `weekOffset` | 35 | `pacScheduleFactory` |
+| `editorOffset` | 37 | `pacScheduleFactory` |
+| `nextRevision` | 39 | `pacScheduleFactory` |
+| `rotateMatrix` | 44 | `pacScheduleFactory` |
+| `validateSchedule` | 49 | `pacScheduleFactory` |
+| `windows` | 65 | `pacScheduleFactory` |
+| `findWindow` | 86 | `pacScheduleFactory` |
+| `monthlyWeeks` | 92 | `pacScheduleFactory` |
+| `pacTime` | 100 | `pacScheduleFactory` |
+
+## admin-web/src/lib/reportSemantics.js
+
+Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `reportStatus` | 5 | FunctionDeclaration |
+| `reportPresentation` | 14 | FunctionDeclaration |
+
 ## admin-web/src/lib/seo.js
 
 Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
@@ -580,13 +653,13 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `formatRelativeTime` | 10 | FunctionDeclaration |
-| `calculatePacTime` | 30 | FunctionDeclaration |
-| `processCircuitsSummary` | 114 | FunctionDeclaration |
-| `fetchTelemetryFromSupabase` | 181 | FunctionDeclaration |
-| `useTelemetry` | 235 | FunctionDeclaration |
-| `refresh` | 262 | `useTelemetry` |
-| `handleVisibilityChange` | 297 | `useTelemetry` |
+| `formatRelativeTime` | 11 | FunctionDeclaration |
+| `calculatePacTime` | 31 | FunctionDeclaration |
+| `processCircuitsSummary` | 38 | FunctionDeclaration |
+| `fetchTelemetryFromSupabase` | 105 | FunctionDeclaration |
+| `useTelemetry` | 159 | FunctionDeclaration |
+| `refresh` | 186 | `useTelemetry` |
+| `handleVisibilityChange` | 221 | `useTelemetry` |
 
 ## admin-web/src/main.jsx
 
@@ -600,18 +673,19 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `AdminPortal` | 12 | FunctionDeclaration |
-| `fetchAdminData` | 77 | `AdminPortal` |
-| `handleLogin` | 141 | `AdminPortal` |
-| `handleLogout` | 155 | `AdminPortal` |
-| `cycleCell` | 165 | `AdminPortal` |
-| `handleSavePac` | 181 | `AdminPortal` |
-| `handleSaveDonations` | 211 | `AdminPortal` |
-| `handleAddSector` | 233 | `AdminPortal` |
-| `handleRemoveSector` | 243 | `AdminPortal` |
-| `handleSendBroadcast` | 251 | `AdminPortal` |
-| `pingApi` | 266 | `AdminPortal` |
-| `getBadgeClass` | 360 | `AdminPortal` |
+| `AdminReportsList` | 14 | FunctionDeclaration |
+| `AdminPortal` | 53 | FunctionDeclaration |
+| `fetchAdminData` | 119 | `AdminPortal` |
+| `handleLogin` | 186 | `AdminPortal` |
+| `handleLogout` | 200 | `AdminPortal` |
+| `cycleCell` | 210 | `AdminPortal` |
+| `handleSavePac` | 226 | `AdminPortal` |
+| `handleSaveDonations` | 260 | `AdminPortal` |
+| `handleAddSector` | 282 | `AdminPortal` |
+| `handleRemoveSector` | 292 | `AdminPortal` |
+| `handleSendBroadcast` | 300 | `AdminPortal` |
+| `pingApi` | 315 | `AdminPortal` |
+| `getBadgeClass` | 409 | `AdminPortal` |
 
 ## admin-web/src/pages/Blog.jsx
 
@@ -686,8 +760,8 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `AppTheme` | 16 | FunctionDeclaration |
-| `getAppBlockColor` | 31 | `AppTheme` |
+| `AppTheme` | 17 | FunctionDeclaration |
+| `getAppBlockColor` | 32 | `AppTheme` |
 
 ## admin-web/src/pages/tv/LightTheme.jsx
 
@@ -695,7 +769,7 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `LightTheme` | 12 | FunctionDeclaration |
+| `LightTheme` | 13 | FunctionDeclaration |
 
 ## admin-web/src/pages/tv/MercuryTheme.jsx
 
@@ -703,7 +777,7 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `MercuryTheme` | 11 | FunctionDeclaration |
+| `MercuryTheme` | 12 | FunctionDeclaration |
 
 ## admin-web/src/pages/tv/PerformanceTheme.jsx
 
@@ -711,7 +785,7 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `PerformanceTheme` | 12 | FunctionDeclaration |
+| `PerformanceTheme` | 13 | FunctionDeclaration |
 
 ## admin-web/src/pages/tv/RadarTheme.jsx
 
@@ -719,7 +793,7 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `RadarTheme` | 11 | FunctionDeclaration |
+| `RadarTheme` | 12 | FunctionDeclaration |
 
 ## admin-web/src/pages/tv/WebTheme.jsx
 
@@ -727,7 +801,7 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `WebTheme` | 14 | FunctionDeclaration |
+| `WebTheme` | 15 | FunctionDeclaration |
 
 ## admin-web/src/pages/TvKioskMode.jsx
 
@@ -803,51 +877,148 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 | `confirm` | 184 | `legacyContext` |
 | `getItem` | 185 | `legacyContext` |
 | `createClient` | 186 | `legacyContext` |
-| `extractFunction` | 193 | FunctionDeclaration |
-| `select` | 204 | FunctionExpression |
-| `eq` | 204 | FunctionExpression |
-| `single` | 204 | ArrowFunctionExpression |
-| `upsert` | 204 | FunctionExpression |
-| `from` | 205 | ArrowFunctionExpression |
-| `publishPacSchedule` | 213 | FunctionExpression |
-| `updateSyncStatus` | 213 | ArrowFunctionExpression |
-| `from` | 222 | FunctionExpression |
-| `select` | 222 | FunctionExpression |
-| `eq` | 222 | FunctionExpression |
-| `single` | 222 | ArrowFunctionExpression |
-| `single` | 225 | ArrowFunctionExpression |
-| `getElementById` | 233 | ArrowFunctionExpression |
-| `requireAdmin` | 233 | ArrowFunctionExpression |
-| `alert` | 235 | FunctionExpression |
-| `error` | 235 | FunctionExpression |
-| `from` | 236 | FunctionExpression |
-| `upsert` | 236 | ArrowFunctionExpression |
-| `divIcon` | 287 | ArrowFunctionExpression |
-| `marker` | 287 | ArrowFunctionExpression |
-| `bindPopup` | 287 | `marker` |
-| `clearLayers` | 288 | FunctionExpression |
-| `addLayer` | 288 | FunctionExpression |
-| `editSector` | 299 | ArrowFunctionExpression |
-| `closest` | 303 | ArrowFunctionExpression |
-| `preventDefault` | 303 | FunctionExpression |
-| `approvalFixture` | 316 | FunctionDeclaration |
-| `randomUUID` | 322 | `approvalFixture` |
-| `getItem` | 323 | `approvalFixture` |
-| `setItem` | 323 | `approvalFixture` |
-| `alert` | 324 | `approvalFixture` |
-| `from` | 325 | `approvalFixture` |
-| `insert` | 326 | `approvalFixture.from` |
-| `upsert` | 327 | `approvalFixture.from` |
-| `delete` | 328 | `approvalFixture.from` |
-| `eq` | 328 | `approvalFixture.from.delete` |
-| `name` | 330 | `approvalFixture` |
-| `publishPacSchedule` | 331 | `approvalFixture` |
-| `setApprovalFields` | 337 | FunctionDeclaration |
-| `alert` | 411 | ArrowFunctionExpression |
-| `hideActiveBroadcast` | 412 | ArrowFunctionExpression |
-| `from` | 413 | ArrowFunctionExpression |
-| `upsert` | 413 | `from` |
-| `preventDefault` | 418 | FunctionExpression |
+| `extractFunction` | 194 | FunctionDeclaration |
+| `select` | 205 | FunctionExpression |
+| `eq` | 205 | FunctionExpression |
+| `single` | 205 | ArrowFunctionExpression |
+| `upsert` | 205 | FunctionExpression |
+| `from` | 206 | ArrowFunctionExpression |
+| `publishPacSchedule` | 214 | FunctionExpression |
+| `updateSyncStatus` | 214 | ArrowFunctionExpression |
+| `from` | 223 | FunctionExpression |
+| `select` | 223 | FunctionExpression |
+| `eq` | 223 | FunctionExpression |
+| `single` | 223 | ArrowFunctionExpression |
+| `single` | 226 | ArrowFunctionExpression |
+| `getElementById` | 234 | ArrowFunctionExpression |
+| `requireAdmin` | 234 | ArrowFunctionExpression |
+| `alert` | 236 | FunctionExpression |
+| `error` | 236 | FunctionExpression |
+| `from` | 237 | FunctionExpression |
+| `upsert` | 237 | ArrowFunctionExpression |
+| `getElementById` | 254 | ArrowFunctionExpression |
+| `requireAdmin` | 254 | ArrowFunctionExpression |
+| `alert` | 256 | FunctionExpression |
+| `from` | 257 | FunctionExpression |
+| `upsert` | 257 | ArrowFunctionExpression |
+| `divIcon` | 339 | ArrowFunctionExpression |
+| `marker` | 339 | ArrowFunctionExpression |
+| `bindPopup` | 339 | `marker` |
+| `addTo` | 339 | `marker.bindPopup` |
+| `clearLayers` | 340 | FunctionExpression |
+| `addLayer` | 340 | FunctionExpression |
+| `editSector` | 353 | ArrowFunctionExpression |
+| `closest` | 357 | ArrowFunctionExpression |
+| `preventDefault` | 357 | FunctionExpression |
+| `approvalFixture` | 370 | FunctionDeclaration |
+| `randomUUID` | 376 | `approvalFixture` |
+| `getItem` | 377 | `approvalFixture` |
+| `setItem` | 377 | `approvalFixture` |
+| `alert` | 378 | `approvalFixture` |
+| `from` | 379 | `approvalFixture` |
+| `insert` | 380 | `approvalFixture.from` |
+| `upsert` | 381 | `approvalFixture.from` |
+| `delete` | 382 | `approvalFixture.from` |
+| `eq` | 382 | `approvalFixture.from.delete` |
+| `name` | 384 | `approvalFixture` |
+| `publishPacSchedule` | 385 | `approvalFixture` |
+| `setApprovalFields` | 391 | FunctionDeclaration |
+| `alert` | 465 | ArrowFunctionExpression |
+| `hideActiveBroadcast` | 466 | ArrowFunctionExpression |
+| `from` | 467 | ArrowFunctionExpression |
+| `upsert` | 467 | `from` |
+| `preventDefault` | 472 | FunctionExpression |
+
+## admin-web/tests/pac-edge-api.test.cjs
+
+Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `json` | 26 | ArrowFunctionExpression |
+| `request` | 27 | ArrowFunctionExpression |
+| `fixture` | 33 | FunctionDeclaration |
+| `now` | 37 | `fixture` |
+| `error` | 38 | `fixture` |
+| `fetchImpl` | 39 | `fixture` |
+| `sendPushImpl` | 52 | `fixture` |
+| `fetchOverride` | 76 | ArrowFunctionExpression |
+| `fetchOverride` | 93 | ArrowFunctionExpression |
+| `fetchOverride` | 112 | ArrowFunctionExpression |
+| `fetchOverride` | 196 | ArrowFunctionExpression |
+| `fetchImpl` | 215 | ArrowFunctionExpression |
+| `error` | 222 | FunctionExpression |
+| `fetchImpl` | 222 | ArrowFunctionExpression |
+| `fetchImpl` | 235 | ArrowFunctionExpression |
+| `now` | 245 | ArrowFunctionExpression |
+| `fetchImpl` | 245 | ArrowFunctionExpression |
+
+## admin-web/tests/pac-map.test.cjs
+
+Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `makeMapHarness` | 79 | FunctionDeclaration |
+| `element` | 81 | `makeMapHarness` |
+| `appendChild` | 82 | `makeMapHarness.element` |
+| `addEventListener` | 82 | `makeMapHarness.element` |
+| `setAttribute` | 82 | `makeMapHarness.element` |
+| `getZoom` | 85 | `makeMapHarness` |
+| `setView` | 85 | `makeMapHarness` |
+| `fitBounds` | 85 | `makeMapHarness` |
+| `removeLayer` | 85 | `makeMapHarness` |
+| `invalidateSize` | 85 | `makeMapHarness` |
+| `remove` | 85 | `makeMapHarness` |
+| `addTo` | 86 | `makeMapHarness` |
+| `addLayer` | 86 | `makeMapHarness` |
+| `removeLayer` | 86 | `makeMapHarness` |
+| `hasLayer` | 86 | `makeMapHarness` |
+| `map` | 91 | `makeMapHarness` |
+| `layerGroup` | 91 | `makeMapHarness` |
+| `divIcon` | 91 | `makeMapHarness` |
+| `tileLayer` | 92 | `makeMapHarness` |
+| `addTo` | 92 | `makeMapHarness.tileLayer` |
+| `on` | 92 | `makeMapHarness.tileLayer` |
+| `heatLayer` | 93 | `makeMapHarness` |
+| `addTo` | 93 | `makeMapHarness.heatLayer` |
+| `marker` | 94 | `makeMapHarness` |
+| `setLatLng` | 95 | `makeMapHarness.marker` |
+| `setIcon` | 95 | `makeMapHarness.marker` |
+| `getPopup` | 95 | `makeMapHarness.marker` |
+| `bindPopup` | 95 | `makeMapHarness.marker` |
+| `setPopupContent` | 95 | `makeMapHarness.marker` |
+| `getLatLng` | 95 | `makeMapHarness.marker` |
+| `openPopup` | 95 | `makeMapHarness.marker` |
+| `getElementById` | 99 | `makeMapHarness` |
+| `onMapReady` | 99 | `makeMapHarness` |
+| `onSectorClicked` | 99 | `makeMapHarness` |
+| `addEventListener` | 99 | `makeMapHarness` |
+
+## admin-web/tests/pac-schedule.test.cjs
+
+Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
+
+No contiene funciones con nombre detectables; sus constantes, configuración o efectos de nivel superior se explican en el capítulo correspondiente.
+
+## admin-web/tests/report-aggregation-concurrency.cjs
+
+Explicación: [06-base-de-datos-configuracion-y-operacion.md](06-base-de-datos-configuracion-y-operacion.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `runSql` | 6 | FunctionDeclaration |
+| `main` | 18 | FunctionDeclaration |
+| `write` | 21 | `main` |
+
+## admin-web/tests/report-semantics.test.cjs
+
+Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `render` | 74 | ArrowFunctionExpression |
+| `getBlockBadgeClass` | 101 | ArrowFunctionExpression |
 
 ## admin-web/tests/sendPushAlert.test.cjs
 
@@ -899,17 +1070,164 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 
 Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
 
+No contiene funciones con nombre detectables; sus constantes, configuración o efectos de nivel superior se explican en el capítulo correspondiente.
+
+## app/src/main/assets/map/pac-map-app.js
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
 | Función | Línea | Contexto |
 |---|---:|---|
-| `initMap` | 265 | FunctionDeclaration |
-| `setBasemap` | 283 | FunctionDeclaration |
-| `toggleBasemap` | 310 | FunctionDeclaration |
-| `toggleHeatmap` | 314 | FunctionDeclaration |
-| `recenterBarinas` | 327 | FunctionDeclaration |
-| `getCoords` | 333 | FunctionDeclaration |
-| `renderLayers` | 358 | FunctionDeclaration |
-| `handleSectorClick` | 455 | FunctionDeclaration |
-| `updateMapData` | 463 | FunctionExpression |
+| `installAndroidMap` | 1 | FunctionExpression |
+| `updateStatus` | 9 | `installAndroidMap` |
+| `setBasemap` | 16 | `installAndroidMap` |
+| `onTileError` | 28 | `installAndroidMap.setBasemap` |
+| `selectSector` | 32 | `installAndroidMap` |
+| `createPopup` | 36 | `installAndroidMap` |
+| `onSelectSector` | 44 | `installAndroidMap.createPopup` |
+| `createGroupPopup` | 48 | `installAndroidMap` |
+| `appendGroupSector` | 57 | `installAndroidMap.createGroupPopup` |
+| `onSelectGroupSector` | 62 | `installAndroidMap.createGroupPopup.appendGroupSector` |
+| `renderLayers` | 72 | `installAndroidMap` |
+| `removeMissing` | 76 | `installAndroidMap.renderLayers` |
+| `updateMarker` | 79 | `installAndroidMap.renderLayers` |
+| `updateHeatVisibility` | 101 | `installAndroidMap.renderLayers` |
+| `restoreMarker` | 103 | `installAndroidMap.renderLayers` |
+| `updateMapData` | 114 | `installAndroidMap` |
+| `resumePacMap` | 127 | `installAndroidMap` |
+| `disposePacMap` | 128 | `installAndroidMap` |
+| `initMap` | 134 | `installAndroidMap` |
+| `onBasemapClick` | 140 | `installAndroidMap.initMap` |
+| `onHeatmapClick` | 141 | `installAndroidMap.initMap` |
+| `onCenterClick` | 142 | `installAndroidMap.initMap` |
+
+## app/src/main/assets/map/pac-map-core.js
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `installPacMapCore` | 2 | FunctionExpression |
+| `createPacMapCore` | 6 | FunctionExpression |
+| `textKey` | 32 | `createPacMapCore` |
+| `escapeHtml` | 35 | `createPacMapCore` |
+| `normalizeBlock` | 38 | `createPacMapCore` |
+| `normalizeStatus` | 42 | `createPacMapCore` |
+| `statusInfo` | 48 | `createPacMapCore` |
+| `validCoordinatePair` | 57 | `createPacMapCore` |
+| `coordinates` | 61 | `createPacMapCore` |
+| `locationGroups` | 70 | `createPacMapCore` |
+| `representativeSector` | 80 | `createPacMapCore` |
+| `markerHtml` | 83 | `createPacMapCore` |
+| `heatPoints` | 90 | `createPacMapCore` |
+| `voltageLabel` | 95 | `createPacMapCore` |
+
+## app/src/main/java/com/example/ads/AdFreeRewardCard.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `findAdsActivity` | 34 | Kotlin fun |
+| `rememberAdFreeActive` | 42 | Kotlin fun |
+| `AdFreeRewardCard` | 69 | Kotlin fun |
+| `AdPrivacyOptionsButton` | 118 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/AdFreeRewardStore.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `initialize` | 13 | Kotlin fun |
+| `isActive` | 22 | Kotlin fun |
+| `grantEarnedReward` | 29 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/AdFreeRewardWindow.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `isActive` | 5 | Kotlin fun |
+| `grant` | 13 | Kotlin fun |
+| `resolveRewardHours` | 24 | Kotlin fun |
+| `resolveAdUnitId` | 27 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/AdsConfiguration.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `unitId` | 9 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/AdsRuntime.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `initialize` | 34 | Kotlin fun |
+| `reconcile` | 64 | Kotlin fun |
+| `canRequestAds` | 95 | Kotlin fun |
+| `showPrivacyOptions` | 98 | Kotlin fun |
+| `canShowOn` | 110 | Kotlin fun |
+| `acquire` | 119 | Kotlin fun |
+| `release` | 125 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/AppOpenInteractionGuard.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `canOpenAfterReturn` | 14 | Kotlin fun |
+| `acquire` | 18 | Kotlin fun |
+| `release` | 24 | Kotlin fun |
+| `AppOpenInteractionProtection` | 32 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/AppOpenLaunchGate.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `AppOpenLaunchGate` | 23 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/AppOpenLaunchHost.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `AppOpenLaunchHost` | 15 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/AppOpenLaunchPolicy.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `evaluate` | 13 | Kotlin fun |
+| `skip` | 39 | Kotlin fun |
+| `onAdFinished` | 43 | Kotlin fun |
+| `continueOnce` | 46 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/RewardedAdManager.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `clear` | 29 | Kotlin fun |
+| `load` | 35 | Kotlin fun |
+| `onAdLoaded` | 59 | Kotlin fun |
+| `onAdFailedToLoad` | 68 | Kotlin fun |
+| `show` | 78 | Kotlin fun |
+| `finish` | 92 | Kotlin fun |
+| `onAdDismissedFullScreenContent` | 107 | Kotlin fun |
+| `onAdFailedToShowFullScreenContent` | 108 | Kotlin fun |
 
 ## app/src/main/java/com/example/data/local/AppDatabase.kt
 
@@ -1034,35 +1352,66 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `updateSlot` | 110 | Kotlin fun |
-| `getMatrixSnapshot` | 147 | Kotlin fun |
-| `getSlotsSnapshot` | 151 | Kotlin fun |
-| `updateMatrix` | 155 | Kotlin fun |
-| `updateCell` | 164 | Kotlin fun |
-| `deleteSlot` | 172 | Kotlin fun |
-| `addSlot` | 187 | Kotlin fun |
-| `getDayTurnAudit` | 200 | Kotlin fun |
-| `deleteTurnAndRebalance` | 225 | Kotlin fun |
-| `applySingleTurnPreset` | 291 | Kotlin fun |
-| `applyDoubleTurnPreset` | 309 | Kotlin fun |
-| `resetToDefault` | 320 | Kotlin fun |
-| `addSectorToBlock` | 494 | Kotlin fun |
-| `removeSectorFromBlock` | 511 | Kotlin fun |
-| `reassignSector` | 521 | Kotlin fun |
-| `getMonthlyWeeks` | 541 | Kotlin fun |
-| `getDayIndex` | 586 | Kotlin fun |
-| `getWeekOffsetForDayOfMonth` | 599 | Kotlin fun |
-| `getBlockForDate` | 608 | Kotlin fun |
-| `getCurrentSlotIndex` | 615 | Kotlin fun |
-| `getActiveBlockNow` | 638 | Kotlin fun |
-| `findScheduledWindowForBlock` | 645 | Kotlin fun |
-| `findNextWindowForBlock` | 715 | Kotlin fun |
+| `updateSlot` | 111 | Kotlin fun |
+| `getScheduleSnapshot` | 150 | Kotlin fun |
+| `applySnapshot` | 157 | Kotlin fun |
+| `getMatrixSnapshot` | 169 | Kotlin fun |
+| `getSlotsSnapshot` | 174 | Kotlin fun |
+| `updateMatrix` | 179 | Kotlin fun |
+| `updateCell` | 189 | Kotlin fun |
+| `deleteSlot` | 198 | Kotlin fun |
+| `addSlot` | 214 | Kotlin fun |
+| `getDayTurnAudit` | 228 | Kotlin fun |
+| `deleteTurnAndRebalance` | 254 | Kotlin fun |
+| `applySingleTurnPreset` | 321 | Kotlin fun |
+| `applyDoubleTurnPreset` | 340 | Kotlin fun |
+| `resetToDefault` | 352 | Kotlin fun |
+| `addSectorToBlock` | 527 | Kotlin fun |
+| `removeSectorFromBlock` | 545 | Kotlin fun |
+| `reassignSector` | 556 | Kotlin fun |
+| `getMonthlyWeeks` | 577 | Kotlin fun |
+| `getDayIndex` | 623 | Kotlin fun |
+| `getWeekOffsetForDayOfMonth` | 637 | Kotlin fun |
+| `getBlockForDate` | 647 | Kotlin fun |
+| `getCurrentSlotIndex` | 655 | Kotlin fun |
+| `getActiveBlockNow` | 672 | Kotlin fun |
+| `findScheduledWindowForBlock` | 680 | Kotlin fun |
+| `findNextWindowForBlock` | 751 | Kotlin fun |
+
+## app/src/main/java/com/example/data/model/PacScheduleSnapshot.kt
+
+Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `fingerprint` | 15 | Kotlin fun |
+| `parse` | 28 | Kotlin fun |
+| `parseRevision` | 61 | Kotlin fun |
 
 ## app/src/main/java/com/example/data/model/PowerStatus.kt
 
 Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 
 No contiene funciones con nombre detectables; sus constantes, configuración o efectos de nivel superior se explican en el capítulo correspondiente.
+
+## app/src/main/java/com/example/data/model/ReportSemantics.kt
+
+Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `status` | 7 | Kotlin fun |
+| `canonicalType` | 13 | Kotlin fun |
+| `remoteStatus` | 19 | Kotlin fun |
+
+## app/src/main/java/com/example/data/model/TutorialLink.kt
+
+Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `update` | 10 | Kotlin fun |
+| `validate` | 12 | Kotlin fun |
 
 ## app/src/main/java/com/example/data/PacAlertTargetResolver.kt
 
@@ -1080,7 +1429,7 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 |---|---:|---|
 | `getPrefs` | 27 | Kotlin fun |
 | `saveSchedule` | 31 | Kotlin fun |
-| `loadSchedule` | 62 | Kotlin fun |
+| `loadSchedule` | 63 | Kotlin fun |
 
 ## app/src/main/java/com/example/data/remote/ApiClient.kt
 
@@ -1112,17 +1461,19 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `startRealtimeSync` | 141 | Kotlin fun |
-| `handleConfigChange` | 235 | Kotlin fun |
-| `processConfig` | 245 | Kotlin fun |
-| `listenToSector` | 297 | Kotlin fun |
-| `updateLocalSector` | 329 | Kotlin fun |
-| `uploadCitizenReport` | 377 | Kotlin fun |
-| `fetchWeeklyCitizenReports` | 411 | Kotlin fun |
-| `publishPacScheduleToCloud` | 430 | Kotlin fun |
-| `uploadCommunityLocation` | 441 | Kotlin fun |
-| `applyRemotePacScheduleJson` | 476 | Kotlin fun |
-| `stopRealtimeSync` | 543 | Kotlin fun |
+| `startRealtimeSync` | 150 | Kotlin fun |
+| `handleConfigChange` | 219 | Kotlin fun |
+| `processConfig` | 229 | Kotlin fun |
+| `listenToSector` | 284 | Kotlin fun |
+| `updateLocalSector` | 316 | Kotlin fun |
+| `uploadCitizenReport` | 366 | Kotlin fun |
+| `fetchWeeklyCitizenReports` | 402 | Kotlin fun |
+| `publishPacScheduleToCloud` | 421 | Kotlin fun |
+| `uploadCommunityLocation` | 432 | Kotlin fun |
+| `applyRemotePacScheduleJson` | 467 | Kotlin fun |
+| `stopRealtimeSync` | 493 | Kotlin fun |
+| `reportId` | 509 | Kotlin fun |
+| `resolvedCoordinates` | 519 | Kotlin fun |
 
 ## app/src/main/java/com/example/data/repository/EnergyRepository.kt
 
@@ -1131,10 +1482,10 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 | Función | Línea | Contexto |
 |---|---:|---|
 | `initializePreloadedDataIfEmpty` | 60 | Kotlin fun |
-| `getPredictionForSector` | 210 | Kotlin fun |
-| `submitReport` | 226 | Kotlin fun |
-| `syncPendingReportsNow` | 326 | Kotlin fun |
-| `registerCommunityLocation` | 351 | Kotlin fun |
+| `getPredictionForSector` | 149 | Kotlin fun |
+| `submitReport` | 165 | Kotlin fun |
+| `syncPendingReportsNow` | 260 | Kotlin fun |
+| `registerCommunityLocation` | 287 | Kotlin fun |
 
 ## app/src/main/java/com/example/engine/OutagePredictionEngine.kt
 
@@ -1160,8 +1511,11 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `onCreate` | 85 | Kotlin fun |
-| `MainAppScreen` | 136 | Kotlin fun |
+| `onStart` | 87 | Kotlin fun |
+| `onStop` | 97 | Kotlin fun |
+| `onCreate` | 105 | Kotlin fun |
+| `onSaveInstanceState` | 147 | Kotlin fun |
+| `MainAppScreen` | 155 | Kotlin fun |
 
 ## app/src/main/java/com/example/notification/NotificationActionReceiver.kt
 
@@ -1232,28 +1586,42 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | `addSiren` | 108 | Kotlin fun |
 | `post` | 116 | Kotlin fun |
 
+## app/src/main/java/com/example/ui/components/AdaptiveActionDialog.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `AdaptiveActionDialog` | 17 | Kotlin fun |
+
 ## app/src/main/java/com/example/ui/components/AdComponents.kt
 
 Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `initializeAdMob` | 21 | Kotlin fun |
-| `getBannerAdUnitId` | 28 | Kotlin fun |
-| `AdaptiveBannerAd` | 44 | Kotlin fun |
-| `preload` | 84 | Kotlin fun |
-| `onAdLoaded` | 91 | Kotlin fun |
-| `onAdFailedToLoad` | 94 | Kotlin fun |
-| `showAd` | 101 | Kotlin fun |
-| `onAdDismissedFullScreenContent` | 107 | Kotlin fun |
-| `onAdFailedToShowFullScreenContent` | 111 | Kotlin fun |
-| `loadAd` | 134 | Kotlin fun |
-| `onAdLoaded` | 143 | Kotlin fun |
-| `onAdFailedToLoad` | 146 | Kotlin fun |
-| `showAdIfAvailable` | 153 | Kotlin fun |
-| `onAdDismissedFullScreenContent` | 158 | Kotlin fun |
-| `onAdFailedToShowFullScreenContent` | 163 | Kotlin fun |
-| `onAdShowedFullScreenContent` | 168 | Kotlin fun |
+| `initializeAdMob` | 41 | Kotlin fun |
+| `getBannerAdUnitId` | 43 | Kotlin fun |
+| `AdaptiveBannerAd` | 47 | Kotlin fun |
+| `clear` | 97 | Kotlin fun |
+| `preload` | 99 | Kotlin fun |
+| `onAdLoaded` | 110 | Kotlin fun |
+| `onAdFailedToLoad` | 118 | Kotlin fun |
+| `showAd` | 128 | Kotlin fun |
+| `finish` | 142 | Kotlin fun |
+| `onAdShowedFullScreenContent` | 150 | Kotlin fun |
+| `onAdDismissedFullScreenContent` | 151 | Kotlin fun |
+| `onAdFailedToShowFullScreenContent` | 152 | Kotlin fun |
+| `isLaunchEligible` | 178 | Kotlin fun |
+| `hasAvailableAd` | 181 | Kotlin fun |
+| `clear` | 184 | Kotlin fun |
+| `loadAd` | 191 | Kotlin fun |
+| `onAdLoaded` | 203 | Kotlin fun |
+| `onAdFailedToLoad` | 215 | Kotlin fun |
+| `showAdIfAvailable` | 226 | Kotlin fun |
+| `finish` | 236 | Kotlin fun |
+| `onAdDismissedFullScreenContent` | 245 | Kotlin fun |
+| `onAdFailedToShowFullScreenContent` | 246 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt
 
@@ -1261,7 +1629,7 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `BarinasAddressDialog` | 73 | Kotlin fun |
+| `BarinasAddressDialog` | 33 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/components/DonationsDialog.kt
 
@@ -1285,11 +1653,16 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `onSectorClicked` | 39 | Kotlin fun |
-| `onMapReady` | 46 | Kotlin fun |
-| `InteractiveBarinasMap` | 55 | Kotlin fun |
-| `sendDataToMap` | 64 | Kotlin fun |
-| `onPageFinished` | 138 | Kotlin fun |
+| `mapAssetName` | 42 | Kotlin fun |
+| `mapDataScript` | 49 | Kotlin fun |
+| `onSectorClicked` | 81 | Kotlin fun |
+| `onMapReady` | 87 | Kotlin fun |
+| `dispose` | 91 | Kotlin fun |
+| `InteractiveBarinasMap` | 99 | Kotlin fun |
+| `shouldOverrideUrlLoading` | 150 | Kotlin fun |
+| `shouldOverrideUrlLoading` | 153 | Kotlin fun |
+| `shouldInterceptRequest` | 155 | Kotlin fun |
+| `blockedResponse` | 172 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt
 
@@ -1297,10 +1670,11 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `OnboardingFlowDialog` | 38 | Kotlin fun |
-| `WelcomeStep` | 79 | Kotlin fun |
-| `PermissionsStep` | 165 | Kotlin fun |
-| `BatteryStep` | 226 | Kotlin fun |
+| `OnboardingFlowDialog` | 40 | Kotlin fun |
+| `WelcomeStep` | 91 | Kotlin fun |
+| `WelcomeFeature` | 109 | Kotlin fun |
+| `PermissionsStep` | 120 | Kotlin fun |
+| `BatteryStep` | 148 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/components/PacScheduleView.kt
 
@@ -1309,10 +1683,10 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | Función | Línea | Contexto |
 |---|---:|---|
 | `PacScheduleView` | 81 | Kotlin fun |
-| `PacOfficialMatrixCard` | 618 | Kotlin fun |
-| `PacBlockSectorsGrid` | 839 | Kotlin fun |
-| `BlockSectorsCard` | 884 | Kotlin fun |
-| `getBlockColor` | 1010 | Kotlin fun |
+| `PacOfficialMatrixCard` | 624 | Kotlin fun |
+| `PacBlockSectorsGrid` | 845 | Kotlin fun |
+| `BlockSectorsCard` | 890 | Kotlin fun |
+| `getBlockColor` | 1016 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/components/PacSettingsDialog.kt
 
@@ -1328,7 +1702,7 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `StatusBadge` | 39 | Kotlin fun |
+| `StatusBadge` | 33 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt
 
@@ -1345,7 +1719,8 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `UpdatePromptDialog` | 26 | Kotlin fun |
+| `UpdatePromptDialog` | 25 | Kotlin fun |
+| `UpdatePromptContent` | 44 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/screens/AdminScreen.kt
 
@@ -1361,8 +1736,8 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `DashboardScreen` | 85 | Kotlin fun |
-| `BroadcastNoticeBanner` | 876 | Kotlin fun |
+| `DashboardScreen` | 91 | Kotlin fun |
+| `BroadcastNoticeBanner` | 802 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/screens/LegalScreen.kt
 
@@ -1385,8 +1760,8 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `MapScreen` | 49 | Kotlin fun |
-| `FilterChipItem` | 304 | Kotlin fun |
+| `MapScreen` | 48 | Kotlin fun |
+| `FilterChipItem` | 116 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/screens/SettingsScreen.kt
 
@@ -1395,8 +1770,8 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | Función | Línea | Contexto |
 |---|---:|---|
 | `SettingsScreen` | 31 | Kotlin fun |
-| `SettingsCategory` | 314 | Kotlin fun |
-| `SettingsItem` | 342 | Kotlin fun |
+| `SettingsCategory` | 323 | Kotlin fun |
+| `SettingsItem` | 351 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/screens/TelemetryScreen.kt
 
@@ -1439,37 +1814,39 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `selectSector` | 179 | Kotlin fun |
-| `switchProfile` | 210 | Kotlin fun |
-| `selectSectorByName` | 254 | Kotlin fun |
-| `setFilter` | 263 | Kotlin fun |
-| `setTab` | 267 | Kotlin fun |
-| `toggleDarkMode` | 271 | Kotlin fun |
-| `updateTheme` | 277 | Kotlin fun |
-| `reportPowerStatus` | 297 | Kotlin fun |
-| `syncPendingReportsNow` | 335 | Kotlin fun |
-| `triggerPushAlertSimulation` | 352 | Kotlin fun |
-| `buildPacStateCopy` | 367 | Kotlin fun |
-| `setAdminOpen` | 381 | Kotlin fun |
-| `updateMatrixCell` | 385 | Kotlin fun |
-| `updateSlot` | 394 | Kotlin fun |
-| `deleteSlot` | 403 | Kotlin fun |
-| `addSlot` | 414 | Kotlin fun |
-| `addSectorToBlock` | 423 | Kotlin fun |
-| `removeSectorFromBlock` | 432 | Kotlin fun |
-| `reassignSector` | 441 | Kotlin fun |
-| `applyDoubleTurnPreset` | 450 | Kotlin fun |
-| `applySingleTurnPreset` | 461 | Kotlin fun |
-| `resetScheduleToDefault` | 472 | Kotlin fun |
-| `deleteTurnAndRebalance` | 476 | Kotlin fun |
-| `registerCommunityLocation` | 487 | Kotlin fun |
-| `setOnboardingOpen` | 530 | Kotlin fun |
-| `setUserLocation` | 534 | Kotlin fun |
-| `publishScheduleNotification` | 574 | Kotlin fun |
-| `dismissBroadcastNotice` | 595 | Kotlin fun |
-| `clearUserMessage` | 599 | Kotlin fun |
-| `refreshPrediction` | 603 | Kotlin fun |
-| `onCleared` | 610 | Kotlin fun |
+| `selectSector` | 177 | Kotlin fun |
+| `switchProfile` | 208 | Kotlin fun |
+| `selectSectorByName` | 252 | Kotlin fun |
+| `setFilter` | 261 | Kotlin fun |
+| `setTab` | 265 | Kotlin fun |
+| `toggleDarkMode` | 269 | Kotlin fun |
+| `updateTheme` | 275 | Kotlin fun |
+| `reportPowerStatus` | 295 | Kotlin fun |
+| `syncPendingReportsNow` | 333 | Kotlin fun |
+| `triggerPushAlertSimulation` | 350 | Kotlin fun |
+| `buildPacStateCopy` | 365 | Kotlin fun |
+| `setAdminOpen` | 379 | Kotlin fun |
+| `updateMatrixCell` | 383 | Kotlin fun |
+| `updateSlot` | 392 | Kotlin fun |
+| `deleteSlot` | 401 | Kotlin fun |
+| `addSlot` | 412 | Kotlin fun |
+| `addSectorToBlock` | 421 | Kotlin fun |
+| `removeSectorFromBlock` | 430 | Kotlin fun |
+| `reassignSector` | 439 | Kotlin fun |
+| `applyDoubleTurnPreset` | 448 | Kotlin fun |
+| `applySingleTurnPreset` | 459 | Kotlin fun |
+| `resetScheduleToDefault` | 470 | Kotlin fun |
+| `deleteTurnAndRebalance` | 474 | Kotlin fun |
+| `registerCommunityLocation` | 485 | Kotlin fun |
+| `completeOnboarding` | 528 | Kotlin fun |
+| `showUserMessage` | 533 | Kotlin fun |
+| `setOnboardingOpen` | 535 | Kotlin fun |
+| `setUserLocation` | 539 | Kotlin fun |
+| `publishScheduleNotification` | 579 | Kotlin fun |
+| `dismissBroadcastNotice` | 600 | Kotlin fun |
+| `clearUserMessage` | 604 | Kotlin fun |
+| `refreshPrediction` | 608 | Kotlin fun |
+| `onCleared` | 615 | Kotlin fun |
 
 ## app/src/main/java/com/example/utils/AppUpdater.kt
 
@@ -1495,7 +1872,78 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `doWork` | 17 | Kotlin fun |
+| `doWork` | 15 | Kotlin fun |
+
+## app/src/test/java/com/example/AdFreeRewardPersistenceTest.kt
+
+Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `earnedRewardPersistsTheSameWindowUsedByAllAdGatesAndDoesNotExtendOnDuplicateCallback` | 18 | Kotlin fun |
+
+## app/src/test/java/com/example/AdFreeRewardWindowTest.kt
+
+Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `defaultRewardIs12HoursAndConfigurationCannotExceedOneDay` | 14 | Kotlin fun |
+| `oneRewardRemovesAdsForExactly24HoursWithoutStacking` | 24 | Kotlin fun |
+| `expiredRewardCanBeEarnedAgainAndConfiguredDurationIsBounded` | 33 | Kotlin fun |
+| `corruptPreferencesOrClockBeforeTheGrantDoNotCreateUnlimitedAdFreeTime` | 43 | Kotlin fun |
+| `debugAlwaysUsesTheOfficialTestUnitForEveryFormatEvenWithProductionConfiguration` | 51 | Kotlin fun |
+| `releaseDisablesAFormatUntilAValidProductionUnitIsConfigured` | 60 | Kotlin fun |
+
+## app/src/test/java/com/example/AppOpenLaunchHostTest.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `FakeGate` | 30 | Kotlin fun |
+| `returnOverlayPreservesMountedFormAndDraft` | 35 | Kotlin fun |
+| `protectedReturnIsSkippedAndNotDeferredUntilFormCloses` | 60 | Kotlin fun |
+| `activeAlarmBypassesInitialGateAndAlwaysBlocksReturn` | 91 | Kotlin fun |
+| `closingOneProtectedSurfaceCannotReleaseAnother` | 110 | Kotlin fun |
+
+## app/src/test/java/com/example/AppOpenLaunchPolicyTest.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `step` | 8 | Kotlin fun |
+| `loadCallbackShowsOnlyWithinLoadingDeadline` | 13 | Kotlin fun |
+| `timeoutAndLateCallbackCannotShowOverContent` | 22 | Kotlin fun |
+| `skipAndRewardEndLoadingExactlyOnce` | 28 | Kotlin fun |
+| `consentOrLoadFailureNeverBlocksEntry` | 36 | Kotlin fun |
+
+## app/src/test/java/com/example/CompactDialogUiTest.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `LargeText` | 38 | Kotlin fun |
+| `weeklyMatrixShowsSeventhSlotAndMissingCellsAsUnassigned` | 48 | Kotlin fun |
+| `registerSectorSaveRemainsReachableWithLargeText` | 60 | Kotlin fun |
+| `updateActionsRemainReachableWithLongReleaseNotesInLandscape` | 85 | Kotlin fun |
+| `welcomeCanBeSkippedWithoutOpeningPermissionSetup` | 105 | Kotlin fun |
+| `longSectorNameKeepsChangeActionAndIrregularReportUsable` | 120 | Kotlin fun |
+
+## app/src/test/java/com/example/DashboardStatusUiTest.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `publishActivePacForTheWholeDay` | 29 | Kotlin fun |
+| `restoreSchedule` | 38 | Kotlin fun |
+| `showStatus` | 40 | Kotlin fun |
+| `unknownServiceIsNotReportedAsAnObservedOutageDuringPac` | 55 | Kotlin fun |
+| `normalCommunityReportRemainsDistinctFromTheActivePac` | 62 | Kotlin fun |
+| `irregularFaultKeepsItsLabelDuringAnActiveScheduledCut` | 69 | Kotlin fun |
 
 ## app/src/test/java/com/example/ExampleRobolectricTest.kt
 
@@ -1524,6 +1972,17 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 |---|---:|---|
 | `greeting_screenshot` | 25 | Kotlin fun |
 
+## app/src/test/java/com/example/MapBridgeSecurityTest.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `sector` | 19 | Kotlin fun |
+| `selectedIdAndPayloadAreEncodedAsJsonInsteadOfExecutableJavascript` | 26 | Kotlin fun |
+| `localAssetOriginOnlyServesAnExplicitAllowlist` | 42 | Kotlin fun |
+| `coordinatesAndZeroVoltageArePreservedWhenValid` | 54 | Kotlin fun |
+
 ## app/src/test/java/com/example/PacAlertsPersistenceTest.kt
 
 Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
@@ -1536,10 +1995,11 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 | `selectProfile` | 66 | Kotlin fun |
 | `repairsLegacyCachedBlockFromTheSelectedRoomSector` | 78 | Kotlin fun |
 | `coldStartLoadsPersistedScheduleBeforeArmingActualAlarmTimes` | 93 | Kotlin fun |
-| `changingProfileReplacesOldAlarmsAndRejectsAnAlreadyQueuedOldIntent` | 109 | Kotlin fun |
-| `disabledSettingsCancelPreviouslyScheduledAlarmsAndUnscheduledDArmsNothing` | 138 | Kotlin fun |
-| `exactAndPeriodicDeliveryShareADurableKeyButDifferentProfilesAreIndependent` | 156 | Kotlin fun |
-| `planHonorsIndependentAlertSwitchesAndSchedulesFutureWhileCurrentCutIsActive` | 166 | Kotlin fun |
+| `olderPersistedScheduleCannotOverrideANewerInMemorySnapshot` | 109 | Kotlin fun |
+| `changingProfileReplacesOldAlarmsAndRejectsAnAlreadyQueuedOldIntent` | 122 | Kotlin fun |
+| `disabledSettingsCancelPreviouslyScheduledAlarmsAndUnscheduledDArmsNothing` | 151 | Kotlin fun |
+| `exactAndPeriodicDeliveryShareADurableKeyButDifferentProfilesAreIndependent` | 169 | Kotlin fun |
+| `planHonorsIndependentAlertSwitchesAndSchedulesFutureWhileCurrentCutIsActive` | 179 | Kotlin fun |
 
 ## app/src/test/java/com/example/PacScheduleRegressionTest.kt
 
@@ -1556,6 +2016,19 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 | `overnightUsesThePreviousStartDateAcrossAMonthBoundaryAndHasExclusiveEnd` | 66 | Kotlin fun |
 | `choosesChronologicallyEvenWhenSlotsAreOutOfOrderAndIgnoresDeviceTimezone` | 85 | Kotlin fun |
 | `malformedScheduleCannotCreateAWindow` | 102 | Kotlin fun |
+
+## app/src/test/java/com/example/PacScheduleSnapshotTest.kt
+
+Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `source` | 9 | Kotlin fun |
+| `isoAndNumericRevisionsRepresentTheSameUpdate` | 14 | Kotlin fun |
+| `invalidPayloadCannotPartiallyChangeTheLiveSchedule` | 21 | Kotlin fun |
+| `customSlotGapHasNoInventedActiveSlot` | 30 | Kotlin fun |
+| `tutorialAllowsOnlyDirectHttpsYoutubeVideoLinks` | 39 | Kotlin fun |
+| `reportKindsKeepIrregularSupplyEvenWithPower` | 47 | Kotlin fun |
 
 ## patch_appupdater.js
 
@@ -1653,6 +2126,64 @@ Archivo local de mantenimiento, fuera del seguimiento Git; puede no existir en u
 |---|---:|---|
 | `supabase_upsert` | 16 | Python def |
 | `main` | 162 | Python def |
+
+## supabase/functions/pac-api/firebase.mjs
+
+Explicación: [../OPERACION_GATEWAY_SUPABASE.md](../OPERACION_GATEWAY_SUPABASE.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `base64url` | 7 | FunctionDeclaration |
+| `encodeJson` | 13 | FunctionDeclaration |
+| `readServiceAccount` | 17 | FunctionDeclaration |
+| `createFirebaseSender` | 32 | FunctionDeclaration |
+| `sendFirebase` | 34 | `createFirebaseSender` |
+
+## supabase/functions/pac-api/index.ts
+
+Explicación: [../OPERACION_GATEWAY_SUPABASE.md](../OPERACION_GATEWAY_SUPABASE.md).
+
+No contiene funciones con nombre detectables; sus constantes, configuración o efectos de nivel superior se explican en el capítulo correspondiente.
+
+## supabase/functions/pac-api/pac-schedule-core.js
+
+Explicación: [../OPERACION_GATEWAY_SUPABASE.md](../OPERACION_GATEWAY_SUPABASE.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `installPacScheduleCore` | 2 | FunctionExpression |
+| `pacScheduleFactory` | 6 | FunctionExpression |
+| `civilParts` | 16 | `pacScheduleFactory` |
+| `civilEpoch` | 22 | `pacScheduleFactory` |
+| `normalizeBlock` | 30 | `pacScheduleFactory` |
+| `weekOffset` | 35 | `pacScheduleFactory` |
+| `editorOffset` | 37 | `pacScheduleFactory` |
+| `nextRevision` | 39 | `pacScheduleFactory` |
+| `rotateMatrix` | 44 | `pacScheduleFactory` |
+| `validateSchedule` | 49 | `pacScheduleFactory` |
+| `windows` | 65 | `pacScheduleFactory` |
+| `findWindow` | 86 | `pacScheduleFactory` |
+| `monthlyWeeks` | 92 | `pacScheduleFactory` |
+| `pacTime` | 100 | `pacScheduleFactory` |
+
+## supabase/functions/pac-api/router.mjs
+
+Explicación: [../OPERACION_GATEWAY_SUPABASE.md](../OPERACION_GATEWAY_SUPABASE.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `parsePushPayload` | 9 | FunctionDeclaration |
+| `parseTelemetry` | 23 | FunctionDeclaration |
+| `sectorDto` | 38 | FunctionDeclaration |
+| `readConfig` | 51 | FunctionDeclaration |
+| `routePath` | 66 | FunctionDeclaration |
+| `readJson` | 75 | FunctionDeclaration |
+| `createPacApi` | 99 | FunctionDeclaration |
+| `rest` | 105 | `createPacApi` |
+| `schedule` | 121 | `createPacApi` |
+| `sector` | 130 | `createPacApi` |
+| `pacApi` | 136 | `createPacApi` |
+| `respond` | 144 | `createPacApi.pacApi` |
 
 ## test.py
 

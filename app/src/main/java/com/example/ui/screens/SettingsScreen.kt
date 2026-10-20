@@ -37,7 +37,8 @@ fun SettingsScreen(
     onOpenAlarmSettings: () -> Unit,
     onCheckUpdate: () -> Unit,
     onOpenDonations: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onWatchTutorial: (() -> Unit)? = null
 ) {
     var currentLegalPage by remember { mutableStateOf<LegalPage?>(null) }
 
@@ -97,6 +98,10 @@ fun SettingsScreen(
                     contentPadding = PaddingValues(vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    item {
+                        com.example.ads.AdFreeRewardCard()
+                        com.example.ads.AdPrivacyOptionsButton()
+                    }
                     // Categoría: General
                     item {
                         SettingsCategory(title = "General") {
@@ -116,6 +121,10 @@ fun SettingsScreen(
                                 subtitle = "Modificar el sector para ver el cronograma",
                                 onClick = onChangeLocation
                             )
+                            if (onWatchTutorial != null) {
+                                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                                SettingsItem(Icons.Outlined.PlayCircle, "Tutorial en YouTube", "Conoce las funciones de PAC Barinas", onWatchTutorial)
+                            }
                             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                             SettingsItem(
                                 icon = Icons.Outlined.RestartAlt,

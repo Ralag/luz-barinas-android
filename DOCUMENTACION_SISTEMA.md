@@ -1,8 +1,8 @@
 # PAC Barinas: documentación del sistema
 
-**Versión documental: 16 de octubre de 2026.** Esta guía describe el código de ambos repositorios después de la primera corrección de seguridad y alertas por bloque. El [registro de cambios y verificaciones](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md) distingue código, pruebas y activación remota. Publicar código no acredita su distribución en Google Play.
+**Versión documental: 20 de octubre de 2026.** Esta guía describe el código de ambos repositorios con seguridad y alertas por bloque, mapa común, publicidad opcional de doce horas, pantallas compactas y sincronización PAC corregida. El [registro de cambios y verificaciones](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md) distingue código, pruebas y activación remota. Publicar código no acredita su distribución en Google Play.
 
-La referencia Android sigue siendo **1.3.1, versionCode 7**; todavía no se ha emitido una nueva versión del binario. Los commits c890853 en Android y 19a76ce en web corresponden al análisis inicial. Los defectos corregidos se identifican expresamente; el trabajo restante figura en la tabla de mantenimiento.
+El código prepara Android **1.4.0, versionCode 8**; todavía no se ha publicado el binario. Las instalaciones anteriores conservan su mapa y anuncios hasta actualizar. Los commits c890853 en Android y 19a76ce en web corresponden al análisis inicial. Los defectos corregidos se identifican expresamente; el [registro actual](docs/CAMBIOS_MAPA_ANUNCIOS_Y_SINCRONIZACION.md) explica límites y validación, y la [guía del gateway](docs/OPERACION_GATEWAY_SUPABASE.md) detalla rutas compatibles y cuotas.
 
 ## Índice
 
@@ -147,7 +147,7 @@ Las preferencias se separan entre luz_barinas_user_prefs —dirección, selecci�
 | community_locations | Propuestas con identidad, nombre, territorio, block/circuitCode, datos de estado, submittedAt y ampliaciones geográficas. |
 | app_config | config_key y config_value JSONB; configuración común por documento. |
 
-Las mayúsculas son parte del contrato. created_at, reportedAtMillis, voltageObserved y community_sectors no pertenecen a ese contrato. La migración v3 añade sectors.isCommunity, citizen_reports.observation, el registro privado admin_users y el control privado push_alert_limits. No hay un trigger versionado que agregue todos los reportes en porcentajes.
+Las mayúsculas son parte del contrato. created_at, reportedAtMillis, voltageObserved y community_sectors no pertenecen a ese contrato. La migración v3 añade sectors.isCommunity, citizen_reports.observation, el registro privado admin_users y el control privado push_alert_limits. La migración v4 agrega eventos recientes al sector mediante un trigger privado, con IDs exactos, fecha original y prioridad de ediciones administrativas más recientes.
 
 app_config contiene pac_schedule, broadcast_notice, donations_config, barinas_geography y version; donations_url es un formato heredado. pac_schedule incluye versión, marca temporal, slots y matrixRows con cells, más listas sectorsA–D cuando el productor las conserva. Los timestamps difieren entre productores: milisegundos en clásico y updatedAt ISO en React con version numérica.
 
@@ -171,7 +171,7 @@ El desplazamiento mensual es 0 para días 1–7, 1 para 8–14, 2 para 15–21 y
 
 En Android, OutagePredictionEngine combina una ventana teórica con duración media del historial del sector, admitida entre dos y ocho horas, o cuatro horas de respaldo. Agrupa reportes sin luz por hora de Caracas; con al menos tres en la hora dominante puede ajustar el inicio cuando difiere de la teoría. Usa cifras heurísticas 88/94 para teoría, 78 para respaldo modular y una fórmula ciudadana limitada a 99.
 
-No hay entrenamiento ni calibración estadística de esas cifras. Repeticiones, fechas de envío tardías y concentración de reportes pueden alterar la estimación. El final calculado puede diferir del final real de una franja personalizada. La API JavaScript utiliza una variante más simple y fija cuatro horas.
+No hay entrenamiento ni calibración estadística de esas cifras. Repeticiones antiguas y concentración de reportes pueden alterar la estimación. Los nuevos envíos preservan identidad y fecha original. El motor Android conserva heurísticas; la API compatible nueva utiliza ventanas reales del calendario compartido, duración publicada y confianza cero cuando no hay una probabilidad calibrada.
 
 Las alarmas Android usan findScheduledWindowForBlock: busca desde ayer, calcula la rotación con la fecha de inicio en Caracas, excluye el instante final y devuelve null sin programación. PacBlock acepta A–D y «Bloque X», sin extraer la B de BLOQUE. El contrato predictivo heredado findNextWindowForBlock aún ofrece una estimación de respaldo; las alarmas no lo utilizan. Queda unificar las variantes web/API y el motor ciudadano.
 
@@ -181,7 +181,7 @@ Al iniciar, el ViewModel carga preferencias/PAC, prepara repositorios y observa 
 
 Un reporte desde Dashboard pasa por ViewModel y EnergyRepository.submitReport: se registra en Room, modifica estado local de forma optimista, encola ReportPowerWorker e intenta un envío inmediato. NotificationActionReceiver y la acción del widget escriben Room y encolan trabajo directamente, sin pasar por ese ViewModel/repositorio ni iniciar ese envío inmediato. El worker, con requisito de conectividad, recorre pendientes e intenta insertarlos mediante CloudSync; también existe una ruta manual de sincronización.
 
-Actualmente esas rutas no comparten una idempotencia remota completa. La confirmación inmediata puede elegir el último pendiente en vez del evento original; el uploader usa hora de envío y el worker puede aplicar otra vez cambios de contadores. Por tanto, guardar localmente no equivale a entrega única confirmada.
+Las rutas conservan el ID concreto que devuelve Room y la fecha original del evento. El envío deriva un UUID estable del identificador de instalación, ID local y fecha; un reintento usa `ON CONFLICT DO NOTHING`. La confirmación marca ese pendiente preciso y el worker no vuelve a incrementar contadores. El trigger privado agrega únicamente las inserciones nuevas. Esta identidad evita duplicar el mismo evento pendiente, sin detectar reportes distintos que una persona envíe varias veces.
 
 Una propuesta se envía únicamente a community_locations; Android dejó de publicar sectores directamente. El administrador revisa y publica. La eliminación de la propuesta representa su salida de bandeja, sin historial formal de decisiones ni transacción única de aprobación. La publicación PAC clásica propaga errores y una lectura fallida conserva el horario anterior, sin guardar respaldos. La función Android de publicar PAC todavía devuelve éxito sin escritura real.
 
@@ -209,22 +209,22 @@ firebase.json aún publica desde la carpeta fuente con public="."; no equivale a
 
 Existen pruebas Android para motor, Room, recursos, captura Robolectric/Roborazzi y contexto instrumentado. Esta corrección fija el reloj del test predictivo y añade regresiones para bloques, madrugada, mes, zona horaria, preferencias, perfiles, cancelación y deduplicación. El registro de cambios detalla qué se ejecutó.
 
-La web aprobó75 pruebas Node y build; el fixture de políticas pasó en PostgreSQL16 de GitHub. Android aprobó16 tests y lintDebug sin errores, con76 advertencias pendientes. Ambos repositorios incorporan GitHub Actions y conservan reportes. El fallo de caché Gradle local no altera esas ejecuciones. El [registro de cambios](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md) enlaza resultados y distingue pruebas de despliegue real.
+La entrega anterior aprobó 75 pruebas web y 16 Android en GitHub. La entrega actual aprobó 132 pruebas web y compilación; la agregación pasó 168 sentencias PostgreSQL18.6/PGlite y el fixture PostgreSQL16 de GitHub, incluida concurrencia de dos conexiones reales. Los resultados definitivos Android y CI se mantienen en el [registro actual](docs/CAMBIOS_MAPA_ANUNCIOS_Y_SINCRONIZACION.md). Ambos repositorios incorporan GitHub Actions y conservan reportes.
 
 | Área pendiente | Estado actual y trabajo necesario |
 |---|---|
 | Identidad y permisos | Auth y RLS v3 implementados; mantener registro de administradores y revisar nuevas tablas/policies. |
 | Emisión de alertas | Endpoint protegido y audiencia por bloque corregida; falta recepción FCM Android y suscripción a temas. |
-| Textos remotos | Panel clásico escapado; queda revisar mapa Android y navegación/puente. |
-| Integridad de reportes | ID estable, fecha original, confirmación precisa e idempotencia; separar transporte de contadores. |
-| Horarios y alarmas | Alarmas Android corregidas; queda unificar motores predictivos y variantes web/API. |
+| Textos remotos | Panel clásico escapado y puente Android con origen/navegación restringidos; mantener estas garantías al añadir HTML y enlaces. |
+| Integridad de reportes | ID estable, fecha original y confirmación precisa implementados; quedan IDs históricos sin correspondencia y controles adicionales de abuso. |
+| Horarios y alarmas | PAC coherente en Android y núcleo compartido web/API; queda calibrar y unificar las heurísticas predictivas. |
 | Doble administración | Unificar rutas/contratos, persistir sectores React y controlar concurrencia al guardar JSON PAC. |
 | Estado de carga | Lectura/publicación PAC clásica corregida; revisar formularios y otras operaciones con éxito aparente. |
 | Esquema y evolución | Resolver campos/tablas divergentes, migraciones, restricciones y respaldo/recuperación. |
 | Estimaciones y presentación | Evaluar confianza, diferenciar datos reales de respaldos y actualizar textos legales/promocionales. |
 | Distribución y calidad | Coordinar GitHub/Play, revisar Firebase heredado y ejecutar pruebas reproducibles. |
 
-Esta tabla describe el trabajo restante tras la primera corrección. Consultar el registro de cambios y la guía de activación para conocer la revisión y permisos efectivos.
+Esta tabla distingue las correcciones actuales de las limitaciones restantes. Consultar el registro de cambios y la guía de activación para conocer la revisión y permisos efectivos.
 
 ## 12. Manual del código
 

@@ -4,7 +4,7 @@ Revisión del código local: 16 de octubre de 2026. Este capítulo explica cómo
 
 ## Cómo leer este capítulo
 
-El directorio base de las referencias Kotlin es `E:\LUZ BARINAS\app\src\main\java\com\example`. Una referencia `L180` significa la línea 180 del archivo enlazado al comienzo del apartado. Las líneas corresponden a esta revisión; al editar el código pueden desplazarse. El índice final conserva los nombres exactos de las 124 declaraciones de este alcance, incluidos overrides y JavaScript propio del mapa. Los bloques anónimos se explican con su función contenedora: no tienen un nombre adicional que pueda buscarse en Kotlin.
+El directorio base de las referencias Kotlin es `E:\LUZ BARINAS\app\src\main\java\com\example`. Una referencia `L180` sirve como orientación en la revisión enlazada; las posiciones y firmas vigentes del código local se consultan en el [índice 07](07-indice-funciones.md). Las explicaciones de este capítulo describen la implementación actual, incluidos overrides y JavaScript propio del mapa. Los bloques anónimos se explican con su función contenedora: no tienen un nombre adicional que pueda buscarse en Kotlin.
 
 Las funciones `@Composable` aquí descritas retornan `Unit`: su resultado es una descripción de interfaz que Compose dibuja. Los callbacks como `(Sector) -> Unit` representan una acción que el padre entrega al componente. No equivalen a una escritura en servidor: hay que seguir el callback hasta el ViewModel y después hasta el repositorio. El capítulo [02, datos y motor](02-android-datos-y-motor.md) explica la implementación interna de esos repositorios, modelos y utilidades.
 
@@ -13,7 +13,8 @@ Las funciones `@Composable` aquí descritas retornan `Unit`: su resultado es una
 ```mermaid
 flowchart TD
   A[Android inicia MainActivity] --> B[onCreate: canales, anuncios, trabajo periódico]
-  B --> C[MainAppScreen observa uiState]
+  B --> Q[AppOpenLaunchHost: entrada y protección de interacción]
+  Q --> C[MainAppScreen observa uiState]
   C --> D[Hoy: DashboardScreen]
   C --> E[Horarios: PacScheduleView]
   C --> F[Mapa: MapScreen y WebView]
@@ -34,7 +35,7 @@ flowchart TD
 
 La navegación principal sí monta tres pestañas: índice `0` Hoy, `1` Horarios y `2` Mapa. La pantalla de configuración aparece superpuesta mediante un booleano local y desde ella se abren los textos legales. No hay `NavHost`, rutas de navegación ni pila de destinos declarada: la navegación depende de `currentTab` y de estados `remember`.
 
-`AdminScreen` y `TelemetryScreen` existen, pero no se invocan desde la navegación actual de `MainActivity`. Tampoco abrir `isAdminOpen` las monta automáticamente. Las acciones administrativas del ViewModel siguen presentes para esos componentes, posibles pruebas o una futura reconexión. No debe confundirse código existente con un recorrido accesible al usuario. El intersticial se precarga, pero no se encontró una llamada de producción a `InterstitialAdManager.showAd()`.
+`AdminScreen` y `TelemetryScreen` existen, pero no se invocan desde la navegación actual de `MainActivity`. Tampoco abrir `isAdminOpen` las monta automáticamente. Las acciones administrativas del ViewModel siguen presentes para esos componentes, posibles pruebas o una futura reconexión. No debe confundirse código existente con un recorrido accesible al usuario. El intersticial utiliza puertas de consentimiento, recompensa y frecuencia; su uso depende de una transición natural explícita de navegación, nunca de iniciar la app.
 
 ## 2. Aprender a leer Compose con este proyecto
 
@@ -62,15 +63,15 @@ Los efectos deben mantenerse fuera del dibujo ordinario para evitar repetir escr
 
 ## 3. Entrada y navegación: MainActivity.kt
 
-Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/MainActivity.kt).
+Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/MainActivity.kt).
 
 ### `MainActivity.onCreate(savedInstanceState: Bundle?): Unit` — L85
 
-Android la llama al crear la actividad. `savedInstanceState` se entrega a `super`; este archivo no extrae una navegación anterior de él. La propiedad `viewModel` se obtiene con `by viewModels()` y pertenece al ciclo del propietario de ViewModels.
+`onCreate` restaura la generación publicitaria guardada, crea canales de notificación, inicia UMP/AdMob y programa la comprobación predictiva periódica. `setContent` observa el ViewModel, resuelve tema y escala y monta `AppOpenLaunchHost`. El host espera la entrada inicial antes de componer `MainAppScreen`; una vez montada, conserva esa pantalla incluso durante las compuertas de regreso. Su estado guardable evita repetir la entrada por una simple recomposición o recreación.
 
-El orden es: activar dibujo hasta bordes con `enableEdgeToEdge()`, crear canales de notificación, iniciar AdMob, precargar intersticial y anuncio de apertura, publicar mediante un `Handler` principal una tentativa de mostrar el anuncio de apertura después de dos segundos y encolar el worker predictivo. Después instala Compose con `setContent`.
+`onStop` registra el instante monotónico de salida y precarga apertura si no se está mostrando otro anuncio y no es un cambio de configuración. `onStart` solicita una nueva generación solo al regresar después de al menos cinco minutos, con elegibilidad publicitaria y sin edición, diálogo o alarma protegida; el gestor exige además diez minutos desde la última apertura publicitaria. El host la superpone conservando los estados de la pantalla. `onSaveInstanceState` guarda la generación para que una rotación no produzca otra apertura. Cerrar un anuncio no se interpreta como volver a abrir la app. No existe ya un Handler de dos segundos que intente mostrar sobre la navegación.
 
-Dentro de `setContent` observa `uiState`, resuelve claro/oscuro con `themeMode` y, para `system`, con el tema del sistema. Activa colores dinámicos solo si `colorSchemeName == "dynamic"`. El `CompositionLocalProvider` multiplica tanto la densidad como `fontScale` por `visualScale`; por ello la escala afecta medidas y texto, no solamente el tamaño de letra. No hay callback que cancele expresamente la tarea del `Handler` al destruir la actividad. El retraso de dos segundos es una tentativa: si el anuncio todavía no está cargado, el gestor retorna sin mostrarlo.
+El tema mantiene la escala elegida por el usuario. En una entrada normal, `MainAppScreen` solo empieza después de continuar desde el gate; una alarma activa omite esa espera. La app no solicita permisos ni abre automáticamente selección de dirección detrás de la pantalla de entrada. En retornos posteriores la pantalla sigue montada, de modo que el host conserva los formularios recordados.
 
 ### `MainAppScreen(viewModel: LuzBarinasViewModel): Unit` — L136
 
@@ -78,14 +79,14 @@ La invoca `onCreate`. Lee `uiState` y `PacAlarmPlayer.isPlayingFlow`; mantiene e
 
 | Bloque/callback | Qué hace y qué cambia |
 |---|---|
-| `notificationPermissionLauncher`, L142; `LaunchedEffect(Unit)`, L146 | En Android 13 o posterior comprueba `POST_NOTIFICATIONS` y lo solicita si falta. Su callback ignora el resultado (`_`); no modifica una bandera visible ni ofrece aquí una explicación adicional. |
+| Permiso de notificaciones | Ya no se solicita automáticamente al montar MainAppScreen. Se ofrece desde la bienvenida al activar alertas. |
 | `LaunchedEffect(uiState.userMessage)`, L159 | Muestra el mensaje en snackbar y luego llama a `clearUserMessage()`. El mensaje no debe consumirse antes de que termine la presentación. |
 | `currentBlock` | Usa `PacBlock.normalize` para obtener código válido de la selección. Sin sector/código válido queda vacío, sin elegir A por defecto. |
 | `LaunchedEffect(uiState.selectedSector)`, L176 | Solicita reprogramar alarmas al cambiar el objeto de sector seleccionado. No tiene `scheduleVersion` como clave independiente. |
 | `PacSettingsDialog`, L181 | Recibe el bloque calculado y `userAddress` como nombre; cierra cambiando `isSettingsOpen`. |
 | `ThemeSettingsDialog`, L189 | Recibe modo/paleta/escala y conecta su callback con `viewModel.updateTheme(...)`. |
-| `OnboardingFlowDialog`, L204 | Se abre si el onboarding está pendiente y la dirección no está abierta. Completarlo abre la dirección; ese callback aún no guarda `onboarding_done`. |
-| `BarinasAddressDialog`, L212 | Se abre por solicitud local o cuando no hay dirección y el onboarding ya está cerrado. Elegir llama a `setUserLocation`; registrar llama a `registerCommunityLocation`; cerrar llama a `setOnboardingOpen(false)`. |
+| `OnboardingFlowDialog`, L204 | Se abre si el onboarding está pendiente y la dirección no está abierta. Completarlo guarda onboarding_done y abre la dirección; omitir guarda la elección y permite continuar. |
+| `BarinasAddressDialog`, L212 | Se abre por solicitud explícita o al completar la configuración de ubicación. Elegir llama a `setUserLocation`; registrar llama a `registerCommunityLocation`; cerrar llama a `setOnboardingOpen(false)`. |
 | `DonationsDialog`, L230 | Lee `donationConfig` remoto del estado; cerrar solo oculta el diálogo. |
 | Actualización, L237–256 | Usa `updateAvailable`, una versión descartada y una apertura manual. Si se fuerza sin actualización remota, construye información de la versión actual. El título del diálogo sigue diciendo que existe nueva actualización. |
 | `BackHandler`, L260 | Si la pestaña no es Hoy, vuelve a `0`. `SettingsScreen` añade su propio manejador al estar montada. |
@@ -103,7 +104,7 @@ La configuración se dibuja encima de la estructura principal en `AnimatedVisibi
 
 ## 4. ViewModel: el intermediario entre pantallas y datos
 
-Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt).
+Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt).
 
 ### Modelos de estado y creación
 
@@ -113,14 +114,14 @@ Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/bl
 
 `LuzBarinasViewModel(application: Application)` (L70) crea `EnergyRepository`, abre las preferencias `luz_barinas_user_prefs` y publica `StateFlow` de solo lectura. El estado inicial lee dirección, perfil, existencia de trabajo, modo, paleta y escala, y marca carga. `isDarkMode` comienza con su default y no se deriva en esa construcción de `themeMode`/sistema; algunos componentes pueden usar una bandera distinta al esquema real del tema.
 
-El bloque `init` L90 no es una función invocable separada. Carga el PAC persistido antes de tomar sus copias, inicia sincronización remota, lanza precarga local y crea colectores:
+El bloque `init` no es una función invocable separada. Carga el PAC persistido antes de tomar sus copias; una corutina prepara/migra el catálogo local y después inicia sincronización remota. También crea los colectores:
 
 | Colector | Actualización y efecto |
 |---|---|
 | Sectores Room | Reemplaza catálogo y resuelve solo ID del perfil activo; Casa admite ID general heredado. Ya no elige Alto Barinas I ni primer elemento como selección implícita. Sin coincidencia deja selección nula; quita carga. Si cambia ID escuchado recalcula/conecta sector. |
 | Pendientes, L137 | Copia el contador a `unsyncedReportsCount`. |
 | Reportes locales, L144 | Copia el listado a `recentReports`; es historial del dispositivo, no una descarga del feed global. |
-| Actualización del PAC, L151 | Reconstruye copias y predicción. Este bloque no llama explícitamente a rearmar alarmas. |
+| Actualización del PAC | Reconstruye matriz, franjas, asignaciones y versión desde un snapshot coherente y recalcula predicción. El rearmado remoto se solicita en `CloudSyncRepository` después de aplicar y guardar el horario; este colector no lo duplica. |
 | Avisos, L159 | Publica `activeBroadcastNotice`. |
 | Versión remota, L166 | Publica `updateAvailable`. |
 | Donaciones, L173 | Publica `donationConfig`. |
@@ -160,7 +161,7 @@ Todas las siguientes funciones retornan `Unit`, salvo la constructora privada de
 
 ### Edición del PAC y funciones administrativas presentes
 
-`buildPacStateCopy(userMsg: String? = null): LuzBarinasUiState` L351 es privada. Lee estado actual y singleton y retorna copia con versión, matriz, franjas y listas A–D; mantiene el mensaje anterior si no se proporciona uno. No guarda ni publica. La usan recolector remoto y acciones de edición.
+`buildPacStateCopy(userMsg: String? = null, current: LuzBarinasUiState = _uiState.value): LuzBarinasUiState` es privada. Obtiene un snapshot coherente del singleton y retorna una copia de `current` con versión, matriz, franjas y listas A–D; mantiene el mensaje anterior si no se proporciona uno. El colector remoto le entrega el estado de la actualización atómica para conservar cambios concurrentes. No guarda ni publica. La usan ese colector y las acciones de edición.
 
 El patrón común de edición es **mutar PAC → guardar preferencias → solicitar rearmado de alarmas → publicar snapshots UI → recalcular predicción → lanzar publicación remota**. La última función sigue siendo stub sin escritura; el rearmado sí utiliza el horario local persistido y cancela lo previo. Los callbacks están destinados a AdminScreen, aún sin montaje principal.
 
@@ -190,36 +191,38 @@ Las preferencias del PAC y alertas son otros almacenes manejados por `PacSchedul
 
 ### DashboardScreen.kt
 
-Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/DashboardScreen.kt).
+Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/DashboardScreen.kt).
 
-**`DashboardScreen` L85** recibe `sectors`, `selectedSector`, dirección opcional, `prediction`, `unsyncedCount`, aviso opcional, perfil/existencia de trabajo, callbacks de perfil, aviso, selección, reporte de cuatro argumentos, dirección, horarios y alarma, más `modifier`. Retorna `Unit`. La monta Hoy. No escribe Room: todas las acciones durables salen por callbacks. `unsyncedCount` está en la firma pero no se dibuja aquí como tarjeta de sincronización.
+**`DashboardScreen`** recibe `sectors`, `selectedSector`, dirección opcional, `prediction`, `unsyncedCount`, aviso opcional, perfil/existencia de trabajo, callbacks de perfil, aviso, selección, reporte de cuatro argumentos, dirección, horarios, alarma y tutorial opcional, más `modifier` y `scheduleVersion`. Retorna `Unit`. La monta Hoy. No escribe Room: todas las acciones durables salen por callbacks. `unsyncedCount` está en la firma pero no se dibuja aquí como tarjeta de sincronización.
 
-Mantiene feedback de reporte, texto de observación y su apertura; normaliza bloque con PacBlock.normalize, sin A por defecto; calcula color y horario. Un `LaunchedEffect(Unit)` espera diez segundos repetidamente y publica la clave del minuto; con ella crea `Calendar`, día/franja y día del mes. Calcula corte actual mediante `getBlockForDate`, y “con servicio” combina estado `NORMAL` con ausencia de corte PAC en la franja. Busca próximo turno recorriendo seis posiciones fijas: mantenerlo exige revisar esa suposición si se añaden/eliminan franjas. Estos cálculos usan reloj del dispositivo, no una observación eléctrica.
+Mantiene feedback de reporte, texto de observación y su apertura; normaliza bloque con `PacBlock.normalize`, sin A por defecto. Un `LaunchedEffect(Unit)` espera diez segundos repetidamente y publica la clave del minuto; con ella crea `Calendar` en `America/Caracas`. `scheduleVersion` invalida el snapshot y las ventanas recordadas al publicar un cronograma. `findScheduledWindowForBlock` resuelve el turno activo y el siguiente con las franjas publicadas, incluidos los cruces de medianoche. La banda principal describe el estado comunitario guardado: normal, sin luz, falla irregular o desconocido; su texto secundario muestra por separado la franja PAC activa o siguiente. Un corte previsto no convierte por sí mismo un reporte normal en un corte observado, y un estado desconocido no se presenta como corte programado.
 
 | Elemento visual | Dato y comportamiento |
 |---|---|
 | Aviso superior L174 | Si hay aviso, dibuja `BroadcastNoticeBanner`; cerrar llama al padre. |
 | Búsqueda L185 | `GoogleSearchBar` recibe sectores y selecciona uno por callback. |
 | Casa/Trabajo L194 | Si existe trabajo, dos botones llaman `onSwitchProfile`; si no, “Agregar” cambia a trabajo y abre dirección. |
-| Tarjeta de hoy L250 | Nombre de selección o dirección, distintivo comunitario/PAC, circuito, bloque y “Cambiar”. El circuito tiene respaldo local. |
-| Banda de estado L381 | Verde si el estado compuesto indica suministro; roja en otro caso. Texto de próximo corte toma `algorithmDetail` cuando lo considera futuro, o la franja calculada. Otros textos suponen cuatro horas. |
-| Cronograma diario L447 | Recorre `PacScheduleData.SLOTS`, muestra bloque de cada franja, AHORA y corte del usuario; “Ver mensual” llama a navegación. |
+| Tarjeta de hoy L250 | Nombre de selección o dirección, distintivo comunitario/PAC, circuito, bloque y “Cambiar”. El nombre dispone de todo el ancho y hasta dos líneas con elipsis; circuito hasta dos líneas y chips se ajustan con `FlowRow`. |
+| Banda de estado | Texto y color se derivan del estado comunitario: verde para normal, rojo para sin luz, morado para falla irregular y neutro para desconocido. La descripción accesible usa ese mismo texto. Debajo muestra la referencia PAC activa o siguiente, sin afirmar que sea una medición eléctrica. |
+| Cronograma diario | Recorre todas las franjas del snapshot y aplica la rotación correspondiente a la fecha Caracas. AHORA identifica solo una franja que haya comenzado hoy; el turno nocturno de ayer se explica en la referencia PAC superior. “Ver más” llama a navegación. |
 | Acceso a alertas L559 | Lee `PacAlertPrefs` con `remember`; muestra modo/anticipación y abre diálogo. Ese recuerdo no observa automáticamente cambios de preferencias. |
-| Reportes L632 | Con Luz→`true,NORMAL,118f,obs`; Sin Luz→`false,SIN_LUZ,0f,obs`; Falla→`false,FALLA_IRREGULAR,0f,obs` con descripción de respaldo. Limpia texto/cierra observación y muestra agradecimiento inmediatamente. |
+| Reportes | Con Luz→`true,NORMAL,null,obs`; Sin Luz→`false,SIN_LUZ,0f,obs`; Falla→`false,FALLA_IRREGULAR,0f,obs` con descripción de respaldo. El reporte normal de un toque no inventa una tensión observada. Limpia texto/cierra observación y muestra agradecimiento inmediatamente. |
 | Observación L728 | Toggle, cuatro sugerencias que sustituyen el texto y campo libre; no hay medición de voltaje ni validación de veracidad. |
 | Atajo y pie L823/L839 | Abre horarios y muestra independencia del proyecto/fuentes; es texto local. |
+
+Si `onWatchTutorial` tiene valor aparece un acceso adicional al tutorial. Sin destino configurado no se dibuja un botón inactivo. Los botones de perfil utilizan al menos 48 dp de alto.
 
 **`BroadcastNoticeBanner` L876** recibe `notice: BroadcastNotice`, `onDismiss: () -> Unit` y `modifier`; la llama Dashboard. Retorna `Unit`, no persiste. Compara nivel ignorando mayúsculas y muestra etiqueta/fondo/borde rojo para EMERGENCY, ámbar para WARNING y azul para información; muestra título, mensaje si no está vacío y botón cerrar. Los datos vienen de la configuración recibida por el ViewModel; el aspecto de emergencia no demuestra la procedencia del aviso.
 
 ### PacScheduleView.kt
 
-Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/PacScheduleView.kt).
+Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/PacScheduleView.kt).
 
-**`PacScheduleView` L81.** Entradas: selección nullable, `modifier`, `onSectorClicked: (String) -> Unit` opcional, `pacMatrix: List<List<String>>` y `pacSlots: List<PacSlot>` con copias por defecto. Retorna `Unit`. La monta la pestaña Horarios. Mantiene minuto, día seleccionado, subpestaña, mes seleccionado y obtiene mes/año/día de `Calendar`. Actualiza clave cada diez segundos. Calcula días del mes con calendario Caracas y semanas mediante `getMonthlyWeeks`, recordadas por mes/días/versión.
+**`PacScheduleView`.** Entradas: selección nullable, `modifier`, `onSectorClicked: (String) -> Unit` opcional, `pacMatrix: List<List<String>>` y `pacSlots: List<PacSlot>` con copias por defecto. Retorna `Unit`. La monta la pestaña Horarios. Mantiene minuto, día seleccionado, subpestaña y mes seleccionado; obtiene mes/año/día con `Calendar` en `America/Caracas` y actualiza la clave cada diez segundos. El día del mes determina la semana PAC. `weekMatrix` rota la matriz base por esa semana; las semanas mensuales de `getMonthlyWeeks` se recuerdan por mes, cantidad de días, matriz y franjas. Una franja nocturna que comenzó ayer no se resalta como si comenzara hoy.
 
-Su subpestaña **Semanal** muestra una matriz de `pacMatrix`, permite seleccionar cabecera o chip de día y dibuja detalle de franjas del día con indicación del bloque propio/turno actual. El detalle semanal lee la matriz entregada; el mensual usa las matrices generadas por el motor, por lo que hay que verificar consistencia con rotación de fecha al modificar el modelo. Entre bloques de contenido incorpora un banner. La subpestaña **Mensual** permite elegir cualquiera de los doce meses del año actual y dibuja cuatro semanas calculadas; resalta la que corresponde al mes y semana actuales. **Circuitos** muestra las listas A–D con selección de nombre. Los selectores solo cambian estado de presentación; no publican un cronograma.
+Su subpestaña **Semanal** muestra `weekMatrix`, permite seleccionar cabecera o chip de día y dibuja todas las franjas del detalle diario con indicación del bloque propio/turno actual. Las celdas ausentes del detalle se muestran como `-`. La matriz semanal y las mensuales parten de la misma base y aplican su rotación de semana. Entre bloques de contenido incorpora un banner. La subpestaña **Mensual** permite elegir cualquiera de los doce meses del año actual y dibuja cuatro semanas calculadas; resalta la que corresponde al mes y semana actuales. **Circuitos** muestra las listas A–D con selección de nombre. Los selectores solo cambian estado de presentación; no publican un cronograma.
 
-**`PacOfficialMatrixCard` L618.** Entradas: `title`, `modifier`, matriz, franjas, `highlightToday`, `todayIdx`, `currentSlotIdx`, `userBlock`, `selectedDayIdx` y callback de cabecera nullable. Retorna `Unit`. La usa semanal y cada semana mensual. Dibuja título, tabla con desplazamiento horizontal, días, un máximo de seis filas y leyenda A–D. Para celdas ausentes usa A; día/turno actual y bloque del usuario cambian bordes y fondos. Pulsar cabecera invoca callback si existe; no cambia datos por sí misma. El padre no le pasa siempre `selectedDayIdx`, por lo que el resaltado de selección y el detalle no deben darse por sincronizados automáticamente.
+**`PacOfficialMatrixCard`.** Entradas: `title`, `modifier`, matriz, franjas, `highlightToday`, `todayIdx`, `currentSlotIdx`, `userBlock`, `selectedDayIdx` y callback de cabecera nullable. Retorna `Unit`. La usa semanal y cada semana mensual. Dibuja título, tabla con desplazamiento horizontal, días y leyenda A–D; día/turno actual y bloque del usuario cambian bordes y fondos. Recorre todas las franjas recibidas y representa una celda ausente mediante `-`, sin asignarle A. Pulsar cabecera invoca callback si existe; no cambia datos por sí misma. El padre no le pasa siempre `selectedDayIdx`, por lo que el resaltado de selección y el detalle no deben darse por sincronizados automáticamente.
 
 **`PacBlockSectorsGrid` L839.** `modifier`, `onSectorClicked` opcional; retorna `Unit`. La llama la vista de circuitos. Lee directamente `PacScheduleData.SECTORS_BLOQUE_A/B/C/D` y crea cuatro `BlockSectorsCard`; D incluye una nota. No recibe las copias A–D del ViewModel ni consulta Room.
 
@@ -229,31 +232,33 @@ Su subpestaña **Semanal** muestra una matriz de `pacMatrix`, permite selecciona
 
 ### MapScreen.kt
 
-Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/MapScreen.kt#L49).
+Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/MapScreen.kt).
 
-**`MapScreen` L49** recibe sectores, selección, filtro nullable, callbacks de selección/filtro/reporte rápido y modifier; retorna `Unit`. La monta tab 2. Memoriza lista filtrada por `status`, dibuja título, cuatro chips, WebView con lista filtrada y tarjeta del sector seleccionado. Filtrar no elimina la selección: la tarjeta puede referirse a un sector que no aparece entre los marcadores filtrados.
+**`MapScreen`** recibe sectores, selección, filtro nullable, callbacks de selección/filtro/reporte rápido y modifier; retorna `Unit`. Memoriza los sectores que pasan el filtro y muestra Todos, Con luz, Sin luz y Falla irregular. Filtrar no elimina una selección guardada; la tarjeta advierte si el seleccionado queda fuera del filtro.
 
-La tarjeta muestra nombre/circuito/bloque, `StatusBadge`, tensión, `100 - withoutPowerPercentage`, contador denominado “Reportes hoy” y botones con 118/0 V. Esos datos salen de `Sector`; el componente no comprueba que contador sea diario ni voltaje sea medido. Para cualquier estado no NORMAL usa mensajes de corte PAC, aunque se trate de avería irregular. Los botones llaman `onQuickReport(true,"NORMAL",118f)` o `(false,"SIN_LUZ",0f)`.
+La tarjeta distingue una falla irregular de un corte, limita los nombres a dos líneas y permite desplazar su contenido en un máximo de 205 dp para conservar espacio al mapa. Se retiraron las afirmaciones de suministro “en tiempo real”, el consenso y el contador “Reportes hoy” que el modelo no acreditaba como mediciones actuales. Los tres botones llaman `onQuickReport(true,"NORMAL",null)`, `(false,"SIN_LUZ",null)` y `(false,"FALLA_IRREGULAR",null)`: no inventan una tensión medida para un reporte de un toque.
 
-**`FilterChipItem` L304**, privada: `label`, `color`, `isSelected`, `onClick`; retorna `Unit`. La usa MapScreen para Todos/Normal/Corte PAC/Avería. Dibuja píldora, punto, borde y peso de texto según selección, y propaga clic. No modifica filtro internamente.
+**`FilterChipItem`**, privada, recibe etiqueta, color, selección y callback. Mantiene un blanco táctil de al menos 40 dp y emite el cambio sin modificar el filtro internamente.
 
 ## 6. Diálogos, selección, temas y configuración
 
-### BarinasAddressDialog.kt
+### AdaptiveActionDialog.kt y BarinasAddressDialog.kt
 
-Fuente: [BarinasAddressDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt#L73).
+Fuentes: [AdaptiveActionDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ui/components/AdaptiveActionDialog.kt), [BarinasAddressDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt).
 
-**`BarinasAddressDialog` L73** recibe `isOpen`, `currentAddress: String?`, callback `onLocationSelected(BarinasLocation)`, `onDismiss`, callback nullable de alta `(name,municipio,parroquia,block,circuit)`, sectores disponibles y modifier; retorna `Unit`. Si está cerrado termina antes de componer su contenido. Lo monta `MainAppScreen`.
+**`AdaptiveActionDialog`** es un contenedor interno compartido por ubicación, bienvenida y actualización. Recibe cierre, `modifier`, `dismissible`, acciones como `ColumnScope` y contenido que acepta un `Modifier`. Usa una ventana `Dialog` sin el ancho predeterminado, obtiene el área disponible con `BoxWithConstraints`, descuenta barras/recortes mediante `safeDrawingPadding` y el teclado mediante `imePadding`. Limita la superficie a 560 dp de ancho y a la altura disponible. El cuerpo recibe `weight(1f, fill=false)`; el pie se mide fuera de su desplazamiento. Cada llamador aporta un único contenedor vertical desplazable. Así un formulario largo reduce el área del cuerpo y conserva espacio para Guardar/Cerrar. El sistema, no una altura fija del teléfono, determina ese espacio.
 
-Su estado local contiene pestaña Buscar/Denominar, campos del alta, consulta, preselección y resultados. Convierte sectores de Room en ubicaciones dinámicas, preserva ID/nombre/circuito/bloque/comunitario pero asigna municipio y parroquia “Barinas” a esas conversiones: no recupera sus divisiones territoriales reales. Inicializa formulario con primer municipio/parroquia del catálogo y bloque C.
+**`BarinasAddressDialog`** conserva su contrato: `isOpen`, dirección actual nullable, `onLocationSelected(BarinasLocation)`, `onDismiss`, callback nullable `(name,municipio,parroquia,block,circuit)`, sectores disponibles y `modifier`; retorna `Unit`. Si está cerrado no compone contenido. Pestaña, campos del alta y consulta usan `rememberSaveable`, por lo que sobreviven a recreaciones compatibles de la actividad. La preselección y los resultados siguen siendo estado transitorio.
 
-Un `LaunchedEffect(query,dynamicLocations)` espera 200 ms cuando hay dos caracteres o más; combina coincidencias dinámicas y catálogo, prioriza dinámicas y deduplica por nombre normalizado. Con menos caracteres muestra solo comunidades dinámicas. Cambiar consulta borra preselección; Search del teclado preselecciona primer resultado y oculta foco, todavía sin confirmarlo. Sugerencias populares cambian consulta y consultan directamente el catálogo. Pulsar una fila solo preselecciona; “Confirmar y fijar” emite la ubicación.
+Convierte sectores en ubicaciones dinámicas, preservando ID/nombre/circuito/comunitario y normalizando el bloque con `PacBlock.normalize`. La conversión todavía asigna municipio/parroquia Barinas cuando el modelo `Sector` no transporta el territorio. El formulario empieza con el primer municipio y parroquia del catálogo y bloque C. Cambiar municipio restablece la parroquia a la primera disponible.
 
-La tarjeta de ausencia de resultados pasa al formulario y copia la consulta como nombre. El formulario tiene nombre, municipio, parroquia dependiente del municipio, bloque A–D y circuito opcional. Cambiar municipio restablece parroquia a la primera disponible. Guardar solo exige nombre no vacío; llama al callback si existe con strings recortados y bloque con prefijo `Bloque`, y cierra. Si el callback es `null`, también puede cerrar sin registrar. No espera resultado remoto ni pone el alta en una cola propia. El pie muestra dirección actual si hay una y ofrece cerrar.
+La búsqueda espera 200 ms con dos caracteres o más; combina ubicaciones dinámicas y catálogo, prioriza las dinámicas y deduplica por nombre recortado/minúsculas. Con menos caracteres muestra comunidades dinámicas o instrucciones de búsqueda. Cambiar consulta borra preselección; la acción Search preselecciona el primer resultado y libera el foco. Una fila solo preselecciona; el botón fijo «Elegir este sector» emite `onLocationSelected`. Los nombres y detalles muestran hasta dos líneas con elipsis; el texto completo permanece en las semánticas de Compose.
+
+Sin resultados se ofrece copiar la consulta al formulario de «Mi sector». Una sola `LazyColumn` contiene cabecera, pestañas, campos y resultados; las listas horizontales de municipio/parroquia no compiten con un segundo scroll vertical. «Guardar mi sector» permanece en el pie y solo se habilita con nombre no vacío y callback disponible. Al tocarlo libera el teclado, emite los cinco textos recortados (bloque con prefijo `Bloque`) y cierra; la persistencia y sincronización siguen a cargo del padre. El componente no confirma que Supabase haya recibido la propuesta.
 
 ### GoogleSearchBar.kt
 
-Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/GoogleSearchBar.kt#L72).
+Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/GoogleSearchBar.kt).
 
 **`GoogleSearchBar` L72** recibe `query: String = ""`, `onQueryChange`, sectores, `onSectorSelected` y modifier; retorna `Unit`, llamada por Dashboard. No usa el buscador de Google ni manda la consulta a Internet: es búsqueda local con aspecto de barra de búsqueda. Tiene foco y consulta interna recordados; usa query externa cuando no está vacía, en otro caso interna. Ese modelo mezcla control externo e interno: el padre debe conocerlo para que limpiar funcione como espera.
 
@@ -261,20 +266,21 @@ El efecto de búsqueda espera 250 ms, exige dos caracteres recortados, filtra no
 
 ### OnboardingFlowDialog.kt
 
-Fuente: [OnboardingFlowDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt#L38).
+Fuente: [OnboardingFlowDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt).
 
-| Función / línea | Entradas/retorno, presentación, estado y callbacks |
+| Función | Entradas, presentación y efectos |
 |---|---|
-| `OnboardingFlowDialog` L38 | `isOpen: Boolean`, `onComplete: () -> Unit` → `Unit`. La llama MainAppScreen. Mantiene `currentStep`; diálogo sin cierre por fuera/atrás. `AnimatedContent` presenta Welcome→Permissions→Battery. Completar último paso emite callback, sin guardar preferencias por sí mismo. |
-| `WelcomeStep` L79, privada | `onNext` → `Unit`. Presenta nombre, propósito, aviso de independencia y fuentes. Su botón avanza el estado del padre a 1. No abre enlace ni solicita permisos. |
-| `PermissionsStep` L165, privada | `onNext` → `Unit`. Muestra explicación y botón que, desde Android S, abre `ACTION_REQUEST_SCHEDULE_EXACT_ALARM`. Captura excepción e imprime. “Siguiente” avanza sin verificar concesión. La solicitud runtime de notificaciones está en MainAppScreen, no en este botón. |
-| `BatteryStep` L226, privada | `onNext` → `Unit`. Explica restricciones y abre `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` con URI de paquete. Si falla, muestra Toast con instrucciones. “Elegir mi sector” completa el flujo. No verifica el resultado ni garantiza ejecución 24/7. |
+| `OnboardingFlowDialog` | `isOpen`, `onComplete`, `onSkip=onComplete` y `onWatchTutorial: (() -> Unit)?`. Mantiene el paso con `rememberSaveable`. Abre una bienvenida que se puede cerrar/omitir; elegir sector emite `onComplete` y explorar emite `onSkip`. El padre persiste la decisión y determina la siguiente pantalla. No solicita permisos automáticamente. |
+| `WelcomeStep` | Recibe callback nullable de tutorial. Explica horario, mapa y reportes mediante tres filas. Incluye independencia/fuentes y, solo si existe callback, un botón de tutorial. No contiene una URL ficticia ni abre un destino por su cuenta. |
+| `WelcomeFeature` | Recibe icono vectorial, título y detalle. El icono decorativo carece de descripción redundante y el texto ocupa el ancho restante con `weight`. |
+| `PermissionsStep` | Ayuda opcional. Desde Android 13 solicita `POST_NOTIFICATIONS` mediante Activity Result y actualiza el estado del botón con la respuesta; en versiones anteriores abre ajustes de notificaciones. Desde Android 12 ofrece abrir el permiso de alarmas exactas para el paquete. Consultar horarios/mapa no depende de concederlos. |
+| `BatteryStep` | Explica posibles retrasos en segundo plano y abre la información de la aplicación para revisar batería. No solicita exclusión de optimización directamente ni promete ejecución ininterrumpida. |
 
-En el manifest actual no se declara `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`; mantener esta pantalla requiere cotejar la intención, permiso y comportamiento en dispositivos. El texto de garantía de alarmas es una afirmación de UI, no una validación técnica del sistema.
+El cuerpo se desplaza y las acciones conservan su espacio con `AdaptiveActionDialog`. Una entrada de opacidad de 220 ms presenta el contenido, con botones disponibles inmediatamente. `AnimatedContent` usa transiciones cortas de opacidad (160/100 ms) al abrir ayuda o volver; ambas animaciones respetan la escala de animación de Android. No hay temporizador de espera, avance automático ni animación repetida en el inicio. La bienvenida puede reabrirse desde configuración usando el callback existente del padre.
 
 ### PacSettingsDialog.kt
 
-Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/PacSettingsDialog.kt).
+Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/PacSettingsDialog.kt).
 
 **`PacSettingsDialog`** recibe abierto, bloque/nombre y cierre → Unit. Mantiene borrador local de anticipación/notificación/sirena/retorno/vibración y guarda solo al aceptar. Preview llama `findScheduledWindowForBlock` recordado por bloque y versión PAC; sin ventana muestra “Sin cortes programados para tu bloque”. No usa el respaldo artificial del motor. La preview puede envejecer por paso de tiempo si no recomponen sus claves.
 
@@ -282,13 +288,13 @@ Muestra próximo corte, anticipación rápida 5/10/15/30/60 o entrada numérica 
 
 ### ThemeSettingsDialog.kt y tema
 
-Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt#L18).
+Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt).
 
 **`ThemeSettingsDialog` L18** recibe abierto, modo/paleta/escala actuales, cierre y callback `(String?,String?,Float?) -> Unit`; retorna `Unit`. No crea borrador: cada toque llama inmediatamente al ViewModel con un valor y los otros dos `null`. El bottom sheet ofrece Claro/Oscuro/Sistema, Predeterminado/Dinámico y Compacto 0,85/Normal 1/Grande 1,15. El comentario de `UiState` menciona `nature`, pero no existe un botón ni una paleta implementada para ella. Cerrar oculta y no revierte cambios.
 
 **`ThemeOptionButton` L151**, privada, recibe texto, seleccionado, clic y modifier, retorna `Unit`. La usa el diálogo para todas sus opciones; superficie de 48 dp, colores/borde de selección y texto. No persiste ni decide el modo; ejecuta el callback.
 
-Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Theme.kt#L66).
+Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Theme.kt).
 
 **`MyApplicationTheme` L66** recibe `darkTheme: Boolean = isSystemInDarkTheme()`, `dynamicColor: Boolean = false` y `content: @Composable () -> Unit`; retorna `Unit`, llamada por MainActivity. En Android S o posterior, si dinámico, toma esquema dinámico del contexto; en otro caso usa `DarkColorScheme` o `LightColorScheme`, y entrega esquema/tipografía/formas a `MaterialTheme`. El resto de componentes puede tener colores fijos, por lo que no todo cambia con la paleta.
 
@@ -296,13 +302,13 @@ Archivos sin funciones que forman parte del contrato visual:
 
 | Archivo | Contenido y uso |
 |---|---|
-| [Color.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Color.kt#L11) | Constantes de marca, bloques y estado, fondos/bordes/textos para claro/oscuro y aliases de compatibilidad. A naranja, B azul, C amarillo y D verde en Compose. El mapa HTML tiene otra asociación de colores; no hay una fuente única. |
-| [Type.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Type.kt#L11) | `AppFontFamily = FontFamily.Default`; `Typography` define display 57/45/36 sp, titulares 32/28/24, títulos 22/16/14, cuerpo 16/14/12 y etiquetas 14/12/11, además de altura/peso/espaciado. No hay una fuente Inter instalada por esa declaración. |
-| [Shape.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Shape.kt#L7) | `AppShapes`: esquinas 4/8/14/20/28 dp. Se aplica mediante MaterialTheme, aunque muchos componentes declaran esquinas propias. |
+| [Color.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Color.kt) | Constantes de marca, bloques y estado, fondos/bordes/textos para claro/oscuro y aliases de compatibilidad. A naranja, B azul, C amarillo y D verde en Compose. El mapa HTML tiene otra asociación de colores; no hay una fuente única. |
+| [Type.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Type.kt) | `AppFontFamily = FontFamily.Default`; `Typography` define display 57/45/36 sp, titulares 32/28/24, títulos 22/16/14, cuerpo 16/14/12 y etiquetas 14/12/11, además de altura/peso/espaciado. No hay una fuente Inter instalada por esa declaración. |
+| [Shape.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Shape.kt) | `AppShapes`: esquinas 4/8/14/20/28 dp. Se aplica mediante MaterialTheme, aunque muchos componentes declaran esquinas propias. |
 
 ### SettingsScreen.kt
 
-Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/SettingsScreen.kt#L25).
+Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/SettingsScreen.kt).
 
 `LegalPage` L25 es un enum con PRIVACY, TERMS, DEVELOPER, REFUND, SYSTEM_DOC, TRANSPARENCIA y GOV_DISCLAIMER. No son rutas externas: son valores del estado local.
 
@@ -316,25 +322,31 @@ La lista agrupa General (oscuro, ubicación, bienvenida), Notificaciones/Alarmas
 
 ### DonationsDialog.kt
 
-Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/DonationsDialog.kt#L30).
+Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/DonationsDialog.kt).
 
 **`DonationsDialog` L30** recibe `config: DonationConfig?` y cierre → `Unit`. La llama MainAppScreen con configuración del flujo remoto. Muestra explicación del apoyo y botón PayPal con URL configurada o respaldo integrado; abre `ACTION_VIEW`. Si Binance no está vacío muestra ID y botón de copiar; si banco/teléfono/documento de pago móvil están todos presentes, muestra tarjeta y copia los tres al portapapeles. Sin configuración remota aún existe el botón de respaldo PayPal. No procesa pago, no verifica recepción y no maneja un resultado de navegador. Cambiar destino de donación es una operación administrativa sensible en la configuración remota.
 
 ### UpdatePromptDialog.kt
 
-Fuente: [UpdatePromptDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/UpdatePromptDialog.kt#L26).
+Fuente: [UpdatePromptDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ui/components/UpdatePromptDialog.kt).
 
-**`UpdatePromptDialog` L26** recibe `updateInfo: AppUpdateInfo?` y cierre → `Unit`; sale si es null. Lo monta MainAppScreen de forma automática o manual. Muestra título, versión, notas y “Descargar e instalar”. Si obligatorio deshabilita cierre exterior/atrás y oculta “Más tarde”. El botón lanza corutina que llama `AppUpdater.openPlayStoreForUpdate(context)` y después cierra; el código de fallback intenta abrir `downloadUrl` desde un catch exterior. Excepciones ocurridas dentro de la corutina no necesariamente las captura ese catch: debe ponerse manejo dentro del trabajo si se cambia el flujo. No hay descarga APK ni instalación dentro de este composable. Una actualización obligatoria tampoco constituye un control de versión del servidor.
+**`UpdatePromptDialog`** recibe `AppUpdateInfo?` y cierre; si la información es null no dibuja nada. Obtiene contexto y scope y pasa las acciones a `UpdatePromptContent`. Actualizar lanza `AppUpdater.openPlayStoreForUpdate(context)`, que intenta Google Play y su respaldo web. El diálogo conserva su estado al regresar de la tienda, de modo que un intento fallido no elimina el aviso. No descarga ni instala un APK y el texto «Actualizar en Google Play» describe el comportamiento real.
+
+**`UpdatePromptContent`** recibe información no nula, cierre y callback de actualización. Separar presentación/acción permite probar botones sin abrir tiendas ni descargar archivos. Usa `AdaptiveActionDialog`: icono, versión y notas pertenecen a un cuerpo con `verticalScroll`; actualizar y posponer permanecen en el pie. Unas notas extensas no desplazan los botones fuera de la pantalla. Si la versión es obligatoria, desactiva cierre externo/atrás y oculta posponer. La obligatoriedad de UI no sustituye un control de versiones del servidor.
 
 ### StatusBadge.kt
 
-Fuente: [StatusBadge.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/StatusBadge.kt#L39).
+Fuente: [StatusBadge.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ui/components/StatusBadge.kt).
 
-**`StatusBadge` L39** recibe `status: ServiceStatus`, modifier y `isLarge: Boolean = false` → `Unit`. La llama MapScreen. Elige color/icono/texto para normal, PAC y no programado; los dos últimos animan opacidad entre 0,4 y 1 cada 900 ms en reversa. Cambia dimensiones si grande. Es solo representación: no comprueba suministro ni actualiza métricas.
+**`StatusBadge`** recibe `ServiceStatus`, `modifier` e `isLarge`; retorna `Unit`. Elige color, icono y texto para normal, corte PAC y avería. El texto dispone del ancho restante, admite hasta dos líneas y elipsis y permanece disponible completo para accesibilidad. El icono decorativo no repite la descripción. Se retiró el parpadeo infinito de estados de corte para mantener lectura estable y evitar movimiento innecesario. El componente representa datos recibidos; no comprueba el suministro ni modifica métricas.
+
+### Pruebas de pantallas compactas
+
+`CompactDialogUiTest` usa Robolectric/Compose con un teléfono de 320×480 dp, orientación horizontal de 480×320 dp y escala de fuente 1,6. `LargeText` proporciona la configuración y densidad de prueba; `registerSectorSaveRemainsReachableWithLargeText` escribe un nombre extenso, pulsa Guardar y comprueba los argumentos reales del callback y cierre. `updateActionsRemainReachableWithLongReleaseNotesInLandscape` verifica que actualizar/posponer sigan visibles y funcionen con notas largas. `welcomeCanBeSkippedWithoutOpeningPermissionSetup` verifica el callback de omisión y ausencia del tutorial cuando no hay destino. `longSectorNameKeepsChangeActionAndIrregularReportUsable` comprueba el texto completo accesible, Cambiar y el tipo exacto de reporte irregular. `weeklyMatrixShowsSeventhSlotAndMissingCellsAsUnassigned` monta siete franjas con una fila ausente y exige la séptima etiqueta y sus siete celdas `-`. Las llamadas `captureRoboImage` producen capturas en `app/build/reports/compact-ui/` al activar el modo de grabación Roborazzi; no son imágenes basales dentro de Git. Estos tests no simulan el teclado físico ni sustituyen la comprobación en un dispositivo con IME y barras del fabricante.
 
 ## 7. Páginas legales: contenido, navegación y sus límites
 
-Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/LegalScreen.kt#L31). Todas las funciones de esta sección son composables que retornan `Unit`.
+Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/LegalScreen.kt). Todas las funciones de esta sección son composables que retornan `Unit`.
 
 | Función / línea | Parámetros, qué presenta y efecto |
 |---|---|
@@ -353,7 +365,7 @@ Las páginas las selecciona `SettingsScreen`, no las llama directamente la activ
 
 ### TelemetryScreen.kt
 
-Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/TelemetryScreen.kt#L56).
+Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/TelemetryScreen.kt).
 
 **`TelemetryScreen` L56** recibe `sectors`, `recentReports: List<CitizenReport>`, `unsyncedCount`, `onSyncNow` y modifier → `Unit`. No se encontró invocación desde el código principal. Si se conecta, muestra salud de red calculada por número de sectores NORMAL/total, tarjetas de conteo normal/PAC/avería, pendientes y botón sincronizar. Historial muestra reportes del dispositivo recibidos, voltaje/hora/sector e indicador `isSynced`; lista vacía presenta instrucciones. No descarga reportes de servidor y no mide cobertura geográfica real: porcentaje es proporción de registros NORMAL.
 
@@ -363,7 +375,7 @@ El formateador `dd/MM hh:mm a` usa locale/zona del dispositivo. Colores y texto 
 
 ### AdminScreen.kt
 
-Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/AdminScreen.kt#L79).
+Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/AdminScreen.kt).
 
 **`AdminScreen` L79** es la única función nombrada del archivo, aunque agrupa muchos callbacks. Retorna `Unit`. Recibe sectores, versión, matriz, franjas, listas A–D; callbacks de celda, editar/quitar/añadir franja, presets simple/doble, rebalanceo, alta/baja/traslado de nombre de sector, restaurar, publicar y cerrar, más modifier. `sectors`, `scheduleVersion` y ciertos estados están presentes sin un uso equivalente a una consulta remota; la UI se basa sobre todo en las listas/matriz entregadas.
 
@@ -385,80 +397,111 @@ Mantiene estado de franja que se edita, campos de edición/alta, celda seleccion
 | Añadir franja L965 | Campos similares; exige etiqueta para emitir `onAddSlot` y cerrar. Las vistas que siguen limitadas a seis filas deben revisarse al permitir más. |
 | Celda L1027 | Permite A/B/C/D/Libre; rotar sigue A→B→C→D→-→A; quitar corte guarda `-`; rebalanceo llama `onDeleteTurnAndRebalance`. Todas cierran el diálogo después del callback. |
 
-## 9. El mapa híbrido: Kotlin, JavaScript y recursos locales
+## 9. El mapa compartido: Kotlin, JavaScript y recursos locales
 
-### InteractiveBarinasMap.kt: puente y ciclo de vida
+Fuentes: [InteractiveBarinasMap.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt), [map.html](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/assets/map/map.html), [pac-map-app.js](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/assets/map/pac-map-app.js) y [pac-map-core.js](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/assets/map/pac-map-core.js). Leaflet y su complemento de calor siguen incluidos en el APK. Solo las imágenes del fondo se solicitan a Esri por HTTPS; ni el documento, ni sus scripts, ni la selección pasan por Vercel.
 
-Fuente: [InteractiveBarinasMap.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt#L32).
+### InteractiveBarinasMap.kt: origen local y ciclo de vida
 
-`AndroidMapBridge` L32 recibe dos callbacks: selección por ID y mapa listo. Guarda `Handler` del hilo principal. Sus métodos anotados con `@JavascriptInterface` son la superficie que el JavaScript local puede invocar:
+`InteractiveBarinasMap(sectors, selectedSector, onSectorSelected, modifier)` crea un único WebView durante su composición. `rememberUpdatedState` mantiene los sectores, la selección y el callback actuales: el puente ya no conserva la lista del primer arranque. El efecto de datos envía el contrato al quedar listo el JavaScript y al cambiar sectores o selección. No reconstruye el WebView ni vuelve a cargar HTML en cada actualización.
 
-| Función / línea | Entrada/retorno, llamador y efecto |
+`mapAssetName(uri)` reconoce únicamente HTTPS, host `appassets.androidplatform.net`, puerto implícito y nombres locales de una lista cerrada. `shouldInterceptRequest` abre ese recurso con `context.assets.open`, establece el MIME correcto y responde 403 mediante `blockedResponse` para otras rutas. Las únicas solicitudes externas permitidas son subrecursos HTTPS de proveedores de imágenes del mapa. Ambos overrides `shouldOverrideUrlLoading` bloquean navegación: pulsar una atribución externa no carga otra página dentro del WebView que dispone del puente. JavaScript está activo, pero DOM storage, archivos, contenido, ventanas adicionales y contenido mixto están deshabilitados. El HTML añade CSP: scripts locales, imágenes de proveedores autorizados y sin frames, formularios u objetos.
+
+`mapDataScript(sectors, selected)` devuelve la llamada JavaScript codificada con `JSONObject.quote` tanto para el JSON de sectores como para el ID seleccionado. No concatena IDs como código. Transporta ID, nombre, circuito, bloque, estado enum, voltaje finito o ausente, indicador comunitario, actualización y primera coordenada válida. Rechaza NaN, infinito, rangos imposibles y la pareja 0,0. No inventa 118 V cuando el voltaje es cero. Los campos territoriales no están presentes en el modelo Android: una ubicación sin coordenadas usa una referencia por nombre o Barinas marcada como aproximada; no se debe confundir con geolocalización.
+
+`AndroidMapBridge` expone únicamente `onSectorClicked(id)` y `onMapReady()`. Ambos trasladan la ejecución al hilo principal mediante Handler; IDs excesivamente largos se descartan y el componente busca el ID en la lista actual antes de notificar al padre. `dispose()` desactiva el puente y cancela tareas pendientes. El observador de Lifecycle pausa/reanuda WebView y pide `resumePacMap` al recuperar pantalla. Al salir, se retira el observador, se libera el puente, se pide `disposePacMap`, se detiene la carga y se destruye WebView. Esta limpieza evita callbacks después de abandonar el mapa.
+
+### PacMapCore: reglas idénticas en Android y web
+
+`pac-map-core.js` y `pac-map.css` se mantienen idénticos a `admin-web/public/`. La prueba de sincronía compara sus bytes cuando ambos repositorios están presentes. Los colores de bloque son A azul, B ámbar, C verde y D rosa; una insignia adicional representa el estado con color **y símbolo**. Un bloque inválido se muestra como `-` gris. Una ubicación aproximada lleva borde punteado y texto explicativo.
+
+| Función | Entrada, resultado y propósito |
 |---|---|
-| `onSectorClicked` L39 | `sectorId: String` → `Unit`; JavaScript la llama mediante `window.AndroidBridge`. Publica tarea al hilo principal que emite el ID. No valida el ID dentro de la clase. |
-| `onMapReady` L46 | Sin parámetros → `Unit`; JavaScript de inicio llama; publica al hilo principal el callback de disponibilidad. |
+| `installPacMapCore(root,factory)` / `createPacMapCore()` | Instalan la API congelada en `globalThis.PacMapCore`; en Node también exportan CommonJS para pruebas. No hacen solicitudes de red. |
+| `textKey(value)` | Convierte a texto, elimina diacríticos, pone en minúsculas y recorta. Permite comparar municipios/nombres sin depender de tildes. |
+| `escapeHtml(value)` | Escapa `&`, `<`, `>`, comillas dobles y simples. Nombres y circuitos remotos se presentan como texto; no se consideran HTML confiable. |
+| `normalizeBlock(value)` | Recorta, convierte a mayúsculas y elimina el prefijo BLOQUE. Solo acepta A/B/C/D; devuelve `-` para lo demás. |
+| `normalizeStatus(value)` | Devuelve NORMAL, SCHEDULED_OUTAGE, IRREGULAR_OUTAGE o UNKNOWN. FALLA_IRREGULAR, IRREGULAR, AVERIA y BAJON equivalen a IRREGULAR_OUTAGE; SIN_LUZ y OUTAGE a SCHEDULED_OUTAGE. Un valor nuevo no se pinta falsamente normal. |
+| `statusInfo(value)` | Devuelve `{status,label,color,symbol}` para representar el estado con el mismo contrato en ambas plataformas. Una falla es morada y lleva `⚠`. |
+| `validCoordinatePair(lat,lon)` | Comprueba presencia, números finitos, latitud ±90 y longitud ±180. Acepta un eje cero válido; rechaza ambos cero. |
+| `coordinates(sector)` | Devuelve `{point,approximate,label}`. Usa coordenadas registradas; si no existen busca un nombre conocido exacto y después centro municipal o Barinas. No añade desplazamientos aleatorios ni interpreta una coincidencia parcial como dirección real. |
+| `locationGroups(sectors)` | Agrupa referencias coincidentes con precisión de seis decimales. Cada grupo conserva todos sus sectores, sin ocultarlos bajo marcadores superpuestos. |
+| `representativeSector(sectors,selectedId)` | Elige el seleccionado, luego una falla, luego un corte y finalmente el primero. Decide la insignia del grupo; el popup conserva la lista completa. |
+| `markerHtml(sector,selected,count)` | Construye únicamente el icono con enums, colores validados y contador numérico; no inserta nombres ni IDs remotos. Añade estilo de selección/aproximación. |
+| `heatPoints(sectors)` | Devuelve `[lat,lon,1]` solo para cortes/fallas con coordenadas registradas. Es densidad de sectores afectados; no cantidad de personas ni de reportes. Las referencias aproximadas y los sectores normales no generan calor artificial. |
+| `voltageLabel(value)` | Mantiene cero como cero y muestra un número finito no negativo como tensión reportada. Para ausente/inválido devuelve “Sin tensión reportada”. |
 
-**`InteractiveBarinasMap` L55** recibe sectores, selección, callback de Sector y modifier → `Unit`; la monta MapScreen. Mantiene booleano listo y referencia WebView. En `AndroidView.factory` crea WebView, activa JavaScript/DOM storage, zoom y acceso a archivos/contenido, instala puente `AndroidBridge` y cliente y carga `file:///android_asset/map/map.html`. El callback de ID busca el sector en la lista capturada al crear el WebView; esa captura puede envejecer si llegan sectores nuevos sin recrearlo. La UI nativa busca ID antes de llamar al padre.
+Las tablas de municipios y nombres conocidos son referencias locales; no delimitan circuitos ni acreditan precisión catastral. Los sectores con la misma referencia se agrupan y el popup permite escoger cada uno. Sin conexión pueden faltar imágenes del fondo, aunque el código y los sectores ya almacenados sigan disponibles. No es un mapa offline completo.
 
-**`sendDataToMap` L64** es función local: `wv: WebView`, `sectorList: List<Sector>`, `selected: Sector?` → `Unit`. La invocan efecto por datos/listo, callback del puente, `onPageFinished` y `AndroidView.update`. Construye JSON con id/nombre/circuito/bloque/status/voltaje/comunitario y primera coordenada de cada polígono; no manda contadores, porcentaje, municipio ni parroquia. Cita JSON con `JSONObject.quote`, pero el ID seleccionado se inserta entre comillas simples por concatenación. Ejecuta `window.updateMapData(...)` con `evaluateJavascript` sin esperar resultado.
+### pac-map-app.js: representación estable de Android
 
-**`onPageFinished` L138** es override de un cliente anónimo: `view: WebView?`, `url: String?` → `Unit`. Android lo llama al terminar carga; llama a super, marca listo y envía datos. No comprueba el origen de la URL. Puede coincidir con `onMapReady`, por lo que el envío inicial puede repetirse. El efecto de limpieza destruye WebView y borra referencia al salir del mapa.
+`installAndroidMap()` encapsula las capas, el Map de marcadores por grupo, los sectores actuales y los modos. `initMap()` crea Leaflet una sola vez, con zoom y atribución visibles, registra los controles, observa el tamaño y avisa a `AndroidBridge.onMapReady`. La atribución reconoce al proveedor de imágenes en lugar de ocultarla.
 
-El riesgo no es solo activar JavaScript: se combinan puente nativo, navegación sin lista de orígenes permitidos, permisos de archivo/contenido y HTML interpolado de datos remotos. El puente solo expone dos acciones concretas, pero si se ejecuta contenido no confiable puede invocarlas. Conviene codificar también el ID, sanear los popups, limitar navegación y privilegios. La [guía oficial de puentes WebView](https://developer.android.com/privacy-and-security/risks/insecure-webview-native-bridges) respalda revisar límites de origen; no se ejecutó un ataque durante esta documentación.
-
-### assets/map/map.html: las nueve funciones propias
-
-Fuente: [map.html](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/assets/map/map.html#L211). Los archivos `leaflet.js`, `leaflet.css`, `leaflet-heat.js` e imágenes de marcadores/capas son dependencias de terceros: este manual explica su uso, no reescribe sus APIs internas como código propio.
-
-El HTML se carga localmente, tiene fondo oscuro fijo, pines por bloque, pulsación roja/morada por corte/avería, tres botones flotantes (calor, base satélite/oscura, centrar) y leyenda de estado. El mapa base solicita teselas Esri por HTTPS: que el documento sea local no garantiza cartografía completa sin red. Las coordenadas conocidas y las cabeceras de municipios son tablas locales del script.
-
-Todas las funciones JavaScript siguientes retornan `undefined`, excepto `getCoords`, que retorna pareja numérica. Sus estados compartidos son `map`, capas, `isSatellite`, `isHeatmapActive`, `currentSectors` y `currentSelectedId`.
-
-| Función / línea | Parámetros, pasos, estado y quién la llama |
+| Función / callbacks con nombre | Operación |
 |---|---|
-| `initMap` L265 | Sin parámetros. Crea `L.map` centrado en Barinas, zoom 12, sin controles de zoom/atribución; llama `setBasemap(false)`, crea `markersLayer` y avisa al puente si existe. Se asigna a `window.onload`. |
-| `setBasemap` L283 | `satellite`. Actualiza modo, quita capas anteriores y crea base/etiquetas Esri satélite (maxZoom 19) o gris oscuro (16); cambia texto del botón y trata de subir marcadores. La llaman inicio y toggle. No descarga catálogo de sectores. |
-| `toggleBasemap` L310 | Sin parámetros. Invierte `isSatellite` a través de `setBasemap`. La llama el botón HTML; no altera estado Kotlin. |
-| `toggleHeatmap` L314 | Sin parámetros. Invierte modo calor, cambia clase/texto del botón y llama `renderLayers`. La llama el botón. |
-| `recenterBarinas` L327 | Sin parámetros. Si hay mapa ejecuta `flyTo` al centro/zoom 12 durante un segundo. La llama Centrar; no cambia ubicación guardada. |
-| `getCoords` L333 | `sector` objeto. Primero acepta lat/lon numéricos truthy; después compara nombre parcial contra tabla conocida; si falta, usa cabecera municipal o Barinas y jitter determinista según hash del ID/nombre. Retorna `[lat,lon]`. La usan render y centrado. No es geocodificación ni ubicación real; cero no pasa la primera comprobación y no se validan rangos. |
-| `renderLayers` L358 | Sin parámetros. Termina sin mapa; limpia marcadores y capa de calor anterior. En modo calor y plugin disponible calcula pesos 1 para cortes/averías, 0,25 para normal y radio fijo 30/blur18; añade capa y retorna. En modo pines crea iconos/bloques, pulsación, popup y manejadores; reabre popup seleccionado con timeout. La llaman toggle y datos nuevos. |
-| `handleSectorClick` L455 | `sectorId`. Actualiza selección JS y llama al puente de Kotlin si existe. Lo llaman clic de marcador y botón del popup; no guarda preferencia directamente ni redibuja por sí solo. El redibujado llega con nuevos datos del padre. |
-| `window.updateMapData` / `updateMapData` L463 | `sectorsJson`, `selectedId`. Acepta string JSON o lista, reemplaza datos/selección y llama render. Si hay seleccionado lo busca y centra con `flyTo` mínimo zoom 13. Captura errores y los manda a consola; no retorna acuse estructurado. La llama `evaluateJavascript` desde Kotlin. |
+| `updateStatus()` | Cuenta ubicados/aproximados y explica el alcance del modo calor. `onTileError()` muestra un mensaje de conexión sin borrar los sectores. |
+| `setBasemap(satellite)` / `onBasemapClick()` | Retiran solo base/etiquetas y solicitan Esri oscuro o satélite. No llaman a `bringToFront` sobre LayerGroup, método que no existe en ese tipo de Leaflet. Los marcadores conservan su pane. |
+| `selectSector(id)` / `onSelectSector()` / `onSelectGroupSector()` | Verifican existencia y notifican selección al puente. El usuario elige mediante el botón del popup; explorar un marcador no cambia accidentalmente el perfil. |
+| `createPopup(sector)` | Crea DOM con nombre/circuito escapados, bloque, estado, tensión reportada y precisión de ubicación. El botón usa closure con el ID original, nunca un `onclick` interpolado. |
+| `createGroupPopup(group)` / `appendGroupSector(sector)` | Para una referencia compartida crean lista desplazable de botones con todos los nombres y estados. No se pierde acceso a sectores que comparten centro municipal. |
+| `renderLayers(selectionChanged)` | Actualiza grupos por identidad y firma de contenido; conserva los marcadores sin cambios. Reconstruye calor cuando corresponde, conserva seleccionado interactivo y solo centra/abre popup cuando cambió de verdad la selección. Las actualizaciones en tiempo real no arrebatan el paneo del usuario. |
+| `removeMissing(marker,id)` / `updateMarker(group)` | Eliminan grupos desaparecidos y actualizan posición/icono/popup de los nuevos o modificados. |
+| `updateHeatVisibility(marker)` / `restoreMarker(marker)` | Ocultan pines generales en calor, conservan el seleccionado y restauran todos al volver a pines. |
+| `updateMapData(payload,nextSelectedId)` | API de Kotlin. Acepta JSON/lista, descarta elementos sin ID o IDs duplicados, actualiza datos y decide si cambió selección. Un JSON inválido muestra error. |
+| `onHeatmapClick()` | Alterna calor/pines y `aria-pressed`. `onCenterClick()` encuadra coordenadas registradas o vuelve a Barinas si no hay ubicaciones precisas. |
+| `resumePacMap()` | Invalida dimensiones sin pan automático al cambiar tamaño o recuperar la pantalla. |
+| `disposePacMap()` | Desconecta ResizeObserver, elimina Leaflet, limpia marcadores y rechaza nuevas actualizaciones. |
 
-En los callbacks anónimos de `renderLayers`, `map(s => ...)` calcula peso, `forEach(sector => ...)` crea marcadores, `marker.on('click',...)` selecciona y el timeout abre el popup tras 100 ms. El popup concatena nombre/circuito/parroquia e ID en HTML sin escapar. `sector.voltage || 118` sustituye incluso cero por 118, lo cual puede representar tensión incorrecta durante un corte. La clasificación de estado controla texto/anillo, pero no sana el HTML ni hace confiable una observación.
+### Pruebas del mapa
 
-Los colores de pines JS son A azul, B ámbar, C verde y D rosa, distintos de Compose. El calor no usa volumen de confirmaciones y el puente no lo envía: cambiar ese cálculo exige modificar contrato Kotlin y script a la vez. El primer vértice de un polígono tampoco equivale a su centro; los fallbacks/jitter deben indicarse como aproximaciones si se conservan.
+[MapBridgeSecurityTest.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/test/java/com/example/MapBridgeSecurityTest.kt) incluye `selectedIdAndPayloadAreEncodedAsJsonInsteadOfExecutableJavascript`, `localAssetOriginOnlyServesAnExplicitAllowlist` y `coordinatesAndZeroVoltageArePreservedWhenValid`. La ayuda privada `sector(id)` crea un fixture con nombre hostil y datos no finitos. Las pruebas verifican el contrato de entrada, no afirman haber auditado todo el motor WebView.
 
-## 10. Publicidad: carga, callbacks y límites reales
+[pac-map.test.cjs](https://github.com/Ralag/pac-barinas/blob/main/tests/pac-map.test.cjs) prueba aliases de falla, bloque, coordenadas/precisión, agrupación, escape, calor y cero voltaje. Con ambos repositorios presentes también ejecuta el adaptador Android en un entorno controlado: conserva el pan al llegar datos, reutiliza marcadores, permite escoger sectores recién llegados y no falla al cambiar base. Estas comprobaciones complementan una prueba física de gestos, WebView y conectividad.
 
-Fuente: [AdComponents.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/AdComponents.kt#L21). No se reproducen identificadores de cuentas/unidades; son configuración, no lógica de negocio.
 
-| Función / línea | Entradas/retorno y ejecución |
-|---|---|
-| `initializeAdMob` L21 | `context: Context` → `Unit`. MainActivity la llama; inicia SDK con callback vacío. No registra un estado observable de inicialización. |
-| `getBannerAdUnitId` L28 | Sin parámetros → `String`. Busca campo `ADMOB_BANNER_UNIT_ID` de BuildConfig mediante reflexión; si vacío/placeholder/error retorna una unidad incorporada. El comentario dice test, pero el literal de respaldo no es la unidad de prueba oficial conocida; no asumir que desarrollo queda automáticamente aislado. |
-| `AdaptiveBannerAd` L44 | `adUnitId` default de la función anterior y modifier → `Unit`. MainAppScreen y Horarios la usan. `remember` crea AdView una vez, fija `AdSize.BANNER`, configura unidad y carga petición; `AndroidView` la dibuja. `onDispose` destruye. El nombre Adaptive no corresponde a un cálculo de tamaño adaptable: aquí es BANNER fijo. |
-| `InterstitialAdManager.preload` L84 | Contexto → `Unit`. MainActivity y callbacks de cierre/error llaman. Construye petición y `InterstitialAd.load`, guardando resultado en singleton. |
-| `InterstitialAdManager.showAd` L101 | `activity: Activity` → `Boolean`. Retorna false si no han pasado cinco minutos o falta anuncio; instala callbacks, muestra, guarda hora y retorna true si alcanzó llamada show. No hay llamada desde navegación actual. True no acredita que el usuario terminara de verlo. |
-| `AppOpenAdManager.loadAd` L134 | Contexto → `Unit`. MainActivity llama; termina si ya hay anuncio o `hasShownOnce`; carga y guarda en singleton mediante callbacks. |
-| `AppOpenAdManager.showAdIfAvailable` L153 | Actividad → `Unit`. Handler de MainActivity llama después de dos segundos. Termina si ya está mostrando/ya mostrado/no cargó; si disponible configura callbacks y muestra. No programa nueva tentativa si aún no hay anuncio. |
+## 10. Publicidad: consentimiento, formatos y recompensa
 
-Callbacks con nombre exacto, importantes para seguir referencias aunque compartan nombre:
+Fuentes: [AdComponents.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ui/components/AdComponents.kt), [AdsRuntime.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ads/AdsRuntime.kt), [AdsConfiguration.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ads/AdsConfiguration.kt), [RewardedAdManager.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ads/RewardedAdManager.kt) y [AdFreeRewardCard.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ads/AdFreeRewardCard.kt). La configuración de duración y sus pruebas se explican también en el capítulo 02.
 
-| Clase/callback / línea | Entrada y estado que modifica |
-|---|---|
-| Interstitial `onAdLoaded` L91 | `ad: InterstitialAd` → `Unit`; SDK lo llama y asigna `interstitialAd`. |
-| Interstitial `onAdFailedToLoad` L94 | `error: LoadAdError` → `Unit`; borra anuncio. No informa a UI. |
-| Interstitial `onAdDismissedFullScreenContent` L107 | Sin parámetros → `Unit`; borra anuncio y precarga otro con actividad capturada. |
-| Interstitial `onAdFailedToShowFullScreenContent` L111 | `error: AdError` → `Unit`; borra y precarga. |
-| App Open `onAdLoaded` L143 | `ad: AppOpenAd` → `Unit`; guarda anuncio. |
-| App Open `onAdFailedToLoad` L146 | `error: LoadAdError` → `Unit`; limpia referencia. |
-| App Open `onAdDismissedFullScreenContent` L158 | Sin parámetros → `Unit`; limpia showing, marca shownOnce y elimina referencia. |
-| App Open `onAdFailedToShowFullScreenContent` L163 | `error: AdError` → `Unit`; también marca shownOnce, por lo que no vuelve a cargar en ese proceso. |
-| App Open `onAdShowedFullScreenContent` L168 | Sin parámetros → `Unit`; activa `isShowingAd`. |
+### Consentimiento e inicialización
 
-`hasShownOnce` es memoria del proceso, no preferencia permanente. El banner se destruye al abandonar su composición; no se manejan aquí callbacks de pausa/reanudación de AdView. Mantener la publicidad requiere conservar acceso directo a consulta/reportes y separar configuración de desarrollo de producción, sin llamar a cargas de anuncios como parte de pruebas unitarias del dominio.
+`initializeAdMob(activity)` delega en `AdsRuntime.initialize`. Antes de solicitar anuncios, obtiene la información de UMP y llama `requestConsentInfoUpdate` en cada creación de actividad; en caso de éxito presenta solamente el formulario que UMP considere necesario. `reconcile` publica `AdsRuntimeState` con permiso para solicitar anuncios, necesidad de opciones de privacidad y mensaje de error. Inicializa Mobile Ads una sola vez cuando UMP permite solicitudes; su callback publica `initialized` en el hilo principal. Una solicitud UMP fallida conserva únicamente el permiso que el propio SDK considere válido de una elección anterior. La app sigue funcionando sin anuncios si no existe ese permiso.
+
+`AdsRuntime.canRequestAds(context)` es la puerta común: SDK listo, UMP permite solicitar y recompensa inactiva. Se consulta tanto al cargar como inmediatamente antes de mostrar. Una carga pendiente que termina después de retirar permiso se descarta. Los singletons no guardan una actividad entre cargas: utilizan `applicationContext`.
+
+`AdPrivacyOptionsButton` aparece cuando UMP exige un punto de entrada y la pantalla dispone de actividad. Llama `showPrivacyOptions`, bloquea solicitudes y vacía anuncios almacenados mientras presenta el formulario; al cerrarlo vuelve a consultar UMP. `canShowOn` rechaza actividades destruidas, finalizando o sin estado RESUMED. `FullScreenAdCoordinator.acquire` permite una sola pantalla publicitaria y `release` libera ese turno al cerrar o fallar.
+
+Esto requiere configurar y publicar los mensajes correspondientes al App ID en **AdMob → Privacy & messaging**; integrar el SDK no configura la consola ni acredita cumplimiento por sí mismo. Si la actualización falla sin un formulario de opciones disponible, el mismo componente ofrece reintentar la conexión sin reiniciar la app. El botón de recompensa autoriza ver un anuncio concreto y no reemplaza las opciones de privacidad. Guía oficial: [UMP Android](https://developers.google.com/admob/android/privacy).
+
+### Unidades y separación entre desarrollo y producción
+
+`AdsConfiguration.unitId` selecciona la variable BuildConfig según `AdFormat` y delega la validación en `resolveAdUnitId`. DEBUG siempre usa las unidades oficiales de prueba para banner, intersticial, apertura y recompensa, aunque el entorno tenga unidades reales. Release exige un ID con estructura de unidad AdMob y rechaza unidades oficiales de prueba. Un valor vacío, `DISABLED` o inválido deshabilita ese formato. No se utiliza reflexión para leer BuildConfig, evitando que la optimización R8 elimine campos que solo se accedían por nombre.
+
+Las variables son `ADMOB_BANNER_UNIT_ID`, `ADMOB_INTERSTITIAL_UNIT_ID`, `ADMOB_APP_OPEN_UNIT_ID` y `ADMOB_REWARDED_UNIT_ID`. La unidad con bonificación suministrada por el titular ya figura en la configuración de ejemplo y `ADMOB_REWARD_HOURS=12` define la pausa solicitada. El ID de aplicación es una configuración distinta del ID de una unidad. La ausencia de inventario, las restricciones de la cuenta y la aprobación en AdMob siguen dependiendo del proveedor; una compilación correcta no demuestra anuncios disponibles en producción.
+
+### Banner e intersticial
+
+`getBannerAdUnitId` obtiene el ID validado. `AdaptiveBannerAd` observa consentimiento y recompensa; no monta una vista cuando los anuncios están suspendidos. Usa `BoxWithConstraints` para calcular el ancho disponible y `getCurrentOrientationAnchoredAdaptiveBannerAdSize` para un banner realmente adaptable. Una rotación/cambio de ancho recrea la vista. Un `LifecycleEventObserver` llama `pause`/`resume`; `onDispose` retira el observador y destruye `AdView`. La separación vertical respecto al contenido ayuda a no confundir controles con el anuncio.
+
+`InterstitialAdManager.preload` evita cargas duplicadas, descarta el caché al cumplir una hora y limita reintentos fallidos a uno cada 30 segundos, sin bucle automático. Guarda un número `generation`: `clear` lo incrementa para invalidar también resultados que todavía estaban en vuelo. `onAdLoaded` publica solo si coincide la generación y sigue permitido solicitar; `onAdFailedToLoad` elimina el caché y registra la hora del fallo.
+
+`showAd(activity, onComplete)` acepta anuncios solo con la app en primer plano, sin otra publicidad completa, después del primer minuto de sesión y con al menos cinco minutos entre impresiones. El intervalo usa `SystemClock.elapsedRealtime`, por lo que cambiar la hora no lo evita. Devuelve `false` si no pudo iniciar el anuncio: la navegación debe continuar de inmediato. Si devuelve `true`, `onComplete` continúa tras cierre o error de presentación; su guardia `completed` impide ejecutar dos veces la acción. `onAdShowedFullScreenContent` registra la impresión; `onAdDismissedFullScreenContent` y `onAdFailedToShowFullScreenContent` llaman la función local `finish`, liberan el coordinador y preparan la siguiente carga. Las tareas de reportar, configurar alertas, consultar un corte o instalar una actualización no deben depender de completar un anuncio.
+
+### Apertura: solo durante una carga real
+
+`AppOpenAdManager.loadAd` espera consentimiento y SDK, evita cargas duplicadas y caduca caché a las cuatro horas. `hasAvailableAd` verifica esa edad e `isLaunchEligible` exige unidad configurada y diez minutos desde la última impresión. `showAdIfAvailable` requiere explícitamente `isLoadingScreen=true`, adquiere la exclusión de pantalla completa y continúa una sola vez al cerrar o fallar. Un callback de carga solo cambia estado/caché: no muestra anuncios por sí mismo. `clear` invalida cargas antiguas mediante generación. El fallo de carga registra código y dominio en `PacAds`, sin contenido personal ni claves.
+
+### Recompensa optativa y beneficio local
+
+`AdFreeRewardCard` presenta la duración y el alcance antes de cualquier solicitud. El usuario prepara el anuncio y, una vez READY, pulsa explícitamente **Ver anuncio**. La app no lo presenta desde el callback de carga. `findAdsActivity` resuelve una actividad desde los wrappers de contexto sin mantenerla en un singleton. Todos los estados tienen texto: carga, disponibilidad, anuncio en curso, error, unidad sin configurar y recompensa activa con fecha de vencimiento. El texto y los botones se ajustan al ancho; el contenedor padre debe ser desplazable.
+
+`RewardedAdManager.load` comprueba permiso, ausencia de recompensa y unidad real o test según compilación. Mantiene estados IDLE, LOADING, READY, SHOWING y ERROR, una sola carga y caducidad de una hora. `onAdLoaded` vuelve a validar puertas/generación; `onAdFailedToLoad` permite un nuevo intento después de 30 segundos. `clear` invalida una carga previa y evita reutilizar el anuncio.
+
+`RewardedAdManager.show` consume la referencia antes de mostrar, comprueba edad y adquiere el coordinador. **Solo el listener `onUserEarnedReward` llama `AdFreeRewardStore.grantEarnedReward`**. Cargar, ver una impresión, hacer clic o cerrar antes de recibir ese evento no conceden tiempo. La variable `earned` evita procesar dos veces un callback repetido. Al ganar, invalida intersticiales y anuncios de apertura almacenados; el banner desaparece por el estado observable. Los callbacks de cierre/error llaman `finish` y liberan el coordinador; muestran información, sin conceder el beneficio por sí mismos. No hay anuncios de prueba ni solicitudes reales durante las pruebas unitarias.
+
+`rememberAdFreeActive` observa la ventana persistida, actualiza al reanudar y como máximo cada minuto mientras está compuesto, con un despertar en el vencimiento. Así una recompensa que termina con la pantalla abierta vuelve a habilitar banners sin reiniciar. `AdFreeRewardWindow.isActive` decide el intervalo local (comienzo incluido, vencimiento excluido); `grant` conserva una ventana activa en vez de extenderla. `AdFreeRewardStore.initialize` carga las fechas guardadas y `AdFreeRewardStore.isActive` ofrece la misma decisión a todos los managers. El beneficio dura por defecto **12 horas**, no se acumula, se limita a esta instalación y cubre todos los formatos. `resolveRewardHours` obtiene esa duración de la configuración y limita valores personalizados a 1–24 horas. Las reglas de backup excluyen estas preferencias tanto de la nube como de la transferencia entre dispositivos. No se comparte por cuenta ni requiere Vercel/Supabase. La política de Google permite recompensas no monetarias internas y exige elección clara; no permite incentivar clics. Referencias: [recompensa Android](https://developers.google.com/admob/android/rewarded) y [política de recompensas](https://support.google.com/admob/answer/7313578?hl=en).
+
+La duración de 12 horas es una decisión de producto inicial, no una predicción de rentabilidad. Antes de reducirla o aumentar la presión publicitaria conviene medir solicitudes, anuncios servidos, recompensas completadas e ingresos por usuario activo con datos reales. No se añadió seguimiento analítico adicional en este cambio.
 
 ## 11. Notificaciones y alarmas: programar, recibir y responder
 
@@ -466,7 +509,7 @@ Hay tres caminos distintos: avisos locales con `NotificationHelper`, alarmas exa
 
 ### NotificationHelper.kt
 
-Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/NotificationHelper.kt#L14).
+Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/NotificationHelper.kt).
 
 `NotificationHelper` es un singleton con canales general `alertas_cortes_barinas`, corte `pac_corte_luz`, retorno `pac_restablecimiento_luz`; IDs 1001 alerta, 1002 confirmación, 1003 predictiva, 1004 aviso y 1005 retorno. Reutilizar ID reemplaza la notificación de ese tipo, no crea un historial por sector. Los métodos de mostrar capturan `SecurityException` si falta permiso; no retornan confirmación de presentación.
 
@@ -482,7 +525,7 @@ Los intents de apertura usan NEW_TASK/CLEAR_TASK y requestCode 0. Pulsar no sele
 
 ### PacAlarmScheduler.kt
 
-Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmScheduler.kt).
+Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmScheduler.kt).
 
 `PacScheduledAlert(action: String, triggerAtMillis: Long, window: PacScheduleWindow)` describe una alarma real: tipo, instante y ventana original. No escribe nada por construirlo. El singleton tiene scope IO con SupervisorJob, bloqueo para serializar programación, generación creciente y mapa PRE→5001, RESTORE→5002, VALIDATION→5003.
 
@@ -501,7 +544,7 @@ La búsqueda nullable no inventa turnos. Al dispararse validación se programa y
 
 ### PacAlarmReceiver.kt
 
-Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmReceiver.kt).
+Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmReceiver.kt).
 
 **`onReceive(context, intent): Unit`.** Android entrega broadcast. Sin action termina. STOP detiene player y cancela previa/retorno. Las otras acciones usan goAsync y coroutine IO; antes de terminar siempre finaliza PendingResult en finally. BOOT solicita directamente el scheduler suspendido, que carga PAC; para alertas primero verifica/entrega con handleScheduledAlert y después rearma. Errores se registran. Manifest añade reinicio, hora/zona modificada, reemplazo de APK y concesión de exactas como puntos de rearmado.
 
@@ -511,7 +554,7 @@ El companion conserva actions y nombres extras previos y agrega `EXTRA_PROFILE`,
 
 ### PacAlertNotifier.kt
 
-Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlertNotifier.kt).
+Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlertNotifier.kt).
 
 Es el camino común de entrega exacta y periódica. Todas sus funciones de presentación retornan Boolean de publicación local, no confirmación de lectura del usuario. Ninguna usa Supabase o comprueba suministro físico.
 
@@ -530,7 +573,7 @@ Notificación previa, sirena y retorno son switches independientes. Sirena puede
 
 ### PacAlarmPlayer.kt
 
-Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmPlayer.kt#L16).
+Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmPlayer.kt).
 
 | Función / línea | Entrada/retorno y efectos |
 |---|---|
@@ -542,7 +585,7 @@ El sonido no sobrevive necesariamente a muerte de proceso por ser un objeto en m
 
 ### NotificationActionReceiver.kt: botón de notificación a cola
 
-Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/NotificationActionReceiver.kt#L20).
+Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/NotificationActionReceiver.kt).
 
 **`onReceive(context: Context,intent: Intent): Unit` L22.** Android lo llama desde PendingIntents de pregunta/validación. Lee ID/nombre y extra booleano, con defaults de Alto Barinas; determina tipo NORMAL/SIN_LUZ y tensión 118/0. No usa `intent.action` para comprobar que coincide con el booleano. Cancela ID1001 y muestra confirmación antes de persistir.
 
@@ -554,7 +597,7 @@ El trabajo de receiver es breve en su punto de entrada, pero `goAsync` no autori
 
 ### ReportPowerWorker.kt
 
-Fuente: [ReportPowerWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/worker/ReportPowerWorker.kt#L12).
+Fuente: [ReportPowerWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/worker/ReportPowerWorker.kt).
 
 `ReportPowerWorker(appContext: Context,workerParams: WorkerParameters)` extiende CoroutineWorker; Android/WorkManager construye la instancia. **`doWork(): ListenableWorker.Result` L17** es suspendida y ejecuta en IO. Obtiene DAOs, lee Data de sector, hasPower, tipo y voltaje. Cuando hay ID, actualiza otra vez el sector optimistamente: +1 contador, -10/+15 porcentaje, fuerza estado por hasPower y 118/0 V. Ese bloque no crea el pendiente ni usa tipo/voltaje leído para preservar avería; el evento ya fue guardado por repositorio/receiver/widget. Repetirlo en cada reintento altera métricas nuevamente.
 
@@ -564,7 +607,7 @@ Sus llamadores son las peticiones de EnergyRepository, NotificationActionReceive
 
 ### PredictiveNotificationWorker.kt
 
-Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt).
+Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt).
 
 **`doWork(): Result`**, suspendida sin parámetros en IO. Carga PAC, espera rearmado del scheduler y lee ajustes. Si previa/sirena están apagadas termina success, conservando la programación independiente de retorno realizada por scheduler. Resuelve perfil/sector desde Room; sin destino o próxima ventana real termina success. Obtiene siguiente ventana futura con fecha absoluta Caracas y, si falta entre1ms y la anticipación configurada, llama `PacAlertNotifier.showPreAlert`. Comparte deduplicación con exactas. CancellationException se propaga; otro error devuelve retry. No usa la zona del dispositivo ni calcula “mañana” con columna de hoy; tampoco usa motor heurístico.
 
@@ -572,7 +615,7 @@ Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-a
 
 ## 13. Widget Glance
 
-Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/glance/LuzBarinasWidget.kt#L45).
+Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/glance/LuzBarinasWidget.kt).
 
 **`LuzBarinasWidget.provideGlance(context: Context,id: GlanceId): Unit` L47** es suspendida. Glance la llama para proporcionar la representación del widget. Obtiene Room y lee en IO el ID fijo `sec_a_alto_barinas_1`; si no existe usa nombre y mensajes de respaldo. No observa el perfil actual. En `provideContent` dibuja fondo oscuro, nombre, tensión de referencia/0 V, estado y dos botones. Cada botón usa `actionRunCallback<ReportPowerActionCallback>` con `has_power` y `sector_id`. El estado se toma antes de componer; no se colecta un Flow continuo de Room aquí.
 
@@ -584,7 +627,7 @@ Para hacer el widget coherente con la app, deben compartirse resolución del per
 
 ## 14. Manifest y recursos que sostienen la interfaz
 
-Fuente: [AndroidManifest.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/AndroidManifest.xml).
+Fuente: [AndroidManifest.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/AndroidManifest.xml).
 
 | Declaración | Uso real y punto de mantenimiento |
 |---|---|
@@ -606,17 +649,17 @@ No hay permisos de GPS en este manifest ni servicio de Firebase Messaging propio
 
 | Recurso | Contenido y relación con código |
 |---|---|
-| [strings.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/values/strings.xml#L2) | Solo `app_name = PAC Barinas`. La mayoría del texto UI está hardcodeado en Kotlin: cambios de nombre/legal/traducción no se resuelven modificando esta única cadena. |
-| [themes.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/values/themes.xml#L4) | Tema Android `Theme.DeviceDefault.NoActionBar` como base de actividad. Los colores/tipos Compose vienen de `MyApplicationTheme`, son otra capa. |
-| [colors.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/values/colors.xml#L3) | Paleta XML de plantilla púrpura/teal/blanco/negro; no es la fuente principal de la paleta Compose. |
-| [luz_barinas_widget_info.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/xml/luz_barinas_widget_info.xml#L2) | Mínimo 180×110dp, objetivo 3×2 celdas, periodo solicitado 1.800.000ms, resize horizontal/vertical, preview icono y categoría home. El refresco por acción se solicita adicionalmente en onAction. |
-| [file_paths.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/xml/file_paths.xml#L2) | Expone rutas posibles Download, raíz externa y archivos externos al usar FileProvider. El alcance es amplio; solo se comparten URIs a las que el código conceda acceso, no todas por declararlas. |
-| [backup_rules.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/xml/backup_rules.xml#L8) | Plantilla sin includes/excludes activos. No existe aquí una exclusión deliberada de pendientes/perfiles. |
-| [data_extraction_rules.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/xml/data_extraction_rules.xml#L6) | Sección cloud-backup sin reglas activas; device-transfer solo comentada. Ajustar copia/restauración con conocimiento de Room y cola. |
-| [ic_notification_bolt.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/drawable/ic_notification_bolt.xml#L1) | Vector de rayo usado como icono pequeño de avisos. `ic_power_on.xml` y `ic_power_off.xml` suministran iconos de estado/acciones. |
-| [ic_launcher.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml#L2) y variante round | Iconos adaptativos combinan fondo y primer plano; existen mipmaps para densidades mdpi a xxxhdpi. Mantener legibilidad en formatos redondos/monocromos. |
+| [strings.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/values/strings.xml) | Solo `app_name = PAC Barinas`. La mayoría del texto UI está hardcodeado en Kotlin: cambios de nombre/legal/traducción no se resuelven modificando esta única cadena. |
+| [themes.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/values/themes.xml) | Tema Android `Theme.DeviceDefault.NoActionBar` como base de actividad. Los colores/tipos Compose vienen de `MyApplicationTheme`, son otra capa. |
+| [colors.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/values/colors.xml) | Paleta XML de plantilla púrpura/teal/blanco/negro; no es la fuente principal de la paleta Compose. |
+| [luz_barinas_widget_info.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/xml/luz_barinas_widget_info.xml) | Mínimo 180×110dp, objetivo 3×2 celdas, periodo solicitado 1.800.000ms, resize horizontal/vertical, preview icono y categoría home. El refresco por acción se solicita adicionalmente en onAction. |
+| [file_paths.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/xml/file_paths.xml) | Expone rutas posibles Download, raíz externa y archivos externos al usar FileProvider. El alcance es amplio; solo se comparten URIs a las que el código conceda acceso, no todas por declararlas. |
+| [backup_rules.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/xml/backup_rules.xml) | Plantilla sin includes/excludes activos. No existe aquí una exclusión deliberada de pendientes/perfiles. |
+| [data_extraction_rules.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/xml/data_extraction_rules.xml) | Sección cloud-backup sin reglas activas; device-transfer solo comentada. Ajustar copia/restauración con conocimiento de Room y cola. |
+| [ic_notification_bolt.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/drawable/ic_notification_bolt.xml) | Vector de rayo usado como icono pequeño de avisos. `ic_power_on.xml` y `ic_power_off.xml` suministran iconos de estado/acciones. |
+| [ic_launcher.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml) y variante round | Iconos adaptativos combinan fondo y primer plano; existen mipmaps para densidades mdpi a xxxhdpi. Mantener legibilidad en formatos redondos/monocromos. |
 | `drawable/ic_pac_barinas_logo.png`, `ic_launcher_foreground.png`, `elmatrushka.png` | Bitmaps de identidad/launcher/créditos. `elmatrushka` se dibuja en DeveloperInfoContent. No son funciones ejecutables. |
-| [assets/map/map.html](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/assets/map/map.html#L1) y dependencias | Documento y bibliotecas locales del mapa, con imágenes de capas y marcadores. Los recursos de teselas se solicitan externamente; no están incluidos como mapa offline completo. |
+| [assets/map/map.html](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/assets/map/map.html) y dependencias | Documento y bibliotecas locales del mapa, con imágenes de capas y marcadores. Los recursos de teselas se solicitan externamente; no están incluidos como mapa offline completo. |
 
 ## 15. Cómo seguir y modificar un comportamiento sin perderse
 
@@ -650,7 +693,7 @@ El índice incluye funciones fuente nombradas, privadas/overrides/helpers y call
 
 ### glance/LuzBarinasWidget.kt
 
-Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/glance/LuzBarinasWidget.kt).
+Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/glance/LuzBarinasWidget.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -659,7 +702,7 @@ Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/
 
 ### MainActivity.kt
 
-Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/MainActivity.kt).
+Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/MainActivity.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -668,7 +711,7 @@ Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81
 
 ### notification/NotificationActionReceiver.kt
 
-Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/NotificationActionReceiver.kt).
+Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/NotificationActionReceiver.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -676,7 +719,7 @@ Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-and
 
 ### notification/NotificationHelper.kt
 
-Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/NotificationHelper.kt).
+Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/NotificationHelper.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -688,7 +731,7 @@ Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blo
 
 ### notification/PacAlarmPlayer.kt
 
-Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmPlayer.kt).
+Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmPlayer.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -698,7 +741,7 @@ Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/7a
 
 ### notification/PacAlarmReceiver.kt
 
-Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmReceiver.kt).
+Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmReceiver.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -707,7 +750,7 @@ Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/
 
 ### notification/PacAlarmScheduler.kt
 
-Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmScheduler.kt).
+Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmScheduler.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -722,7 +765,7 @@ Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob
 
 ### notification/PacAlertNotifier.kt
 
-Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlertNotifier.kt).
+Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlertNotifier.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -737,7 +780,7 @@ Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/
 
 ### ui/components/AdComponents.kt
 
-Fuente: [AdComponents.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/AdComponents.kt).
+Fuente: [AdComponents.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/AdComponents.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -760,7 +803,7 @@ Fuente: [AdComponents.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81
 
 ### ui/components/BarinasAddressDialog.kt
 
-Fuente: [BarinasAddressDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt).
+Fuente: [BarinasAddressDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -768,7 +811,7 @@ Fuente: [BarinasAddressDialog.kt](https://github.com/Ralag/luz-barinas-android/b
 
 ### ui/components/DonationsDialog.kt
 
-Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/DonationsDialog.kt).
+Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/DonationsDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -776,7 +819,7 @@ Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/components/GoogleSearchBar.kt
 
-Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/GoogleSearchBar.kt).
+Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/GoogleSearchBar.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -784,7 +827,7 @@ Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/components/InteractiveBarinasMap.kt
 
-Fuente: [InteractiveBarinasMap.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt).
+Fuente: [InteractiveBarinasMap.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -796,7 +839,7 @@ Fuente: [InteractiveBarinasMap.kt](https://github.com/Ralag/luz-barinas-android/
 
 ### ui/components/OnboardingFlowDialog.kt
 
-Fuente: [OnboardingFlowDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt).
+Fuente: [OnboardingFlowDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -807,7 +850,7 @@ Fuente: [OnboardingFlowDialog.kt](https://github.com/Ralag/luz-barinas-android/b
 
 ### ui/components/PacScheduleView.kt
 
-Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/PacScheduleView.kt).
+Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/PacScheduleView.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -819,7 +862,7 @@ Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/components/PacSettingsDialog.kt
 
-Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/PacSettingsDialog.kt).
+Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/PacSettingsDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -827,7 +870,7 @@ Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob
 
 ### ui/components/StatusBadge.kt
 
-Fuente: [StatusBadge.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/StatusBadge.kt).
+Fuente: [StatusBadge.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/StatusBadge.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -835,7 +878,7 @@ Fuente: [StatusBadge.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b
 
 ### ui/components/ThemeSettingsDialog.kt
 
-Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt).
+Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -844,7 +887,7 @@ Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/bl
 
 ### ui/components/UpdatePromptDialog.kt
 
-Fuente: [UpdatePromptDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/UpdatePromptDialog.kt).
+Fuente: [UpdatePromptDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/UpdatePromptDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -852,7 +895,7 @@ Fuente: [UpdatePromptDialog.kt](https://github.com/Ralag/luz-barinas-android/blo
 
 ### ui/screens/AdminScreen.kt
 
-Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/AdminScreen.kt).
+Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/AdminScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -860,7 +903,7 @@ Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b
 
 ### ui/screens/DashboardScreen.kt
 
-Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/DashboardScreen.kt).
+Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/DashboardScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -869,7 +912,7 @@ Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/screens/LegalScreen.kt
 
-Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/LegalScreen.kt).
+Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/LegalScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -884,7 +927,7 @@ Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b
 
 ### ui/screens/MapScreen.kt
 
-Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/MapScreen.kt).
+Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/MapScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -893,7 +936,7 @@ Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07
 
 ### ui/screens/SettingsScreen.kt
 
-Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/SettingsScreen.kt).
+Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/SettingsScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -903,7 +946,7 @@ Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a
 
 ### ui/screens/TelemetryScreen.kt
 
-Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/TelemetryScreen.kt).
+Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/TelemetryScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -912,7 +955,7 @@ Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/theme/Theme.kt
 
-Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Theme.kt).
+Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Theme.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -920,7 +963,7 @@ Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68
 
 ### ui/viewmodel/LuzBarinasViewModel.kt
 
-Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt).
+Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -958,7 +1001,7 @@ Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/bl
 
 ### worker/PredictiveNotificationWorker.kt
 
-Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt).
+Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -967,7 +1010,7 @@ Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-a
 
 ### worker/ReportPowerWorker.kt
 
-Fuente: [ReportPowerWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/worker/ReportPowerWorker.kt).
+Fuente: [ReportPowerWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/worker/ReportPowerWorker.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -975,18 +1018,29 @@ Fuente: [ReportPowerWorker.kt](https://github.com/Ralag/luz-barinas-android/blob
 
 ### Funciones JavaScript propias del mapa
 
-Fuente: [map.html](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/assets/map/map.html). Son callbacks/puente explicados en apartado9, sin cambios en esta corrección.
+Las funciones del contrato compartido `pac-map-core.js` y del adaptador `pac-map-app.js` se explican en el apartado 9. El HTML ya no contiene un script propio inline. El inventario global regenerado localiza todas las declaraciones con las nuevas posiciones; Leaflet y leaflet-heat siguen siendo dependencias de terceros.
+## Coordinación de apertura, recompensa y bienvenida
 
-| Nombre | Línea |
-|---|---|
-| `initMap` | 265 |
-| `setBasemap` | 283 |
-| `toggleBasemap` | 310 |
-| `toggleHeatmap` | 314 |
-| `recenterBarinas` | 327 |
-| `getCoords` | 333 |
-| `renderLayers` | 358 |
-| `handleSectorClick` | 455 |
-| `updateMapData` (asignación de función al puente) | 463 |
+`AppOpenLaunchGate(onReady, modifier)` muestra marca, progreso y «Entrar ahora». Observa consentimiento, inicialización SDK, estado del anuncio y ciclo de vida RESUMED. Usa reloj monotónico y un plazo de 3,5 segundos. Solo este gate puede solicitar mostrar apertura. Si no hay anuncio, hay error, falta permiso publicitario, existe recompensa o vence el plazo, continúa. Una carga que termina después no puede abrir publicidad sobre el mapa o los formularios.
 
-Inventario de este capítulo:122 funciones Kotlin nombradas y9 funciones JavaScript del mapa; no incluye librerías externas. Las pruebas y resolución de datos están en02. [CI Android](https://github.com/Ralag/luz-barinas-android/actions/runs/38904594403) aprobó16 tests y lintDebug sin errores, con76 advertencias. El harness JVM aprobó19 comprobaciones. Ninguna de esas verificaciones sustituye probar la entrega de notificaciones y restricciones de batería en un teléfono.
+`AppOpenLaunchHost(launchGeneration, alarmPlaying, gate, content)` conserva dos estados guardables: si terminó la primera entrada y qué generación de apertura terminó. Durante la primera carga aún no monta el contenido. Después lo mantiene en la misma posición de composición y, al solicitar una nueva generación por retorno desde segundo plano, superpone el gate sin desmontar la pantalla. El contenido cubierto no recibe toques ni se expone como controles accesibles detrás del gate. El parámetro `gate` permite probar esta integración con un botón falso sin solicitar publicidad. Si hay interacción protegida o alarma, termina esa generación sin mostrar ni posponer un anuncio hasta el cierre del formulario.
+
+`AppOpenInteractionGuard.acquire()` registra un token por superficie en uso; `release(owner)` elimina exclusivamente ese token. Su flujo `blocked` permanece activo mientras quede al menos un propietario. `canOpenAfterReturn(launchEligible, alarmPlaying)` exige que el gestor publicitario permita la apertura y que no haya alarma ni tokens. `AppOpenInteractionProtection(busy)` adquiere y libera automáticamente el token mediante `DisposableEffect`, también al salir de la composición. Configuración, tema, dirección, donaciones, bienvenida, ajustes PAC, actualización y alarma se protegen desde `MainAppScreen`; el campo de observación de Hoy añade su propio token mientras está abierto o contiene un borrador.
+
+`MainActivity.onStart()` solo aumenta `launchGeneration` tras cinco minutos fuera, con intervalo publicitario válido y sin interacción protegida. `onStop()` recuerda el inicio del segundo plano y prepara caché únicamente cuando no hay anuncio de pantalla completa ni recreación por configuración. `onSaveInstanceState(outState)` guarda la generación y `onCreate(savedInstanceState)` la restaura: girar el teléfono después de un retorno no solicita otra apertura por un contador reiniciado.
+
+`AppOpenLaunchPolicy.evaluate` es la máquina de estados pura: WAITING puede producir LOAD una vez, SHOW si el anuncio llega antes del límite y la Activity está reanudada, o CONTINUE si debe salir. SHOWING ignora tiempo agotado; espera el callback de cierre/error. `skip()` termina únicamente WAITING. `onAdFinished()` termina únicamente SHOWING. `continueOnce()` fija FINISHED y evita una segunda continuación por carreras de callbacks.
+
+`AppOpenLaunchPolicyTest.step` prepara entradas de la máquina sin cargar anuncios. `loadCallbackShowsOnlyWithinLoadingDeadline` prueba carga/cierre y continuación única; `timeoutAndLateCallbackCannotShowOverContent` prueba el límite exacto; `skipAndRewardEndLoadingExactlyOnce` prueba omisión y recompensa; `consentOrLoadFailureNeverBlocksEntry` verifica salidas sin consentimiento/error. Estas pruebas no certifican inventario AdMob ni funcionamiento en un dispositivo físico.
+
+`AppOpenLaunchHostTest.FakeGate(onReady)` sustituye el anuncio por un botón local. `returnOverlayPreservesMountedFormAndDraft` completa la entrada, escribe un formulario recordado, simula otra generación y comprueba que su composición no se desmonta y conserva el borrador. `protectedReturnIsSkippedAndNotDeferredUntilFormCloses` comprueba que una edición protegida impide el gate y que cerrar el formulario no dispara un anuncio tardío. `activeAlarmBypassesInitialGateAndAlwaysBlocksReturn` verifica el acceso inmediato al control de alarma; `closingOneProtectedSurfaceCannotReleaseAnother` verifica el aislamiento de tokens y la condición de elegibilidad.
+
+`DashboardStatusUiTest.publishActivePacForTheWholeDay()` prepara dos franjas válidas que cubren el día para que el resultado no dependa de la hora de ejecución; `restoreSchedule()` recupera el snapshot anterior. `showStatus(status)` monta Hoy con el estado indicado, desplaza la banda y exige una referencia PAC activa separada. `unknownServiceIsNotReportedAsAnObservedOutageDuringPac`, `normalCommunityReportRemainsDistinctFromTheActivePac` e `irregularFaultKeepsItsLabelDuringAnActiveScheduledCut` verifican respectivamente estado desconocido, reporte normal y falla irregular, sin reemplazarlos por una afirmación de corte observado.
+
+La unidad con bonificación suministrada por el titular está configurada para **12 horas**. `SettingsScreen` monta `AdFreeRewardCard` y `AdPrivacyOptionsButton`; se ofrecen carga y reproducción voluntarias. La recompensa se concede solo en el callback ganado del SDK, persiste localmente y elimina banner, apertura e intersticial. No se acumula ni se transfiere por backup. Una desinstalación o cambio manual de reloj no proporciona una garantía antifraude de servidor. Debug usa exclusivamente IDs oficiales de prueba.
+
+`MainAppScreen` conecta el intersticial al cierre natural de Configuración. El gestor exige sesión mínima de un minuto y cinco minutos entre impresiones; no se invoca al reportar, guardar ubicación, descargar una actualización o abrir una alarma.
+
+`completeOnboarding()` guarda `onboarding_done` en las mismas preferencias de usuario que se leen al iniciar y cierra la bienvenida. Omitir ya no abre automáticamente el selector de sector. `showUserMessage(message)` entrega un aviso al Snackbar del estado. La notificación Android se solicita desde la guía cuando el usuario activa alertas, sin pedirla automáticamente durante la entrada.
+
+Dashboard recibe `scheduleVersion` explícita; por ello Compose invalida el cálculo aun si el sector seleccionado no cambia. «Hoy» y «Horarios» usan Caracas y la matriz de semana actual; un corte nocturno conserva su fecha de inicio y no marca erróneamente como actual la fila que comenzará esta noche. El estado reportado y la programación se explican como fuentes distintas. UNKNOWN se muestra neutro y una falla irregular conserva su etiqueta.

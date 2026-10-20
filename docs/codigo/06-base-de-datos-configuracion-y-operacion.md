@@ -69,7 +69,7 @@ supabase_schema.sql prepara una instalación vacía y supabase_migration_v3_admi
 | `circuitCode` | TEXT. Circuito/alimentador descriptivo. En SQL las mayúsculas requieren comillas. |
 | `status` | TEXT con NORMAL inicial. La aplicación reconoce NORMAL, SCHEDULED_OUTAGE e IRREGULAR_OUTAGE. El SQL no limita esos valores con CHECK. |
 | `voltage` | FLOAT8 predeterminado118. Es un valor informado/asignado, no prueba de sensor. |
-| `confirmedReportsCount` | INT inicial0. Contador almacenado; no hay trigger de agregación definido en estos SQL. |
+| `confirmedReportsCount` | INT inicial0. La migración v4 instala un trigger privado que lo recalcula con la muestra reciente de reportes válidos por ID exacto de sector. |
 | `withoutPowerPercentage` | INT inicial0. No tiene CHECK0–100 en los scripts. |
 | `rotationBlock` | TEXT. Código de bloque; Android normaliza A–D y Bloque X. |
 | `isCommunity` | BOOLEAN NOT NULL DEFAULT false, añadido en v3; completa DTO y clasificación comunitaria. |
@@ -77,7 +77,7 @@ supabase_schema.sql prepara una instalación vacía y supabase_migration_v3_admi
 | `lastUpdatedMillis` | BIGINT, epoch milisegundos. Default SQL con now; los clientes pueden enviarlo. |
 | `notes`, `lat`, `lon` | Añadidos por migración v2. Notas y coordenadas simples; no se almacenan polígonos como los de Room. |
 
-`isCommunity` se envía desde el panel, pero **no se crea** en el esquema ni la migración v2 revisados. El fallback del panel omite ese y otros campos, por lo que un éxito puede ser parcial.
+`isCommunity` se envía desde el panel y se incorpora en el esquema actual y en v3. Un entorno antiguo que solo haya aplicado v2 requiere actualizarse; el fallback del panel puede omitir campos ante un esquema incompleto.
 
 ### `app_config`
 
@@ -85,20 +85,20 @@ Dos columnas: `config_key TEXT PRIMARY KEY` y `config_value JSONB NOT NULL`. Cad
 
 | Clave | Contenido y consumidores |
 |---|---|
-| `pac_schedule` | version/updatedAt, slots, matrixRows[].cells o matrix heredada, sectorsA-D. La leen app/panel/telemetría/API. El panel React actual omite sectorsA-D al guardar. |
+| `pac_schedule` | version/updatedAt, slots, matrixRows[].cells y matrix, sectorsA-D. App/panel/telemetría/API lo leen. React conserva propiedades existentes mediante spread de pacConfig, incluidas las listas sectorsA-D. |
 | `broadcast_notice` | title/message/level/timestamp/active. Banner Android y panel. No equivale a envío FCM. |
 | `donations_config` | paypal/binance/pmBank/pmPhone/pmId. Métodos de colaboración representados en app/panel. |
 | `donations_url` | Formato heredado `{url}` con soporte parcial/residual; no confundir con configuración completa. |
 | `barinas_geography` | Catálogo territorial, municipios, cantidades y updatedAt escrito por seed web. |
 | `version` | versionCode/versionName/releaseNotes/apkDownloadUrl/isMandatory leídos por sync Android. El botón actual de actualización abre Play. |
 
-Los timestamps tienen inconsistencia de formato: el clásico escribe milisegundos y React escribe updatedAt ISO además de version numérica. Android intenta leer updatedAt como long y usa version como respaldo. Si se unifica el contrato, todos los productores/consumidores deben cambiar conjuntamente.
+Los editores actuales publican version y updatedAt como revisión numérica creciente, ambas representaciones de matriz y la base sin doble rotación. Los lectores aceptan también revisiones ISO heredadas; Android valida el documento completo antes de sustituir su snapshot. La escritura de JSON completo aún necesita control de concurrencia para evitar que dos editores se sobrescriban.
 
 ### `citizen_reports`
 
 `id UUID` se genera por defecto en servidor. `sectorId`, `sectorName`, `hasPower` y `reportType` son obligatorios. `voltage`, `observation` y `deviceOrigin` agregan contexto. `timestamp BIGINT` indica el instante enviado/por defecto. No existen `reportedAtMillis`, `voltageObserved` ni `created_at` en esta definición. Tampoco hay FK sectorId, restricción única de evento ciudadano ni procedimiento remoto de deduplicación.
 
-La falta de ID compartido entre Room y remoto permite duplicación. El cliente actual fija timestamp al enviar, por lo que pierde el instante offline. Estos son comportamientos pendientes, no diseño recomendado.
+El cliente actual envía un UUID estable por evento Room y conserva reportedAtMillis en timestamp. Los reintentos usan INSERT con ON CONFLICT DO NOTHING y no vuelven a agregarse al sector. No existe deduplicación semántica entre eventos distintos ni una FK que repare IDs históricos: el trigger omite los IDs sin sector exacto y conserva sus reportes para revisión.
 
 ### `community_locations`
 
@@ -120,7 +120,7 @@ La falta de ID compartido entre Room y remoto permite duplicación. El cliente a
 | `missing_policies.sql` | Script retirado: informa qué migración v3 utilizar y no modifica permisos ni restaura escrituras anónimas. |
 | `copyMigrationSql` | Muestra instrucciones para usar el archivo v3 revisado; ya no genera FOR ALL TO anon ni SQL que abra la base. |
 
-Las funciones SQL v3 is_admin() y claim_push_alert(p_block) se explican abajo. No hay triggers de agregación automática ni estrategia completa de backups/rollback del negocio. No restaurar políticas públicas para resolver fallos de login: comprobar Auth, registro administrador y entorno servidor. El fixture de seguridad se ejecuta solo en una base vacía aislada.
+Las funciones SQL v3 is_admin() y claim_push_alert(p_block) se explican abajo. La migración v4 añade agregación automática por sentencia de citizen_reports, descrita al final del capítulo. Sigue pendiente una estrategia completa de backups/rollback del negocio. No restaurar políticas públicas para resolver fallos de login: comprobar Auth, registro administrador y entorno servidor. Los fixtures de seguridad y agregación se ejecutan solo en bases vacías aisladas.
 
 ### Funciones y tablas privadas v3
 
@@ -270,3 +270,18 @@ La comprobación de cobertura es estructural: que un nombre aparezca en el capí
 | Métrica extraña | Seed, valor sustituto, doble incremento y edad/tamaño de la muestra. |
 
 Registrar el dato observado y el esperado antes de cambiarlo. La recuperación de un fallo de lectura debe conservar la última información válida; sembrar o sobrescribir datos para que desaparezca el error puede destruir la evidencia y el estado correcto.
+## Agregación de reportes y backend compatible
+
+La migración canónica aplicada es `supabase/migrations/20261016140944_aggregate_citizen_reports.sql`; `supabase_migration_v4_report_aggregation.sql` es su copia de operación. La versión CLI local se alineó con el registro real de migraciones remoto. El directorio también incluye la versión v3 ya aplicada; no ejecutar seeds para reparar estos permisos.
+
+`pac_private.citizen_report_status(reportType,hasPower)` clasifica alias de falla irregular antes de interpretar disponibilidad. Una irregularidad con luz sigue siendo irregular y no equivale automáticamente a un apagón para el porcentaje.
+
+`pac_private.aggregate_citizen_reports()` es un trigger AFTER INSERT por sentencia con tabla de transición. Ordena IDs exactos, bloquea cada sector y calcula su muestra de eventos de las últimas dos horas, admitiendo el mismo desfase futuro de diez minutos que RLS. Actualiza número real de reportes y porcentaje real sin luz. El último evento define estado/voltaje solo si su fecha es estrictamente posterior a lastUpdatedMillis; una edición administrativa más reciente o igual conserva prioridad. No inventa 118V cuando falta una medida; conserva la anterior, o infiere cero si declara ausencia de servicio.
+
+Las funciones están en esquema privado sin uso/ejecución para anon/authenticated, con search_path vacío y propietario postgres. El trigger privilegiado no concede UPDATE ciudadano sobre sectores. Un lote duplicado ON CONFLICT DO NOTHING tiene tabla de transición vacía y no altera métricas. IDs inexistentes se archivan sin crear sectores ni asociarlos por parecido de nombres. No hay backfill histórico ni recomputación por DELETE/UPDATE. La muestra se recalcula al aceptar nuevos eventos, no mediante un temporizador que borre el estado cada dos horas.
+
+`tests/sql/report_aggregation.sql` se ejecuta únicamente en una base desechable distinta de la prueba v3. Son 168 sentencias verificadas localmente en PostgreSQL18.6/PGlite; GitHub también la ejecuta sobre PostgreSQL16. PGlite no demuestra carreras entre dos conexiones reales. El bloqueo ordenado y los snapshots READ COMMITTED requieren conservarse al cambiar el trigger. `tests/report-aggregation-concurrency.cjs` usa `runSql` para abrir procesos psql y `main` para insertar desde dos conexiones con sectores en orden inverso; el callback `write` mantiene cada transacción abierta brevemente. Comprueba muestra exacta y último estado irregular. Solo admite PGDATABASE=report_aggregation_test; GitHub lo ejecuta después del fixture, sin conectar a producción.
+
+La auditoría remota inicial encontró 119 sectores (111 con coordenadas) y 2643 reportes; 70 IDs distintos de reportes antiguos no coincidían con el directorio actual. La migración no adivina esas identidades. Es necesario un catálogo explícito y revisado para resolverlas sin atribuir reportes al sector equivocado.
+
+La guía [Operación del gateway](../OPERACION_GATEWAY_SUPABASE.md) explica rutas, variables privadas, autorización y despliegue. La Edge Function pública está activa y sus GET y rechazo 401 fueron comprobados. Mantener ambas copias de servidor idénticas y confirmar el estado final del secreto/rutas en el registro de cambios de esta entrega.

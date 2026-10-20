@@ -1,10 +1,5 @@
 package com.example.ui.components
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -22,12 +17,11 @@ import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ServiceStatus
@@ -42,6 +36,7 @@ fun StatusBadge(
     isLarge: Boolean = false
 ) {
     val (color, icon, label) = when (status) {
+        ServiceStatus.UNKNOWN -> Triple(Color(0xFF64748B), Icons.Outlined.Warning, "Sin reporte actual")
         ServiceStatus.NORMAL -> Triple(
             GoogleAIGreen,
             Icons.Outlined.Bolt,
@@ -59,22 +54,6 @@ fun StatusBadge(
         )
     }
 
-    val needsPulse = status != ServiceStatus.NORMAL
-    val alphaAnim = if (needsPulse) {
-        val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-        infiniteTransition.animateFloat(
-            initialValue = 0.4f,
-            targetValue = 1.0f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(900),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "alpha"
-        ).value
-    } else {
-        1.0f
-    }
-
     Row(
         modifier = modifier
             .background(color.copy(alpha = 0.12f), RoundedCornerShape(100.dp))
@@ -88,13 +67,12 @@ fun StatusBadge(
         Box(
             modifier = Modifier
                 .size(if (isLarge) 10.dp else 8.dp)
-                .graphicsLayer { alpha = alphaAnim }
                 .background(color, CircleShape)
         )
         Spacer(modifier = Modifier.width(6.dp))
         Icon(
             imageVector = icon,
-            contentDescription = label,
+            contentDescription = null,
             tint = color,
             modifier = Modifier.size(if (isLarge) 18.dp else 14.dp)
         )
@@ -103,7 +81,10 @@ fun StatusBadge(
             text = label,
             color = color,
             fontSize = if (isLarge) 14.sp else 12.sp,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
         )
     }
 }

@@ -10,7 +10,9 @@ const web = path.join(root, 'admin-web');
 const docdir = path.join(root, 'docs/codigo');
 const issues = [];
 const report = { coverage: {}, checkedLinks: 0, checkedMarkdown: 0, mirroredFiles: 0, mirroredSources: 0 };
-const sharedSources = ['supabase_schema.sql', 'supabase_migration_v3_admin_security.sql', 'missing_policies.sql', 'tests/sql/admin_security.sql'].map(n => path.join(root, n));
+const sharedSources = ['supabase_schema.sql', 'supabase_migration_v3_admin_security.sql', 'supabase_migration_v4_report_aggregation.sql', 'missing_policies.sql', 'tests/sql/admin_security.sql', 'tests/sql/report_aggregation.sql', 'supabase/.gitignore', 'supabase/config.toml',
+  'supabase/migrations/20261016125703_admin_security_v3.sql', 'supabase/migrations/20261016140944_aggregate_citizen_reports.sql', 'tests/report-aggregation-concurrency.cjs',
+  ...['index.ts', 'router.mjs', 'firebase.mjs', 'pac-schedule-core.js'].map(n => `supabase/functions/pac-api/${n}`)].map(n => path.join(root, n));
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     const absolute = path.join(dir, entry.name);
@@ -19,7 +21,7 @@ function walk(dir) {
 }
 const documentFiles = [
   ...['DOCUMENTACION_SISTEMA.md', 'DOCUMENTACION_CODIGO.md', 'ANALISIS_SISTEMA_PAC_BARINAS_2026-10-15.md'].map(n => path.join(root, n)),
-  ...['ACTIVACION_SEGURIDAD.md', 'CAMBIOS_SEGURIDAD_Y_ALERTAS.md'].map(n => path.join(root, 'docs', n)).filter(fs.existsSync),
+  ...['ACTIVACION_SEGURIDAD.md', 'CAMBIOS_SEGURIDAD_Y_ALERTAS.md', 'OPERACION_GATEWAY_SUPABASE.md', 'CAMBIOS_MAPA_ANUNCIOS_Y_SINCRONIZACION.md'].map(n => path.join(root, 'docs', n)).filter(fs.existsSync),
   ...walk(docdir)
 ];
 function syncCopies() {

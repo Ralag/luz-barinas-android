@@ -1,74 +1,86 @@
 package com.example.ui.components
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.PowerManager
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.background
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import com.example.data.model.Sector
+import androidx.core.app.NotificationManagerCompat
 
+/** A short introduction. Permissions are optional and can be configured later. */
 @Composable
 fun OnboardingFlowDialog(
     isOpen: Boolean,
-    onComplete: () -> Unit
+    onComplete: () -> Unit,
+    onSkip: () -> Unit = onComplete,
+    onWatchTutorial: (() -> Unit)? = null
 ) {
     if (!isOpen) return
-
-    var currentStep by remember { mutableIntStateOf(0) }
-    val context = LocalContext.current
-
-    Dialog(
-        onDismissRequest = { /* Cannot dismiss onboarding */ },
-        properties = DialogProperties(
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false,
-            usePlatformDefaultWidth = false
-        )
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.95f)
-                .wrapContentHeight(),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            AnimatedContent(
-                targetState = currentStep,
-                label = "onboarding_steps"
-            ) { step ->
-                when (step) {
-                    0 -> WelcomeStep { currentStep = 1 }
-                    1 -> PermissionsStep(
-                        onNext = { currentStep = 2 }
-                    )
-                    2 -> BatteryStep { onComplete() }
+    var currentStep by rememberSaveable { mutableIntStateOf(0) }
+    var entered by remember { mutableStateOf(false) }
+    val entranceAlpha by animateFloatAsState(if (entered) 1f else 0f, tween(220), label = "welcome_entrance")
+    LaunchedEffect(Unit) { entered = true }
+    AdaptiveActionDialog(
+        onDismiss = onSkip,
+        modifier = Modifier.testTag("onboarding_dialog"),
+        actions = {
+            Button(onClick = onComplete, modifier = Modifier.fillMaxWidth().testTag("onboarding_choose_sector")) {
+                Text("Elegir mi sector", fontWeight = FontWeight.Bold)
+            }
+            if (currentStep == 0) {
+                TextButton(onClick = { currentStep = 1 }, modifier = Modifier.fillMaxWidth()) { Text("Configurar avisos (opcional)") }
+                TextButton(onClick = onSkip, modifier = Modifier.fillMaxWidth().testTag("onboarding_skip")) { Text("Explorar primero") }
+            } else {
+                TextButton(onClick = { currentStep = 0 }, modifier = Modifier.fillMaxWidth()) { Text("Volver a la bienvenida") }
+            }
+        }
+    ) { bodyModifier ->
+        // Short transitions inherit Android's animator duration scale, including
+        // reduced motion. There is no timer, auto advance or repeating intro.
+        AnimatedContent(
+            targetState = currentStep,
+            transitionSpec = { fadeIn(tween(160)) togetherWith fadeOut(tween(100)) },
+            modifier = bodyModifier.graphicsLayer { alpha = entranceAlpha },
+            label = "onboarding_steps"
+        ) { step ->
+            Column(
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (step == 0) {
+                    WelcomeStep(onWatchTutorial)
+                } else {
+                    PermissionsStep()
+                    HorizontalDivider()
+                    BatteryStep()
                 }
             }
         }
@@ -76,211 +88,72 @@ fun OnboardingFlowDialog(
 }
 
 @Composable
-private fun WelcomeStep(onNext: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Bolt,
-                contentDescription = "Icono de electricidad",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(48.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = "Bienvenido a PAC Barinas",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.ExtraBold,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = "Herramienta comunitaria para consultar cronogramas referenciales del Plan de Administración de Carga (PAC) y registrar el estado eléctrico de tu sector.",
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+private fun WelcomeStep(onWatchTutorial: (() -> Unit)?) {
+    Icon(Icons.Default.Bolt, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(48.dp))
+    Text("Tu día, con más previsión", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+    Text("PAC Barinas reúne tu horario y los avisos de tu comunidad en un solo lugar.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    WelcomeFeature(Icons.Default.Alarm, "Consulta tu próximo turno", "Elige tu sector para ver su programación de hoy.")
+    WelcomeFeature(Icons.Default.Map, "Explora el mapa", "Consulta sectores y reportes de la comunidad.")
+    WelcomeFeature(Icons.Default.NotificationsActive, "Comparte lo que ocurre", "Reporta cortes, retorno del servicio y fallas irregulares.")
+    onWatchTutorial?.let { watch ->
+        OutlinedButton(onClick = watch, modifier = Modifier.fillMaxWidth().testTag("onboarding_tutorial")) { Text("Ver tutorial en YouTube") }
+    }
+    Text(
+        "Aplicación comunitaria independiente; no representa a CORPOELEC ni a organismos públicos. Los horarios son referenciales y proceden de comunicaciones públicas del prestador eléctrico (corpoelec.gob.ve).",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
 
-        // Tarjeta obligatoria de renuncia de responsabilidad y fuentes oficiales
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-            ),
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = "Aviso Legal",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Aviso de Independencia y Fuentes",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "• Esta aplicación NO representa a CORPOELEC, al MPPEE ni a ninguna entidad pública o gubernamental.\n• La información del cronograma es referencial y proviene de comunicaciones públicas del prestador eléctrico (corpoelec.gob.ve).",
-                    fontSize = 11.sp,
-                    lineHeight = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+@Composable
+private fun WelcomeFeature(icon: ImageVector, title: String, detail: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleSmall)
+            Text(detail, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun PermissionsStep() {
+    val context = LocalContext.current
+    var notificationsEnabled by remember { mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled()) }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted -> notificationsEnabled = granted }
+    Text("Avisos a tu ritmo", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+    Text("Puedes consultar horarios y usar el mapa sin conceder permisos. Actívalos si deseas recibir avisos locales antes de tu turno.", style = MaterialTheme.typography.bodyMedium)
+    OutlinedButton(
+        onClick = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                runCatching { context.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)) }
             }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(
-            onClick = onNext,
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("Comenzar Configuración", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
+        },
+        enabled = !notificationsEnabled,
+        modifier = Modifier.fillMaxWidth()
+    ) { Text(if (notificationsEnabled) "Notificaciones activadas" else "Permitir notificaciones") }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        OutlinedButton(
+            onClick = {
+                runCatching { context.startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${context.packageName}"))) }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Revisar permiso de alarmas") }
     }
 }
 
-@SuppressLint("InlinedApi")
 @Composable
-private fun PermissionsStep(onNext: () -> Unit) {
+private fun BatteryStep() {
     val context = LocalContext.current
-    
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.NotificationsActive,
-            contentDescription = "Icono de notificaciones",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(64.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Permisos de Notificación",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Para avisarte cuando se acerque tu turno de corte o si hay una emergencia global, necesitamos que autorices las notificaciones y alarmas exactas.",
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        Button(
-            onClick = {
-                try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                        context.startActivity(intent)
-                    }
-                } catch (e: Exception) { e.printStackTrace() }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-        ) {
-            Text("1. Habilitar Alarmas Exactas")
-        }
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        Button(
-            onClick = onNext,
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("Siguiente", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Default.BatteryAlert, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Text("Si no llegan los avisos", style = MaterialTheme.typography.titleMedium)
     }
-}
-
-@SuppressLint("BatteryLife")
-@Composable
-private fun BatteryStep(onNext: () -> Unit) {
-    val context = LocalContext.current
-    
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.BatteryAlert,
-            contentDescription = "Icono de alerta de batería",
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(64.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "¡Muy Importante!",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Los teléfonos Android \"matan\" las alarmas si la app está cerrada para ahorrar batería. Para que tus alertas funcionen 24/7 con el teléfono en el bolsillo, debes Desactivar la Optimización de Batería para esta app.",
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        Button(
-            onClick = {
-                try {
-                    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                    intent.data = Uri.parse("package:" + context.packageName)
-                    context.startActivity(intent)
-                } catch (e: Exception) { 
-                    e.printStackTrace()
-                    android.widget.Toast.makeText(context, "No se pudo abrir automáticamente. Por favor, ve a Configuración de tu teléfono > Aplicaciones > PAC Barinas y en 'Batería' selecciona 'Sin restricciones' para que las alarmas funcionen.", android.widget.Toast.LENGTH_LONG).show()
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-        ) {
-            Text("Desactivar Restricción")
-        }
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        Button(
-            onClick = onNext,
-            modifier = Modifier.fillMaxWidth().height(50.dp),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("Elegir mi Sector", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
-    }
+    Text("Algunos teléfonos limitan las tareas en segundo plano. Si notas retrasos, revisa los ajustes de batería de PAC Barinas. No necesitas cambiarlos para empezar.", style = MaterialTheme.typography.bodyMedium)
+    OutlinedButton(
+        onClick = { runCatching { context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}"))) } },
+        modifier = Modifier.fillMaxWidth()
+    ) { Text("Abrir ajustes de la aplicación") }
 }

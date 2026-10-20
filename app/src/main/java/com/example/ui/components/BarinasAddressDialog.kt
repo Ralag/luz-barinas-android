@@ -1,73 +1,33 @@
 package com.example.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Clear
-import androidx.compose.material.icons.outlined.ElectricBolt
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import kotlinx.coroutines.delay
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.BarinasLocation
 import com.example.data.model.BarinasLocationsCatalog
-import com.example.ui.theme.BlockAColor
-import com.example.ui.theme.BlockBColor
-import com.example.ui.theme.BlockCColor
-import com.example.ui.theme.BlockDColor
+import com.example.data.model.PacBlock
+import com.example.data.model.Sector
+import kotlinx.coroutines.delay
 
 @Composable
 fun BarinasAddressDialog(
@@ -76,700 +36,185 @@ fun BarinasAddressDialog(
     onLocationSelected: (BarinasLocation) -> Unit,
     onDismiss: () -> Unit,
     onRegisterNewCommunity: ((name: String, municipio: String, parroquia: String, block: String, circuit: String) -> Unit)? = null,
-    availableSectors: List<com.example.data.model.Sector> = emptyList(),
+    availableSectors: List<Sector> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     if (!isOpen) return
-
-    var dialogTab by remember { mutableIntStateOf(0) } // 0 = Buscar, 1 = Denominar / Registrar
-    var customName by remember { mutableStateOf("") }
-    var customMunicipio by remember { mutableStateOf(BarinasLocationsCatalog.BARINAS_MUNICIPALITIES[0].name) }
-    var customParroquia by remember { mutableStateOf(BarinasLocationsCatalog.BARINAS_MUNICIPALITIES[0].parroquias[0]) }
-    var customBlock by remember { mutableStateOf("C") }
-    var customCircuit by remember { mutableStateOf("") }
-
-    var query by remember { mutableStateOf("") }
+    var dialogTab by rememberSaveable { mutableIntStateOf(0) }
+    var customName by rememberSaveable { mutableStateOf("") }
+    var customMunicipio by rememberSaveable { mutableStateOf(BarinasLocationsCatalog.BARINAS_MUNICIPALITIES[0].name) }
+    var customParroquia by rememberSaveable { mutableStateOf(BarinasLocationsCatalog.BARINAS_MUNICIPALITIES[0].parroquias[0]) }
+    var customBlock by rememberSaveable { mutableStateOf("C") }
+    var customCircuit by rememberSaveable { mutableStateOf("") }
+    var query by rememberSaveable { mutableStateOf("") }
     var selectedPreviewLocation by remember { mutableStateOf<BarinasLocation?>(null) }
     val focusManager = LocalFocusManager.current
-
     val dynamicLocations = remember(availableSectors) {
         availableSectors.map { sector ->
-            val cleanBlock = if (sector.rotationBlock.startsWith("Bloque", ignoreCase = true)) {
-                sector.rotationBlock
-            } else {
-                "Bloque ${sector.rotationBlock}"
-            }
             BarinasLocation(
-                id = sector.id,
-                name = sector.name,
-                type = if (sector.isCommunity) "Sector Comunitario 🤝" else "Sector Base PAC 📋",
+                id = sector.id, name = sector.name,
+                type = if (sector.isCommunity) "Sector comunitario" else "Sector PAC",
                 parroquia = "Barinas",
-                block = cleanBlock,
-                circuitCode = sector.circuitCode,
-                sectorEntityId = sector.id,
+                block = PacBlock.normalize(sector.rotationBlock)?.let { "Bloque $it" } ?: sector.rotationBlock,
+                circuitCode = sector.circuitCode, sectorEntityId = sector.id,
                 description = if (sector.isCommunity) "Incorporado por la comunidad" else "Sector del catálogo PAC Barinas",
                 keywords = listOf(sector.name.lowercase(), sector.circuitCode.lowercase(), "barinas"),
                 municipio = "Barinas"
             )
         }
     }
-
-    // Debounced search to avoid blocking main thread on every keystroke
     var results by remember { mutableStateOf(emptyList<BarinasLocation>()) }
     LaunchedEffect(query, dynamicLocations) {
         if (query.length >= 2) {
-            delay(200L) // 200ms debounce
-            val dynamicMatches = dynamicLocations.filter { loc ->
-                loc.name.contains(query, ignoreCase = true) ||
-                loc.circuitCode.contains(query, ignoreCase = true) ||
-                loc.parroquia.contains(query, ignoreCase = true) ||
-                loc.keywords.any { it.contains(query, ignoreCase = true) }
+            delay(200)
+            val matches = dynamicLocations.filter { location ->
+                location.name.contains(query, ignoreCase = true) ||
+                    location.circuitCode.contains(query, ignoreCase = true) ||
+                    location.parroquia.contains(query, ignoreCase = true) ||
+                    location.keywords.any { it.contains(query, ignoreCase = true) }
             }
-            val catalogMatches = BarinasLocationsCatalog.searchLocations(query)
-            // Dynamic matches (especially community sectors) first, distinct by name
-            results = (dynamicMatches + catalogMatches).distinctBy { it.name.trim().lowercase() }
+            results = (matches + BarinasLocationsCatalog.searchLocations(query)).distinctBy { it.name.trim().lowercase() }
         } else {
-            // When query is empty, show Community sectors at the top!
-            val communitySectors = dynamicLocations.filter { it.type.contains("Comunitario") }
-            results = communitySectors
+            results = dynamicLocations.filter { it.type == "Sector comunitario" }
         }
     }
-
-    val popularSuggestions = remember {
-        listOf(
-            "La Cincuentena",
-            "Don Samuel",
-            "Alto Barinas Norte",
-            "Ciudad Varyna",
-            "La Floresta",
-            "Centro",
-            "Los Pozones",
-            "Ciudad Tavacare",
-            "Barinitas",
-            "Socopó"
-        )
-    }
-
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Card(
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-            modifier = modifier
-                .fillMaxWidth(0.94f)
-                .widthIn(max = 560.dp)
-                .padding(vertical = 20.dp)
-                .testTag("barinas_address_dialog")
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Outlined.LocationOn,
-                            contentDescription = "Icono de ubicación",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Ubicación en Barinas",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Busca tu sector o regístralo si aún no aparece.",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Tab Switcher (Buscar vs Denominar / Registrar)
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(modifier = Modifier.padding(3.dp)) {
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (dialogTab == 0) MaterialTheme.colorScheme.surface else Color.Transparent,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable { dialogTab = 0 }
-                        ) {
-                            Text(
-                                text = "🔍 Buscar",
-                                fontSize = 12.sp,
-                                fontWeight = if (dialogTab == 0) FontWeight.Bold else FontWeight.Medium,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                color = if (dialogTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(vertical = 7.dp)
-                            )
-                        }
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (dialogTab == 1) MaterialTheme.colorScheme.surface else Color.Transparent,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable { dialogTab = 1 }
-                        ) {
-                            Text(
-                                text = "➕ Denominar Mi Sector",
-                                fontSize = 12.sp,
-                                fontWeight = if (dialogTab == 1) FontWeight.Bold else FontWeight.Medium,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                color = if (dialogTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(vertical = 7.dp)
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                if (dialogTab == 0) {
-
-                // Search Input Field
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = {
-                        query = it
-                        selectedPreviewLocation = null
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("address_dialog_input"),
-                    placeholder = {
-                        Text(
-                            "Tu barrio, urbanización o sector...",
-                            fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            Icons.Outlined.Search,
-                            contentDescription = "Buscar",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    },
-                    trailingIcon = {
-                        if (query.isNotEmpty()) {
-                            IconButton(onClick = { query = "" }) {
-                                Icon(
-                                    Icons.Outlined.Clear,
-                                    contentDescription = "Limpiar",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-                    ),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        val first = results.firstOrNull()
-                        if (first != null) {
-                            selectedPreviewLocation = first
-                        }
+    AdaptiveActionDialog(
+        onDismiss = onDismiss,
+        modifier = modifier.testTag("barinas_address_dialog"),
+        actions = {
+            if (dialogTab == 1) {
+                Button(
+                    onClick = {
                         focusManager.clearFocus()
-                    })
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Popular Quick Chips
-                Text(
-                    text = "Sectores frecuentes:",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(popularSuggestions, key = { it }) { item ->
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                            border = androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
-                            modifier = Modifier.clickable {
-                                query = item
-                                val match = BarinasLocationsCatalog.searchLocations(item).firstOrNull()
-                                selectedPreviewLocation = match
-                            }
-                        ) {
-                            Text(
-                                text = item,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                            )
-                        }
-                    }
+                        onRegisterNewCommunity?.invoke(customName.trim(), customMunicipio.trim(), customParroquia.trim(), "Bloque $customBlock", customCircuit.trim())
+                        onDismiss()
+                    },
+                    enabled = customName.isNotBlank() && onRegisterNewCommunity != null,
+                    modifier = Modifier.fillMaxWidth().testTag("register_sector_button")
+                ) { Text("Guardar mi sector", fontWeight = FontWeight.Bold) }
+            } else {
+                selectedPreviewLocation?.let { location ->
+                    Button(
+                        onClick = { focusManager.clearFocus(); onLocationSelected(location) },
+                        modifier = Modifier.fillMaxWidth().testTag("confirm_location_button")
+                    ) { Text("Elegir este sector", fontWeight = FontWeight.Bold) }
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Location Confirmation Card if selected
-                AnimatedVisibility(
-                    visible = selectedPreviewLocation != null,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    selectedPreviewLocation?.let { loc ->
-                        val blockColor = when {
-                            loc.block.contains("A") -> BlockAColor
-                            loc.block.contains("B") -> BlockBColor
-                            loc.block.contains("C") -> BlockCColor
-                            loc.block.contains("D") -> BlockDColor
-                            else -> MaterialTheme.colorScheme.primary
-                        }
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 6.dp)
-                                .testTag("location_confirmed_card"),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = blockColor.copy(alpha = 0.12f)),
-                            border = androidx.compose.foundation.BorderStroke(1.5.dp, blockColor)
-                        ) {
-                            Column(modifier = Modifier.padding(14.dp)) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = loc.name,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 15.sp,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = "${loc.type} • Parroquia ${loc.parroquia}",
-                                            fontSize = 11.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Text(
-                                            text = "⚡ ${loc.circuitCode}",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-
-                                    Surface(
-                                        shape = RoundedCornerShape(10.dp),
-                                        color = blockColor
-                                    ) {
-                                        Text(
-                                            text = loc.block,
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White,
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                                        )
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.height(10.dp))
-
-                                Button(
-                                    onClick = {
-                                        onLocationSelected(loc)
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .testTag("confirm_location_button"),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = blockColor)
-                                ) {
-                                    Icon(Icons.Outlined.Check, contentDescription = "Confirmar", modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Confirmar y Fijar esta Ubicación", fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        }
-                    }
+            }
+            TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text("Cerrar") }
+        }
+    ) { bodyModifier ->
+        LazyColumn(
+            modifier = bodyModifier.testTag("address_dialog_scroll"),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Text("Tu sector en Barinas", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text("Busca una ubicación o denomina tu sector.", style = MaterialTheme.typography.bodyMedium)
+                currentAddress?.let {
+                    Text("Actual: $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-
-                // Search Results or Not-Found Card
-                if (query.length >= 2 && results.isEmpty()) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 10.dp)
-                            .clickable {
-                                customName = query.trim()
-                                dialogTab = 1
-                            },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Outlined.LocationOn, contentDescription = "Icono de advertencia", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "¿No encuentras '$query'?",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = "Toca aquí para registrar este sector indicando su Municipio y Parroquia.",
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+            }
+            item {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = dialogTab == 0, onClick = { focusManager.clearFocus(); dialogTab = 0 }, label = { Text("Buscar") }, modifier = Modifier.weight(1f).testTag("address_search_tab"))
+                    FilterChip(selected = dialogTab == 1, onClick = { focusManager.clearFocus(); dialogTab = 1 }, label = { Text("Mi sector") }, modifier = Modifier.weight(1f).testTag("address_register_tab"))
+                }
+            }
+            if (dialogTab == 0) {
+                item {
+                    OutlinedTextField(
+                        value = query, onValueChange = { query = it; selectedPreviewLocation = null },
+                        modifier = Modifier.fillMaxWidth().testTag("address_dialog_input"),
+                        label = { Text("Barrio, urbanización o circuito") },
+                        leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+                        trailingIcon = {
+                            if (query.isNotEmpty()) IconButton(onClick = { query = ""; selectedPreviewLocation = null }) {
+                                Icon(Icons.Outlined.Clear, contentDescription = "Limpiar búsqueda")
                             }
-                        }
-                    }
-                } else {
-                    val isShowingCommunityInitial = query.isEmpty() && results.isNotEmpty()
-                    Text(
-                        text = if (isShowingCommunityInitial) {
-                            "Sectores comunitarios activos (${results.size}) 🤝:"
-                        } else {
-                            "Resultados encontrados (${results.size}):"
                         },
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isShowingCommunityInitial) Color(0xFFFFB300) else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 6.dp)
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { selectedPreviewLocation = results.firstOrNull(); focusManager.clearFocus() })
                     )
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 240.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        items(results, key = { it.id }) { loc ->
-                            val locBlockColor = when {
-                                loc.block.contains("A") -> BlockAColor
-                                loc.block.contains("B") -> BlockBColor
-                                loc.block.contains("C") -> BlockCColor
-                                loc.block.contains("D") -> BlockDColor
-                                else -> MaterialTheme.colorScheme.primary
-                            }
-
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = if (selectedPreviewLocation?.id == loc.id) {
-                                    locBlockColor.copy(alpha = 0.15f)
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-                                },
-                                border = androidx.compose.foundation.BorderStroke(
-                                    width = if (selectedPreviewLocation?.id == loc.id) 1.5.dp else 0.5.dp,
-                                    color = if (selectedPreviewLocation?.id == loc.id) locBlockColor else MaterialTheme.colorScheme.outline
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        selectedPreviewLocation = loc
-                                    }
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(
-                                                text = loc.name,
-                                                fontSize = 13.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            if (loc.type.contains("Comunitario")) {
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                Surface(
-                                                    shape = RoundedCornerShape(6.dp),
-                                                    color = Color(0xFFFFB300).copy(alpha = 0.2f),
-                                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFB300))
-                                                ) {
-                                                    Text(
-                                                        text = "Comunitario 🤝",
-                                                        fontSize = 9.sp,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = Color(0xFFFFB300),
-                                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                                                    )
-                                                }
-                                            } else {
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                Surface(
-                                                    shape = RoundedCornerShape(6.dp),
-                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-                                                ) {
-                                                    Text(
-                                                        text = "Base PAC 📋",
-                                                        fontSize = 9.sp,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        Text(
-                                            text = "${loc.parroquia} • ${loc.circuitCode}",
-                                            fontSize = 11.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = locBlockColor.copy(alpha = 0.2f),
-                                        border = androidx.compose.foundation.BorderStroke(1.dp, locBlockColor)
-                                    ) {
-                                        Text(
-                                            text = loc.block,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = locBlockColor,
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                                        )
-                                    }
-                                }
+                }
+                selectedPreviewLocation?.let { location ->
+                    item(key = "selected_location") {
+                        Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().testTag("location_confirmed_card")) {
+                            Column(Modifier.padding(12.dp)) {
+                                Text(location.name, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Text("${location.block} · ${location.circuitCode}", style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Text("Pulsa «Elegir este sector» para guardar.", style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                 }
-
-                } else {
-                    // TAB 1: Denominar / Registrar Mi Sector (Crowdsource Barinas geography)
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                item {
+                    Text(
+                        if (query.length < 2 && results.isEmpty()) "Escribe al menos dos letras para buscar en el catálogo." else "${results.size} sectores encontrados",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                items(results, key = { it.id }) { location ->
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (selectedPreviewLocation?.id == location.id) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        modifier = Modifier.fillMaxWidth().clickable(role = Role.Button) { selectedPreviewLocation = location; focusManager.clearFocus() }
                     ) {
-                        Text(
-                            text = "📍 Registrar Sector / Comunidad en la Nube",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Ayuda a mapear Barinas. Selecciona tu municipio, parroquia y el bloque asignado.",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        // 1. Nombre de la comunidad
-                        OutlinedTextField(
-                            value = customName,
-                            onValueChange = { customName = it },
-                            label = { Text("Nombre de la Comunidad / Sector *") },
-                            placeholder = { Text("Ej: Urb. Los Profesionales, Barrio...") },
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        // 2. Municipio Selector (12 Municipios Oficiales de Barinas)
-                        Column {
-                            Text("1. Municipio del Estado Barinas: *", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                items(BarinasLocationsCatalog.BARINAS_MUNICIPALITIES) { mun ->
-                                    val isSelected = customMunicipio == mun.name
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-                                        modifier = Modifier.clickable {
-                                            customMunicipio = mun.name
-                                            customParroquia = mun.parroquias.firstOrNull() ?: ""
-                                        }
-                                    ) {
-                                        Text(
-                                            text = mun.name,
-                                            fontSize = 11.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // 3. Parroquia Selector (Filtradas según el Municipio seleccionado)
-                        Column {
-                            val availableParroquias = remember(customMunicipio) {
-                                BarinasLocationsCatalog.getParroquiasForMunicipality(customMunicipio)
-                            }
-                            Text("2. Parroquia (Municipio $customMunicipio): *", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                items(availableParroquias) { p ->
-                                    val isSelected = customParroquia == p
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceVariant,
-                                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-                                        modifier = Modifier.clickable { customParroquia = p }
-                                    ) {
-                                        Text(
-                                            text = p,
-                                            fontSize = 11.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (isSelected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface,
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // 4. Bloque PAC Asignado
-                        Column {
-                            Text("3. Bloque PAC asignado por Corpoelec: *", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                listOf("A", "B", "C", "D").forEach { b ->
-                                    val isSelected = customBlock == b
-                                    val bColor = when (b) {
-                                        "A" -> BlockAColor
-                                        "B" -> BlockBColor
-                                        "C" -> BlockCColor
-                                        else -> BlockDColor
-                                    }
-                                    Surface(
-                                        shape = RoundedCornerShape(10.dp),
-                                        color = if (isSelected) bColor else bColor.copy(alpha = 0.12f),
-                                        border = androidx.compose.foundation.BorderStroke(if (isSelected) 2.dp else 1.dp, bColor),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .clickable { customBlock = b }
-                                    ) {
-                                        Text(
-                                            text = "Bloque $b",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                            color = if (isSelected) Color.White else bColor,
-                                            modifier = Modifier.padding(vertical = 10.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // 5. Circuito o Referencia
-                        OutlinedTextField(
-                            value = customCircuit,
-                            onValueChange = { customCircuit = it },
-                            label = { Text("Circuito o Punto de Referencia (Opcional)") },
-                            placeholder = { Text("Ej: Circuito Don Samuel / Cerca de la plaza...") },
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        // Submit Button
-                        Button(
-                            onClick = {
-                                if (customName.isNotBlank()) {
-                                    onRegisterNewCommunity?.invoke(
-                                        customName.trim(),
-                                        customMunicipio.trim(),
-                                        customParroquia.trim(),
-                                        "Bloque $customBlock",
-                                        customCircuit.trim()
-                                    )
-                                    onDismiss()
-                                }
-                            },
-                            enabled = customName.isNotBlank(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(Icons.Outlined.Check, contentDescription = "Guardar", modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Guardar y Registrar en la Nube", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Column(Modifier.padding(12.dp)) {
+                            Text(location.name, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            Text("${location.type} · ${location.block}", style = MaterialTheme.typography.labelMedium)
+                            Text("${location.parroquia} · ${location.circuitCode}", style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Dismiss / Explore button
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (currentAddress != null) {
-                        Text(
-                            text = "Actual: $currentAddress",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.width(1.dp))
+                if (query.length >= 2 && results.isEmpty() && onRegisterNewCommunity != null) {
+                    item {
+                        OutlinedButton(onClick = { customName = query.trim(); dialogTab = 1; focusManager.clearFocus() }, modifier = Modifier.fillMaxWidth()) {
+                            Text("No aparece: denominar mi sector")
+                        }
                     }
-
-                    TextButton(onClick = onDismiss) {
-                        Text("Cerrar", fontSize = 12.sp)
+                }
+            } else {
+                item {
+                    Text("Denominar mi sector", style = MaterialTheme.typography.titleMedium)
+                    Text("Indica su ubicación y bloque PAC. La propuesta se enviará para revisión cuando tengas conexión.", style = MaterialTheme.typography.bodyMedium)
+                }
+                item {
+                    OutlinedTextField(value = customName, onValueChange = { customName = it }, label = { Text("Nombre del sector") }, singleLine = true, keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next), modifier = Modifier.fillMaxWidth().testTag("register_sector_name"))
+                }
+                item {
+                    Text("Municipio", style = MaterialTheme.typography.labelLarge)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(BarinasLocationsCatalog.BARINAS_MUNICIPALITIES) { municipality ->
+                            FilterChip(selected = customMunicipio == municipality.name, onClick = { customMunicipio = municipality.name; customParroquia = municipality.parroquias.firstOrNull().orEmpty() }, label = { Text(municipality.name) })
+                        }
                     }
+                }
+                item {
+                    Text("Parroquia", style = MaterialTheme.typography.labelLarge)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(BarinasLocationsCatalog.getParroquiasForMunicipality(customMunicipio)) { parish ->
+                            FilterChip(selected = customParroquia == parish, onClick = { customParroquia = parish }, label = { Text(parish) })
+                        }
+                    }
+                }
+                item {
+                    Text("Bloque PAC asignado", style = MaterialTheme.typography.labelLarge)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("A", "B", "C", "D").forEach { block ->
+                            FilterChip(selected = customBlock == block, onClick = { customBlock = block }, label = { Text(block) }, modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+                item {
+                    OutlinedTextField(
+                        value = customCircuit, onValueChange = { customCircuit = it },
+                        label = { Text("Circuito o referencia (opcional)") }, minLines = 1, maxLines = 3,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done), keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        modifier = Modifier.fillMaxWidth().testTag("register_sector_circuit")
+                    )
                 }
             }
         }

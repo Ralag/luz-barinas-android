@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -63,6 +65,8 @@ data class SupabaseSector(
     val rotationBlock: String? = null,
     val isCommunity: Boolean? = null,
     val is_community: Boolean? = null,
+    val lat: Double? = null,
+    val lon: Double? = null,
     val lastUpdatedMillis: Long = 0L
 ) {
     val resolvedIsCommunity: Boolean
@@ -79,10 +83,11 @@ data class SupabaseCitizenReport(
     val sectorName: String,
     val hasPower: Boolean,
     val reportType: String,
-    val voltage: Double,
+    val voltage: Double? = null,
     val observation: String? = null,
-    val deviceOrigin: String,
-    val timestamp: Long
+    val deviceOrigin: String? = null,
+    val timestamp: Long,
+    val id: String? = null
 )
 
 @Serializable
@@ -109,6 +114,8 @@ class CloudSyncRepository(
     
     private var sectorsJob: Job? = null
     private var appConfigJob: Job? = null
+    private var reconciliationJob: Job? = null
+    private var realtimeStarted = false
 
     private val _broadcastNoticeFlow = MutableStateFlow<BroadcastNotice?>(null)
     val broadcastNoticeFlow: StateFlow<BroadcastNotice?> = _broadcastNoticeFlow.asStateFlow()
@@ -118,10 +125,12 @@ class CloudSyncRepository(
     private val _donationConfigFlow = kotlinx.coroutines.flow.MutableStateFlow<com.example.data.model.DonationConfig?>(null)
     val donationConfigFlow = _donationConfigFlow.asStateFlow()
 
-    private val _pacScheduleUpdatedFlow = MutableSharedFlow<Long>(extraBufferCapacity = 1)
+    private val _pacScheduleUpdatedFlow = MutableSharedFlow<Long>(replay = 1, extraBufferCapacity = 1)
     val pacScheduleUpdatedFlow: SharedFlow<Long> = _pacScheduleUpdatedFlow.asSharedFlow()
 
     private val syncPrefs = context.getSharedPreferences("cloud_sync_prefs", Context.MODE_PRIVATE)
+
+    init { com.example.data.model.TutorialLink.update(syncPrefs.getString("youtube_tutorial_url", null)) }
 
     private val supabaseUrl = "https://ikttyjojubtredehtneb.supabase.co"
     private val supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrdHR5am9qdWJ0cmVkZWh0bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwOTU4NTIsImV4cCI6MjEwNTY3MTg1Mn0.kbEerwT-EWdIlxlGWlEv7kSJ-k9AnteTe52IzxYDlXg"
@@ -139,6 +148,25 @@ class CloudSyncRepository(
     private val jsonFormat = Json { ignoreUnknownKeys = true }
 
     fun startRealtimeSync() {
+        if (reconciliationJob?.isActive == true) return
+        // HTTP reconciliation works even if a websocket is blocked or disconnected.
+        reconciliationJob = scope.launch {
+            while (isActive) {
+                try {
+                    val configs = supabase.postgrest["app_config"].select().decodeList<SupabaseAppConfig>()
+                    configs.forEach { config ->
+                        try { processConfig(config.config_key, config.config_value.jsonObject) }
+                        catch (e: Exception) { Log.w(TAG, "Invalid config ${config.config_key}", e) }
+                    }
+                } catch (e: Exception) { Log.w(TAG, "Config reconciliation unavailable", e) }
+                try {
+                    supabase.postgrest["sectors"].select().decodeList<SupabaseSector>().forEach { updateLocalSector(it) }
+                } catch (e: Exception) { Log.w(TAG, "Sector reconciliation unavailable", e) }
+                delay(60_000L)
+            }
+        }
+        if (realtimeStarted) return
+        realtimeStarted = true
         scope.launch {
             try {
                 supabase.realtime.connect()
@@ -158,50 +186,6 @@ class CloudSyncRepository(
                 
                 channel.subscribe()
                 
-                // Fetch initial state
-                val configs = supabase.postgrest["app_config"].select().decodeList<SupabaseAppConfig>()
-                for (config in configs) {
-                    processConfig(config.config_key, config.config_value.jsonObject)
-                }
-
-                // Sync all sectors (especially to get community sectors approved by admin)
-                val allSectors = supabase.postgrest["sectors"].select().decodeList<SupabaseSector>()
-                val sectorDao = database.sectorDao()
-                
-                val entitiesToUpdate = allSectors.map { s ->
-                    val existing = sectorDao.getSectorById(s.id)
-                    val isCom = s.resolvedIsCommunity
-                    if (existing != null) {
-                        existing.copy(
-                            name = s.name ?: existing.name,
-                            circuitCode = s.circuitCode ?: existing.circuitCode,
-                            status = s.status,
-                            voltage = s.voltage.toFloat(),
-                            confirmedReportsCount = s.confirmedReportsCount,
-                            withoutPowerPercentage = s.withoutPowerPercentage,
-                            lastUpdatedMillis = if (s.lastUpdatedMillis > 0) s.lastUpdatedMillis else existing.lastUpdatedMillis,
-                            rotationBlock = s.rotationBlock ?: existing.rotationBlock,
-                            isCommunity = isCom
-                        )
-                    } else {
-                        // It's a new sector (likely community)
-                        com.example.data.local.entity.SectorEntity(
-                            id = s.id,
-                            name = s.name ?: s.id,
-                            circuitCode = s.circuitCode ?: "Circuito Urbano",
-                            status = s.status,
-                            voltage = s.voltage.toFloat(),
-                            confirmedReportsCount = s.confirmedReportsCount,
-                            withoutPowerPercentage = s.withoutPowerPercentage,
-                            lastUpdatedMillis = if (s.lastUpdatedMillis > 0) s.lastUpdatedMillis else System.currentTimeMillis(),
-                            rotationBlock = s.rotationBlock ?: "Bloque C",
-                            polygonPointsRaw = "8.625,-70.220;8.635,-70.208;8.620,-70.202;8.615,-70.215",
-                            isCommunity = isCom
-                        )
-                    }
-                }
-                sectorDao.insertOrUpdateSectors(entitiesToUpdate)
-
                 // Realtime subscription for whole sectors table to propagate admin changes instantly
                 val sectorsTableChannel = supabase.realtime.channel("public-sectors-global")
                 sectorsTableChannel.postgresChangeFlow<PostgresAction>(schema = "public") {
@@ -245,8 +229,6 @@ class CloudSyncRepository(
     private fun processConfig(key: String, obj: JsonObject) {
         when (key) {
             "pac_schedule" -> {
-                // Convert kotlinx.serialization JsonObject to Map<String, Any> to reuse existing logic
-                // Or just rewrite the parsing logic simply
                 applyRemotePacScheduleJson(obj)
             }
             "broadcast_notice" -> {
@@ -268,6 +250,11 @@ class CloudSyncRepository(
                 } else {
                     _broadcastNoticeFlow.value = null
                 }
+            }
+            "app_experience" -> {
+                val url = com.example.data.model.TutorialLink.validate(obj["youtubeTutorialUrl"]?.jsonPrimitive?.content)
+                com.example.data.model.TutorialLink.update(url)
+                syncPrefs.edit().putString("youtube_tutorial_url", url).apply()
             }
             "donations_config" -> {
                 _donationConfigFlow.value = com.example.data.model.DonationConfig(
@@ -338,19 +325,21 @@ class CloudSyncRepository(
                     (s.rotationBlock != null && existing.rotationBlock != s.rotationBlock) ||
                     existing.isCommunity != isCom ||
                     (s.name != null && existing.name != s.name) ||
-                    (s.circuitCode != null && existing.circuitCode != s.circuitCode)
+                    (s.circuitCode != null && existing.circuitCode != s.circuitCode) ||
+                    existing.polygonPointsRaw != resolvedCoordinates(s, existing.polygonPointsRaw)
 
             if (isChanged) {
                 sectorDao.updateSector(
                     existing.copy(
                         name = s.name ?: existing.name,
                         circuitCode = s.circuitCode ?: existing.circuitCode,
-                        status = s.status,
+                        status = com.example.data.model.ReportSemantics.remoteStatus(s.status).name,
                         voltage = s.voltage.toFloat(),
                         confirmedReportsCount = s.confirmedReportsCount,
                         withoutPowerPercentage = s.withoutPowerPercentage,
                         lastUpdatedMillis = if (s.lastUpdatedMillis > 0) s.lastUpdatedMillis else existing.lastUpdatedMillis,
                         rotationBlock = s.rotationBlock ?: existing.rotationBlock,
+                        polygonPointsRaw = resolvedCoordinates(s, existing.polygonPointsRaw),
                         isCommunity = isCom
                     )
                 )
@@ -361,13 +350,13 @@ class CloudSyncRepository(
                     id = s.id,
                     name = s.name ?: s.id,
                     circuitCode = s.circuitCode ?: "Circuito Urbano",
-                    status = s.status,
+                    status = com.example.data.model.ReportSemantics.remoteStatus(s.status).name,
                     voltage = s.voltage.toFloat(),
                     confirmedReportsCount = s.confirmedReportsCount,
                     withoutPowerPercentage = s.withoutPowerPercentage,
                     lastUpdatedMillis = if (s.lastUpdatedMillis > 0) s.lastUpdatedMillis else System.currentTimeMillis(),
-                    rotationBlock = s.rotationBlock ?: "Bloque C",
-                    polygonPointsRaw = "8.625,-70.220;8.635,-70.208;8.620,-70.202;8.615,-70.215",
+                    rotationBlock = s.rotationBlock ?: "-",
+                    polygonPointsRaw = resolvedCoordinates(s),
                     isCommunity = isCom
                 )
             )
@@ -380,27 +369,29 @@ class CloudSyncRepository(
         hasPower: Boolean,
         reportType: String,
         voltage: Float?,
-        observation: String? = null
+        observation: String? = null,
+        reportedAtMillis: Long = System.currentTimeMillis(),
+        localReportId: Long? = null
     ): Boolean = withContext(Dispatchers.IO) {
         try {
             val report = SupabaseCitizenReport(
                 sectorId = sectorId,
                 sectorName = sectorName,
                 hasPower = hasPower,
-                reportType = reportType,
-                voltage = (voltage ?: if (hasPower) 118f else 0f).toDouble(),
+                reportType = com.example.data.model.ReportSemantics.canonicalType(reportType, hasPower),
+                voltage = voltage?.toDouble(),
                 observation = observation,
                 deviceOrigin = "LuzBarinas_Citizen_App",
-                timestamp = System.currentTimeMillis()
+                timestamp = reportedAtMillis,
+                id = reportId(localReportId, reportedAtMillis)
             )
             
-            supabase.postgrest["citizen_reports"].insert(report)
+            supabase.postgrest["citizen_reports"].upsert(report) {
+                onConflict = "id"
+                ignoreDuplicates = true
+            }
             
-            // Note: Since Supabase triggers or RPCs are better for atomic updates,
-            // we will simulate the optimistic update by fetching and updating if needed.
-            // But realistically, the backend should handle the math via triggers.
-            // For now, we will do a simple read/write if needed, or rely on realtime to reflect changes.
-            
+            // A private database trigger aggregates accepted reports; citizens never write sectors.
             true
         } catch (e: Exception) {
             Log.e(TAG, "Failed to upload citizen report to Supabase", e)
@@ -475,72 +466,33 @@ class CloudSyncRepository(
 
     private fun applyRemotePacScheduleJson(obj: JsonObject) {
         try {
-            val remoteVersion = obj["version"]?.jsonPrimitive?.longOrNull ?: 0L
-            val remoteUpdatedAt = obj["updatedAt"]?.jsonPrimitive?.longOrNull ?: remoteVersion
-            val lastApplied = syncPrefs.getLong("last_applied_pac_updated_at", 0L)
-
-            if (remoteUpdatedAt > lastApplied || remoteVersion > PacScheduleData.scheduleVersion || (remoteUpdatedAt > 0L && PacScheduleData.scheduleVersion == 0L)) {
-                
-                // 1. Apply remote slots
-                val slotsArray = obj["slots"]?.jsonArray
-                if (slotsArray != null && slotsArray.isNotEmpty()) {
-                    PacScheduleData.activeSlots.clear()
-                    slotsArray.forEachIndexed { idx, element ->
-                        val sMap = element.jsonObject
-                        val label = sMap["timeLabel"]?.jsonPrimitive?.content ?: "Turno ${idx + 1}"
-                        val startH = sMap["startHour"]?.jsonPrimitive?.intOrNull ?: 0
-                        val endH = sMap["endHour"]?.jsonPrimitive?.intOrNull ?: 4
-                        PacScheduleData.activeSlots.add(PacSlot(idx, label, startH, endH))
-                    }
+            val snapshot = com.example.data.model.PacScheduleSnapshot.parse(obj)
+            val fingerprint = snapshot.fingerprint()
+            synchronized(PacScheduleData) {
+                val previousFingerprint = syncPrefs.getString("pac_content_fingerprint_v2", null)
+                val previousRevision = syncPrefs.getLong("pac_remote_revision_v2", 0L)
+                if (previousFingerprint != null && snapshot.revision > 0L && snapshot.revision < previousRevision) return
+                if (fingerprint == previousFingerprint) {
+                    if (snapshot.revision > previousRevision) syncPrefs.edit()
+                        .putLong("pac_remote_revision_v2", snapshot.revision).apply()
+                    return
                 }
-
-                // 2. Apply remote matrix
-                val matrixRows = obj["matrixRows"]?.jsonArray
-                if (matrixRows != null && matrixRows.isNotEmpty()) {
-                    PacScheduleData.activeMatrix = Array(matrixRows.size) { i ->
-                        val cells = matrixRows[i].jsonObject["cells"]?.jsonArray
-                        cells?.map { it.jsonPrimitive.content }?.toTypedArray() ?: Array(7) { "-" }
-                    }
-                } else {
-                    val matrixRaw = obj["matrix"]?.jsonArray
-                    if (matrixRaw != null && matrixRaw.isNotEmpty()) {
-                        PacScheduleData.activeMatrix = Array(matrixRaw.size) { i ->
-                            matrixRaw[i].jsonArray.map { it.jsonPrimitive.content }.toTypedArray()
-                        }
-                    }
-                }
-
-                // 3. Apply remote sector assignments
-                obj["sectorsA"]?.jsonArray?.let { arr ->
-                    PacScheduleData.SECTORS_BLOQUE_A.clear()
-                    PacScheduleData.SECTORS_BLOQUE_A.addAll(arr.map { it.jsonPrimitive.content })
-                }
-                obj["sectorsB"]?.jsonArray?.let { arr ->
-                    PacScheduleData.SECTORS_BLOQUE_B.clear()
-                    PacScheduleData.SECTORS_BLOQUE_B.addAll(arr.map { it.jsonPrimitive.content })
-                }
-                obj["sectorsC"]?.jsonArray?.let { arr ->
-                    PacScheduleData.SECTORS_BLOQUE_C.clear()
-                    PacScheduleData.SECTORS_BLOQUE_C.addAll(arr.map { it.jsonPrimitive.content })
-                }
-                obj["sectorsD"]?.jsonArray?.let { arr ->
-                    PacScheduleData.SECTORS_BLOQUE_D.clear()
-                    PacScheduleData.SECTORS_BLOQUE_D.addAll(arr.map { it.jsonPrimitive.content })
-                }
-
-                PacScheduleData.scheduleVersion = remoteUpdatedAt
-                syncPrefs.edit().putLong("last_applied_pac_updated_at", remoteUpdatedAt).apply()
-
+                val version = maxOf(System.currentTimeMillis(), PacScheduleData.scheduleVersion + 1)
+                PacScheduleData.applySnapshot(snapshot, version)
                 PacSchedulePrefs.saveSchedule(context)
-                com.example.notification.PacAlarmScheduler.scheduleNextAlarm(context)
-                _pacScheduleUpdatedFlow.tryEmit(remoteUpdatedAt)
+                syncPrefs.edit().putString("pac_content_fingerprint_v2", fingerprint)
+                    .putLong("pac_remote_revision_v2", snapshot.revision).apply()
+                _pacScheduleUpdatedFlow.tryEmit(version)
             }
+            com.example.notification.PacAlarmScheduler.scheduleNextAlarm(context)
         } catch (e: Exception) {
-            Log.e(TAG, "Error applying remote PAC schedule JSON", e)
+            Log.e(TAG, "Rejected invalid PAC schedule; previous schedule retained", e)
         }
     }
 
     fun stopRealtimeSync() {
+        reconciliationJob?.cancel()
+        realtimeStarted = false
         sectorsJob?.cancel()
         appConfigJob?.cancel()
         scope.launch {
@@ -552,6 +504,23 @@ class CloudSyncRepository(
 
     companion object {
         private const val TAG = "CloudSyncRepository"
+    }
+
+    private fun reportId(localReportId: Long?, timestamp: Long): String {
+        if (localReportId == null) return java.util.UUID.randomUUID().toString()
+        val installation = synchronized(CloudSyncRepository::class.java) {
+            syncPrefs.getString("report_installation_id", null) ?: java.util.UUID.randomUUID().toString().also {
+                syncPrefs.edit().putString("report_installation_id", it).commit()
+            }
+        }
+        return java.util.UUID.nameUUIDFromBytes("$installation:$localReportId:$timestamp".toByteArray(Charsets.UTF_8)).toString()
+    }
+
+    private fun resolvedCoordinates(sector: SupabaseSector, existing: String = ""): String {
+        val lat = sector.lat
+        val lon = sector.lon
+        if (lat != null && lon != null && lat.isFinite() && lon.isFinite() && lat in -90.0..90.0 && lon in -180.0..180.0) return "$lat,$lon"
+        return if (existing == "8.625,-70.220;8.635,-70.208;8.620,-70.202;8.615,-70.215") "" else existing
     }
 }
 
