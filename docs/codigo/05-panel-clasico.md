@@ -4,7 +4,7 @@
 
 ## 1. Qué aplicación es esta y qué archivos carga
 
-El panel clásico es una página HTML con nueve pestañas. Carga estilos, Tailwind por CDN, Leaflet/calor, SDK Supabase, **/admin-security.js** y **/app.js**, con rutas absolutas para recargas bajo /admin. Los controles estáticos conservan callbacks conocidos; las acciones que transportan datos ciudadanos usan ahora atributos data-* y delegación DOM, sin interpolar nombres o IDs en JavaScript ejecutable.
+El panel clásico es una página HTML con nueve pestañas. Carga estilos, Tailwind por CDN, Leaflet/calor, SDK Supabase, **/pac-schedule-core.js**, **/pac-map-core.js**, **/admin-security.js** y **/app.js**, con rutas absolutas para recargas bajo /admin. Los controles estáticos conservan callbacks conocidos; las acciones que transportan datos ciudadanos usan ahora atributos data-* y delegación DOM, sin interpolar nombres o IDs en JavaScript ejecutable.
 
 Vite construye `admin.html` como entrada adicional y copia `public/app.js` a la salida. Por eso la copia distribuida como `dist/app.js` procede de `public/app.js`. El archivo `admin-web/app.js` también existe y sirve al abrir la carpeta por ciertos servidores simples, pero no es la fuente de la copia estática de Vite. No se debe corregir solamente esa copia raíz esperando que cambie el panel compilado.
 
@@ -209,7 +209,7 @@ Para mantener esta parte hay que revisar también la integridad de referencias: 
 | `handleSendBroadcast(event)` | Lee título/mensaje/nivel, exige administración y escribe aviso activo. Comprueba error antes del éxito y de limpiar inputs; si falla conserva el borrador. No llama FCM: su lectura/suscripción pertenece al flujo de avisos en configuración. |
 | `testGlobalPushAlert()` | Confirma un aviso global y llama `adminAuth.postJson('/api/sendPushAlert', {title,message,is_alarm:true})`. El controlador valida identidad/rol y adjunta el Bearer vigente. Comprueba `success`, muestra `messageId` o el error HTTP y siempre restaura el botón en `finally`. No envía `block` ni `topic`: la audiencia es global. Las cuotas y la autorización definitiva se comprueban en servidor. |
 | `setReportFeedFilter(filter)` · 2479 | Guarda ALL/NORMAL/OUTAGE/IRREGULAR, ajusta estilos y llama render. |
-| `renderCitizenReportsFeed()` | Cuenta categorías sobre los 50 cargados, filtra por tipo y texto de sector/ID/observación y crea tarjetas. Usa timestamp remoto y escapa las observaciones y nombres antes del HTML. Las copias raíz/public son idénticas y reconocen también FALLA_IRREGULAR. |
+| `renderCitizenReportsFeed()` | Cuenta categorías sobre los 50 cargados, filtra por tipo y texto de sector/ID/observación y crea tarjetas. Usa timestamp remoto y escapa las observaciones y nombres antes del HTML. Los tres pasos —contadores, filtros y tarjetas— clasifican las variantes irregulares de reportType/report_type/status con PacMapCore.normalizeStatus antes de hasPower, de modo que BAJON con suministro presente sigue siendo falla irregular. voltageLabel conserva cero y muestra ausencia como “Sin tensión reportada”; no sustituye un valor falso por 118 V. Las copias raíz/public son idénticas. |
 | `seedAllBarinasCatalog()` · 2796 | Escribe geografía, recorre catálogo embebido y publica PAC. Introduce estados/contadores predeterminados como 18/95 o 3/0. Puede sobrescribir filas con IDs iguales y no comprueba cada error devuelto. Es una operación de datos, no un botón inocuo de refresco. |
 | `saveDonationConfig()` · 2847 | Lee cinco campos y hace upsert `donations_config`, comprobando error. Cambia instrucciones de pago, no procesa una transacción financiera. |
 | `loadDonationUrl()` | Lee `donations_config` y precarga inputs presentes. `renderAdminAccess` la llama al abrir la sesión autorizada. Conserva el nombre antiguo y todavía captura errores sin mostrarlos. |
@@ -218,16 +218,22 @@ Los arrays `BARINAS_MUNICIPALITIES` y `MASTER_BARINAS_SECTORS` son datos embebid
 
 ## 12. Directorio y mapa maestro
 
+El panel y Android usan el mismo contrato `PacMapCore` y el mismo `pac-map.css`. `admin.html` carga ambos antes de `app.js`. Los pines conservan el color del bloque y añaden una insignia de estado: una falla irregular es morada con `⚠`; los datos no reconocidos son grises. Las referencias aproximadas tienen borde punteado, texto explicativo y agrupación cuando coinciden. Los popups se construyen como nodos DOM y conservan los IDs en `dataset`, con el botón Editar atendido por la delegación administrativa existente.
+
+El núcleo no consulta servidores. `installPacMapCore` instala la API creada por `createPacMapCore` en `globalThis` y CommonJS. `textKey` compara nombres sin tildes; `escapeHtml` hace inertes textos remotos; `normalizeBlock` admite solo A–D; `normalizeStatus` agrupa IRREGULAR_OUTAGE/FALLA_IRREGULAR/IRREGULAR/AVERIA/BAJON antes de representar el estado. `statusInfo` devuelve `{status,label,color,symbol}`; un estado desconocido no implica suministro normal. `validCoordinatePair` valida presencia, finitud y rangos; `coordinates` devuelve `{point,approximate,label}` a partir de coordenadas registradas, coincidencia exacta de nombre o centro municipal/Barinas. No usa coincidencias parciales ni hash para inventar una dirección.
+
+`locationGroups` conserva todos los sectores de una misma referencia; `representativeSector` prioriza seleccionado, falla, corte y primero; `markerHtml` usa colores/enums validados y contador numérico. `heatPoints` incluye solo sectores con cortes/fallas y coordenadas registradas, con peso 1: el resultado es densidad de sectores, no cantidad de reportes. `voltageLabel` conserva cero y muestra ausencias como “Sin tensión reportada”, sin sustituirlas por 118 V. Las tablas locales no son delimitaciones de circuitos. Las imágenes del fondo se solicitan directamente al proveedor y su atribución permanece visible. El detalle del contrato compartido está también en el apartado 9 del capítulo Android.
+
 | Función y línea | Contrato y efectos |
 |---|---|
 | `handleFilterMasterTypeChange(val)` · 2891 | Guarda ALL/COMMUNITY/OFFICIAL y repinta directorio; expuesta en window para HTML. |
-| `getSectorCoordinates(sector)` · 2940 | Devuelve `[lat,lon]`: primero valores válidos, luego coincidencia con nombres conocidos y finalmente centro municipal más desplazamiento determinista por hash. Ese último valor es aproximado/artificial, no medición. |
-| `applyBasemap(key)` · 2969 | Retira capas anteriores y añade Esri oscuro, OSM invertido o satélite/etiquetas. Actualiza rótulo y eleva marcadores. Consume tiles externos. Los comentarios de gratuidad no son garantía contractual de terceros. |
+| `getSectorCoordinates(sector)` | Wrapper de `PacMapCore.coordinates(sector).point`, usado por mapa y enlaces del directorio. La precisión se explica en el popup, sin hash de ubicación. |
+| `applyBasemap(key)` | Valida la base solicitada, retira capas anteriores y añade Esri oscuro, OSM invertido o satélite/etiquetas. Actualiza rótulo; usa panes normales de Leaflet en lugar de llamar al inexistente `LayerGroup.bringToFront`. Los proveedores externos conservan sus condiciones de uso. |
 | `changeMapBasemap(key)` · 3029 | Wrapper de UI que delega en `applyBasemap`. |
-| `initBarinasMasterMap()` · 3033 | Comprueba contenedor y Leaflet, reutiliza mapa con `invalidateSize` o crea uno centrado en Barinas. Instala click que abre alta con coordenadas, crea grupo de marcadores y renderiza. No duplica el mapa si ya existe. |
+| `initBarinasMasterMap()` | Comprueba contenedor y Leaflet, reutiliza mapa con `invalidateSize` o crea uno centrado en Barinas, con atribución. Instala click que abre alta con coordenadas, crea grupo y nota accesible sobre precisión/densidad; no duplica mapa ni nota. |
 | `focusBarinasMapHome()` · 3069 | Vuelve al centro/zoom 10 si mapa existe. No cambia filtros. |
-| `focusSectorOnMap(lat,lon,name)` · 3074 | Si no hay mapa abre pestaña y reintenta tras 150 ms; si existe centra a zoom 14, abre popups cercanos y desplaza al contenedor. `name` no se usa para buscar el marcador. Si el mapa no puede inicializarse, el reintento puede repetirse. |
-| `updateBarinasMapMarkers()` · 3095 | Limpia grupo/capa calor, filtra bloque y crea calor o pines. Calor usa peso 1/0.25 y radio25; pines muestran estado y acciones. Usa coordenadas reales o aproximadas; no adapta intensidad a cantidad de reportes. |
+| `focusSectorOnMap(lat,lon,name,attempt=0)` | Valida coordenadas. Si no hay mapa abre pestaña y reintenta hasta cuatro veces; si existe centra a zoom 14, abre popups cercanos y desplaza al contenedor. `name` se conserva por compatibilidad, sin buscar por texto. El fallo de inicialización ya no crea un bucle de reintentos indefinido. |
+| `updateBarinasMapMarkers()` | Filtra por bloque normalizado, agrupa coordenadas coincidentes y crea pines/DOM seguros. La falla irregular y sus variantes se ven en insignias y popups. Calor usa solo coordenadas registradas con corte/falla; si falta el plugin muestra pines y lo explica. No representa normales como calor ni inventa tensión o ubicación precisa. |
 | `toggleMapHeatmapMode()` · 3204 | Alterna Boolean, cambia botón y reconstruye capas. No modifica estados remotos. |
 | `handleMapBlockFilterChange(val)` · 3219 | Guarda filtro exclusivo del mapa y actualiza marcadores; no cambia necesariamente filtros del directorio. |
 | `initMasterFilterDropdowns()` · 3224 | Rellena municipios si select todavía tiene como máximo una opción; prepara municipios/parroquias del modal. Evita añadir todas las opciones repetidamente. |
@@ -276,7 +282,7 @@ Los callbacks de `forEach`, `map`, `filter`, `.then`, Realtime y listeners se en
 
 **Investigar un sector que reaparece:** revisar respuesta de DELETE, permisos, listas A–D y `pac_deleted_sector_ids`. La lista local puede estar ocultando el problema. No borrar las preferencias de un usuario como sustituto de corregir servidor.
 
-**Cambiar mapa:** diferenciar fuente de coordenadas (`getSectorCoordinates`), capas (`applyBasemap`) y representación (`updateBarinasMapMarkers`). El centro municipal y el hash son aproximaciones; no tratarlos como límites reales de un circuito.
+**Cambiar mapa:** diferenciar reglas compartidas (`PacMapCore`), capas (`applyBasemap`) y representación (`updateBarinasMapMarkers`). Mantener el núcleo y CSS idénticos entre web y Android. El centro municipal o una referencia por nombre son aproximaciones; no tratarlos como límites reales de un circuito.
 
 **Modificar donaciones:** `saveDonationConfig` escribe los cinco campos; Android lee `donations_config`. `renderAdminAccess` inicia la precarga mediante `loadDonationUrl`. Al añadir un campo, actualizar tanto guardado como carga y consumidores; que el input exista no garantiza su persistencia.
 
@@ -289,3 +295,10 @@ Las pruebas locales de [admin-ui.test.cjs](https://github.com/Ralag/pac-barinas/
 Los cambios implementados cierran el acceso local por contraseña incrustada, retiran las escrituras de recuperación tras fallar una lectura y propagan el fallo al publicar. Aún requieren seguimiento el tratamiento de `{error}` en otras operaciones heredadas, la atomicidad de aprobaciones/fusiones/borrados, las coordenadas aproximadas y la concurrencia al sustituir un JSON PAC completo. La protección en producción depende de las políticas y configuración del servidor, cuyo estado no se certifica en este capítulo.
 
 Una aprobación puede insertar el sector y luego fallar al publicar o retirar la propuesta. La solicitud permanece disponible cuando falla la publicación; el sector recién creado puede existir ya. Antes de repetir, revisar directorio y PAC para evitar duplicados. La fusión puede modificar un target o borrar duplicados establecidos antes de un fallo posterior. Convertir estos pasos en una operación transaccional con idempotencia requiere un contrato de servidor adicional; no se simula una reversión automática en el cliente.
+## Publicación coherente de semana y cronograma de hoy
+
+`initFirebaseSync.fetchPac` valida primero los datos remotos y calcula `pacEditorWeekOffset` en Caracas. Proyecta la base para editar la semana actual. `publishPacSchedule` deshace esa proyección antes de guardar matrix/matrixRows, conserva asignaciones y campos previos, valida todo y utiliza `nextRevision` para version/updatedAt. El mensaje confirma publicación; no asegura que todos los teléfonos hayan descargado ya.
+
+`renderMonthlyProjection` calcula cada semana con desplazamiento `semanaObjetivo-editorOffset`. `applyMonthlyWeekAsBase` utiliza el mismo cálculo antes de convertir de nuevo a base al publicar; así no suma una segunda rotación. La semana señalada como actual es la que corresponde al editor, no siempre la primera del mes.
+
+`getActiveBlockNow` conserva su contrato de objeto `{block,timeLabel,slotIdx,rotatedSlot}` y utiliza el núcleo compartido para el corte activo, incluidos noche y cambio de mes. Si no hay bloque publicado devuelve guion. La acción de sincronizar sectores rechaza ese caso en lugar de marcar a todos como normales. Mantener el contrato de objeto es necesario para el panel de telemetría y sus callbacks.

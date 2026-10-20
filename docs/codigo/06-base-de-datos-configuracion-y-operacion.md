@@ -270,3 +270,18 @@ La comprobación de cobertura es estructural: que un nombre aparezca en el capí
 | Métrica extraña | Seed, valor sustituto, doble incremento y edad/tamaño de la muestra. |
 
 Registrar el dato observado y el esperado antes de cambiarlo. La recuperación de un fallo de lectura debe conservar la última información válida; sembrar o sobrescribir datos para que desaparezca el error puede destruir la evidencia y el estado correcto.
+## Agregación de reportes y backend compatible
+
+La migración canónica aplicada es `supabase/migrations/20261016140944_aggregate_citizen_reports.sql`; `supabase_migration_v4_report_aggregation.sql` es su copia de operación. La versión CLI local se alineó con el registro real de migraciones remoto. El directorio también incluye la versión v3 ya aplicada; no ejecutar seeds para reparar estos permisos.
+
+`pac_private.citizen_report_status(reportType,hasPower)` clasifica alias de falla irregular antes de interpretar disponibilidad. Una irregularidad con luz sigue siendo irregular y no equivale automáticamente a un apagón para el porcentaje.
+
+`pac_private.aggregate_citizen_reports()` es un trigger AFTER INSERT por sentencia con tabla de transición. Ordena IDs exactos, bloquea cada sector y calcula su muestra de eventos de las últimas dos horas, admitiendo el mismo desfase futuro de diez minutos que RLS. Actualiza número real de reportes y porcentaje real sin luz. El último evento define estado/voltaje solo si su fecha es estrictamente posterior a lastUpdatedMillis; una edición administrativa más reciente o igual conserva prioridad. No inventa 118V cuando falta una medida; conserva la anterior, o infiere cero si declara ausencia de servicio.
+
+Las funciones están en esquema privado sin uso/ejecución para anon/authenticated, con search_path vacío y propietario postgres. El trigger privilegiado no concede UPDATE ciudadano sobre sectores. Un lote duplicado ON CONFLICT DO NOTHING tiene tabla de transición vacía y no altera métricas. IDs inexistentes se archivan sin crear sectores ni asociarlos por parecido de nombres. No hay backfill histórico ni recomputación por DELETE/UPDATE. La muestra se recalcula al aceptar nuevos eventos, no mediante un temporizador que borre el estado cada dos horas.
+
+`tests/sql/report_aggregation.sql` se ejecuta únicamente en una base desechable distinta de la prueba v3. Son 168 sentencias verificadas localmente en PostgreSQL18.6/PGlite; GitHub también la ejecuta sobre PostgreSQL16. PGlite no demuestra carreras entre dos conexiones reales. El bloqueo ordenado y los snapshots READ COMMITTED requieren conservarse al cambiar el trigger. `tests/report-aggregation-concurrency.cjs` usa `runSql` para abrir procesos psql y `main` para insertar desde dos conexiones con sectores en orden inverso; el callback `write` mantiene cada transacción abierta brevemente. Comprueba muestra exacta y último estado irregular. Solo admite PGDATABASE=report_aggregation_test; GitHub lo ejecuta después del fixture, sin conectar a producción.
+
+La auditoría remota inicial encontró 119 sectores (111 con coordenadas) y 2643 reportes; 70 IDs distintos de reportes antiguos no coincidían con el directorio actual. La migración no adivina esas identidades. Es necesario un catálogo explícito y revisado para resolverlas sin atribuir reportes al sector equivocado.
+
+La guía [Operación del gateway](../OPERACION_GATEWAY_SUPABASE.md) explica rutas, variables privadas, autorización y despliegue. La Edge Function pública está activa y sus GET y rechazo 401 fueron comprobados. Mantener ambas copias de servidor idénticas y confirmar el estado final del secreto/rutas en el registro de cambios de esta entrega.

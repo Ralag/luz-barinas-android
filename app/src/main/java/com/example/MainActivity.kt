@@ -81,9 +81,30 @@ import com.example.ui.viewmodel.LuzBarinasViewModel
 class MainActivity : ComponentActivity() {
 
     private val viewModel: LuzBarinasViewModel by viewModels()
+    private var launchGeneration by mutableStateOf(0)
+    private var backgroundSince = 0L
+
+    override fun onStart() {
+        super.onStart()
+        if (backgroundSince > 0L && android.os.SystemClock.elapsedRealtime() - backgroundSince >= 5 * 60_000L &&
+            com.example.ads.AppOpenInteractionGuard.canOpenAfterReturn(
+                com.example.ui.components.AppOpenAdManager.isLaunchEligible(), PacAlarmPlayer.isPlayingFlow.value)) {
+            launchGeneration++
+        }
+        backgroundSince = 0L
+    }
+
+    override fun onStop() {
+        if (!isChangingConfigurations && !com.example.ads.FullScreenAdCoordinator.isShowing) {
+            backgroundSince = android.os.SystemClock.elapsedRealtime()
+            com.example.ui.components.AppOpenAdManager.loadAd(applicationContext)
+        }
+        super.onStop()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        launchGeneration = savedInstanceState?.getInt("pac_app_open_generation") ?: 0
         enableEdgeToEdge()
 
         // Create notification channel for alerts
@@ -91,16 +112,6 @@ class MainActivity : ComponentActivity() {
 
         // Initialize AdMob SDK
         com.example.ui.components.initializeAdMob(this)
-
-        // Preload interstitial and app open ads
-        com.example.ui.components.InterstitialAdManager.preload(this)
-        com.example.ui.components.AppOpenAdManager.loadAd(this)
-
-        // Show splash ad after a short delay to let it load
-        val activity = this
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            com.example.ui.components.AppOpenAdManager.showAdIfAvailable(activity)
-        }, 2000)
 
         // Start predictive notification worker (checks every 30 min for upcoming outages)
         com.example.worker.PredictiveNotificationWorker.enqueue(this)
@@ -124,10 +135,18 @@ class MainActivity : ComponentActivity() {
                         fontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale * uiState.visualScale
                     )
                 ) {
-                    MainAppScreen(viewModel = viewModel)
+                    val alarmPlaying by PacAlarmPlayer.isPlayingFlow.collectAsStateWithLifecycle()
+                    com.example.ads.AppOpenLaunchHost(launchGeneration, alarmPlaying) {
+                        MainAppScreen(viewModel = viewModel)
+                    }
                 }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("pac_app_open_generation", launchGeneration)
+        super.onSaveInstanceState(outState)
     }
 }
 
@@ -138,22 +157,11 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    // Request notification permissions on Android 13+
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { _ -> }
-
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val hasPermission = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-            if (!hasPermission) {
-                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
-    }
+    val tutorialUrl by com.example.data.model.TutorialLink.url.collectAsStateWithLifecycle()
+    val watchTutorial: (() -> Unit)? = tutorialUrl?.let { url -> {
+        try { context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))) }
+        catch (_: android.content.ActivityNotFoundException) { viewModel.showUserMessage("No se encontró un navegador para abrir el tutorial.") }
+    } }
 
     // Snackbar alerts
     LaunchedEffect(uiState.userMessage) {
@@ -204,13 +212,16 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
     com.example.ui.components.OnboardingFlowDialog(
         isOpen = uiState.isOnboardingOpen && !showAddressDialog,
         onComplete = {
+            viewModel.completeOnboarding()
             showAddressDialog = true
-        }
+        },
+        onSkip = { viewModel.completeOnboarding() },
+        onWatchTutorial = watchTutorial
     )
 
     // Onboarding / Location Selector Dialog (Barinas Locations Catalog + Live Community Sectors)
     BarinasAddressDialog(
-        isOpen = showAddressDialog || (uiState.userAddress == null && !uiState.isOnboardingOpen),
+        isOpen = showAddressDialog,
         currentAddress = uiState.userAddress,
         availableSectors = uiState.sectors,
         onLocationSelected = { location ->
@@ -243,7 +254,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         val displayUpdate = update ?: com.example.ui.viewmodel.AppUpdateInfo(
             versionCode = BuildConfig.VERSION_CODE,
             versionName = BuildConfig.VERSION_NAME,
-            releaseNotes = "Estás utilizando la versión actual.\nSi deseas forzar una actualización manual o verificar detalles técnicos, presiona Descargar e Instalar.",
+            releaseNotes = "Estás utilizando la versión actual.\nPuedes comprobar si hay novedades en la tienda oficial.",
             downloadUrl = "https://pacbarinas.site", // Ecosistema Web Oficial
             isMandatory = false
         )
@@ -262,6 +273,11 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
     }
 
     val isAlarmActive by PacAlarmPlayer.isPlayingFlow.collectAsStateWithLifecycle(initialValue = false)
+    com.example.ads.AppOpenInteractionProtection(
+        isSettingsOpen || showSettingsScreen || showThemeScreen || showAddressDialog || showDonationsDialog ||
+            uiState.isOnboardingOpen || forceShowUpdateDialog ||
+            (update != null && dismissedUpdateVersion != update.versionCode) || isAlarmActive
+    )
 
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isLargeScreen = configuration.screenWidthDp > 600
@@ -501,7 +517,9 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                         },
                         onChangeAddressClicked = { showAddressDialog = true },
                         onNavigateToSchedule = { viewModel.setTab(1) },
-                        onOpenAlarmSettings = { isSettingsOpen = true }
+                        onOpenAlarmSettings = { isSettingsOpen = true },
+                        onWatchTutorial = watchTutorial,
+                        scheduleVersion = uiState.scheduleVersion
                     )
                     1 -> PacScheduleView(
                         selectedSector = uiState.selectedSector,
@@ -534,7 +552,12 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
         exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically { it }
     ) {
         SettingsScreen(
-            onBack = { showSettingsScreen = false },
+            onBack = {
+                val activity = context as? android.app.Activity
+                if (activity == null || !com.example.ui.components.InterstitialAdManager.showAd(activity) { showSettingsScreen = false }) {
+                    showSettingsScreen = false
+                }
+            },
             onToggleDarkMode = { viewModel.toggleDarkMode() },
             isDarkMode = uiState.isDarkMode,
             onChangeLocation = { showAddressDialog = true },
@@ -545,6 +568,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
             onOpenAlarmSettings = { isSettingsOpen = true },
             onCheckUpdate = { forceShowUpdateDialog = true },
             onOpenDonations = { showDonationsDialog = true },
+            onWatchTutorial = watchTutorial,
             modifier = Modifier.fillMaxSize()
         )
     }

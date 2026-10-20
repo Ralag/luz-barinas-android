@@ -38,6 +38,7 @@ Son modelos de transporte dentro de la aplicación. Sus constructores no consult
 | `NORMAL` | Servicio Normal | `0xFF10B981` |
 | `SCHEDULED_OUTAGE` | Corte Programado (PAC) | `0xFFEF4444` |
 | `IRREGULAR_OUTAGE` | Corte Irregular (Avería) | `0xFF9333EA` |
+| `UNKNOWN` | Sin reporte actual | `0xFF64748B` |
 
 Agregar otro estado afecta conversiones Room, validación remota, filtros, insignias y las decisiones optimistas del worker. No basta con agregar el elemento a esta enumeración.
 
@@ -120,7 +121,7 @@ Fuente: [SectorEntity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81
 
 1. Separa el polígono por `;` y cada punto por `,`.
 2. Conserva únicamente pares de dos componentes que puedan convertirse a `Double`.
-3. Convierte `status` con `ServiceStatus.valueOf`; una cadena no reconocida se reemplaza por `NORMAL`.
+3. Convierte `status` con `ReportSemantics.remoteStatus`; una cadena no reconocida se representa como `UNKNOWN`.
 4. Copia todos los demás campos al modelo de dominio.
 
 La llaman el flujo de sectores, la consulta de predicción y el alta comunitaria del repositorio. No escribe ni usa red. Los vértices inválidos se descartan silenciosamente; no comprueba límites de latitud/longitud ni que haya suficientes puntos para un polígono. Un estado remoto nuevo o mal escrito se presenta como servicio normal, lo cual puede ocultar un problema de contrato.
@@ -200,30 +201,13 @@ No hay `@Transaction` que agrupe insertar evento, cambiar sector y programar tra
 
 ### 4.1 `PacSchedulePrefs`
 
-Fuente: [PacSchedulePrefs.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/PacSchedulePrefs.kt#L16).
+`getPrefs(context)` abre `pac_schedule_prefs`, privado y asociado al contexto de aplicación. Sus claves conservan matriz, franjas, asignaciones y versión, por compatibilidad con instalaciones anteriores.
 
-El objeto guarda una instantánea del singleton, no una tabla Room. Nombre de archivo lógico: `pac_schedule_prefs`. Claves: `pac_matrix`, `pac_slots`, `sectors_bloque_a`, `sectors_bloque_b`, `sectors_bloque_c`, `sectors_bloque_d` y `schedule_version`. `TAG` solo identifica mensajes de diagnóstico.
+`saveSchedule(context)` obtiene **una sola** instantánea coherente mediante `getScheduleSnapshot`. Serializa su matriz y franjas como JSON, sus asignaciones como conjuntos y su revisión como Long, y escribe todas las claves en un mismo editor de preferencias. `apply` actualiza memoria inmediatamente y persiste de forma asíncrona; no constituye un acuse del servidor.
 
-**`getPrefs(context)` — L27, privada.** Recibe `Context`, devuelve `SharedPreferences` con `applicationContext` y `MODE_PRIVATE`. La llaman exclusivamente `saveSchedule` y `loadSchedule`; no lee todavía una matriz ni abre la red.
+`loadSchedule(context): Boolean` devuelve false si faltan matriz/franjas o si los datos son inválidos. Primero construye un objeto temporal y lo valida íntegramente con `PacScheduleSnapshot.parse`. Solo después entra en el monitor de `PacScheduleData` y llama `applySnapshot`. No reemplaza un estado en memoria cuya versión sea más reciente. Un JSON corrupto conserva la configuración válida anterior. Se utiliza tanto al abrir la app como al calcular alarmas desde segundo plano; no necesita una Activity.
 
-**`saveSchedule(context)` — L31.** Recibe contexto y devuelve `Unit`.
-
-1. Obtiene preferencias y abre un editor con la extensión `edit`.
-2. Serializa `activeMatrix` como array JSON de filas.
-3. Serializa cada `activeSlots` con `timeLabel`, `startHour` y `endHour`; no escribe el `index`, que se reconstruye por posición.
-4. Guarda las cuatro listas de nombres como `StringSet` y la versión como `Long`.
-
-La llaman las acciones de edición del ViewModel y la aplicación de PAC remoto. Efecto: persistencia local mediante `apply` de preferencias; sin red y sin programación automática de alarmas. Los conjuntos eliminan duplicados y no conservan el orden original; la escritura a disco no es un acuse remoto. No devuelve confirmación ni captura errores propios.
-
-**`loadSchedule(context)` — L62.** Recibe contexto y devuelve `Boolean`: `false` si no existe `pac_matrix`, si falta su cadena o si una excepción impide completar; `true` si termina la carga.
-
-1. Lee y convierte la matriz JSON y la asigna al singleton.
-2. Si hay slots, crea `PacSlot` con índices consecutivos, vacía la lista activa y copia los reconstruidos.
-3. Si cada conjunto de sectores existe, sustituye su lista por el conjunto ordenado alfabéticamente.
-4. Restaura `scheduleVersion`, con respaldo cero.
-5. Ante error registra un warning y devuelve `false`.
-
-La carga se realiza desde el ViewModel y también antes de calcular en scheduler, receiver y worker. Un arranque en frío no depende de abrir una Activity. El parser aún no valida por sí mismo forma de matriz/slots u horas ni revierte una carga parcial; la API de ventanas reales rechaza estructuras incompatibles y horas inválidas al buscar alarmas. Si cambia el formato, mantener compatibilidad o migrar preferencias explícitamente.
+Los conjuntos de preferencias eliminan duplicados y no guardan orden; al restaurar se ordenan los nombres. No hay transacción entre este archivo y las preferencias separadas de sincronización de nube. Para diagnóstico revisar ambos, sin borrar la cola Room.
 
 ### 4.2 `PacAlertSettings` y `PacAlertPrefs`
 
@@ -409,9 +393,9 @@ Pese al nombre, **no borra una franja ni deja la celda libre: sustituye un bloqu
 
 Ejemplo para matriz inicial, lunes y franja 07–11, índice 1: el día 5 consulta fila 1 y obtiene A; el día 12 consulta fila 2 y obtiene B; el día 19 consulta fila 3 y obtiene C; el día 26 consulta fila 4 y obtiene A. Se conserva la hora de la franja visible y se mueve la asignación de bloque entre filas.
 
-**`getCurrentSlotIndex(hourOfDay, minuteOfHour = 0)` — L615.** Hora/minuto locales ya elegidos por el llamador → índice de franja. Convierte a minutos y busca la primera franja que contiene el instante. Para inicio menor que final utiliza intervalo semiabierto `[inicio, final)`; para inicio mayor o igual usa `hora >= inicio || hora < final`, que representa cruce de medianoche cuando son distintos. Si no encuentra, devuelve índices fijos del esquema original: 0 para 03–06, 1 para 07–10, 2 para 11–14, 3 para 15–18, 4 para 19–22 y 5 para el resto. Lo llaman dashboard y vista PAC; la consulta activa central utiliza ahora ventanas absolutas.
+**`getCurrentSlotIndex(hourOfDay, minuteOfHour = 0)`.** Hora/minuto elegidos por el llamador → índice de franja. Convierte a minutos y busca la primera franja que contiene el instante. Para inicio menor que final utiliza intervalo semiabierto `[inicio, final)`; para inicio mayor o igual usa `hora >= inicio || hora < final`, que representa cruce de medianoche cuando son distintos. Si no encuentra devuelve **-1**, sin elegir una franja del esquema original. Lo llaman dashboard y vista PAC; la consulta activa central utiliza ventanas absolutas.
 
-Límites: no valida hora/minuto; una franja con inicio igual a final coincide todo el día bajo esa condición; si hay solapamientos gana la primera del listado. El respaldo puede devolver un índice inexistente después de eliminar franjas o crear huecos. Esta función no decide a qué fecha pertenece la franja nocturna.
+Límites: no valida hora/minuto; una franja con inicio igual a final coincide todo el día bajo esa condición si se modifica el singleton directamente, aunque el parser remoto la rechaza. Si hay solapamientos gana la primera del listado. Esta función no decide a qué fecha pertenece la franja nocturna; las pantallas y la búsqueda de ventanas deben resolver su fecha de inicio.
 
 **`getActiveBlockNow(currentTimeMillis = System.currentTimeMillis())`.** Instante en ms → código o `-`. Recorre A/B/C/D y usa `findScheduledWindowForBlock` para devolver el primero cuya ventana sea activa. Sin disco/red. Intervalo inicio incluido/final excluido y fecha de inicio de ayer para 23–03. Si hay solapamientos de distintos bloques gana el primero A/B/C/D; la edición aún debe impedir esa ambigüedad.
 
@@ -484,18 +468,11 @@ Los tres getters de nube pueden provocar la creación lazy de `cloudSync`, pero 
 
 ### 8.2 `initializePreloadedDataIfEmpty()` — L60
 
-**Contrato:** sin parámetros; función suspendida ejecutada en IO; no produce un resultado de negocio explícito. La llama el `init` del ViewModel. Si hay errores de base se propagan, pues no existe `try/catch` en esta función.
+Función suspendida en IO, llamada antes de iniciar la sincronización de nube. Si Room tiene menos de 60 sectores incorpora el catálogo precargado, conservando sus IDs y nombres para búsquedas sin conexión. **Los valores de demostración del listado no se insertan:** el mapeo final guarda `UNKNOWN`, cero contadores, fecha cero y geometría vacía. Cero en la columna de voltaje es un respaldo de almacenamiento, no una medición; el mapa no lo presenta como voltaje conocido para UNKNOWN.
 
-**Pasos y efectos:**
+La migración local `demo_geometry_removed_v1` retira, una vez, los polígonos con varios vértices que las versiones anteriores inventaban y sus cifras asociadas. Conserva IDs, perfiles, direcciones y reportes pendientes. La nube posterior repone los datos reales y coordenadas. Ya no crea los seis históricos sintéticos al iniciar. No hay borrado masivo de históricos existentes ni asociación automática de nombres parecidos.
 
-1. Si el total de sectores es menor que 60, construye e inserta/reemplaza **63 sectores**, con estados, voltajes, contadores, porcentajes, fechas relativas a “ahora”, bloques textuales y polígonos incluidos en Kotlin.
-2. Distribución: 18 de A, 19 de B, 16 de C y 10 de D. Los B se siembran como `SCHEDULED_OUTAGE`, voltaje cero y porcentajes elevados; los otros bloques como `NORMAL`, con referencias de voltaje y contadores distintos de cero.
-3. Si el histórico está vacío, crea seis registros: tres para Alto Barinas Norte, dos para Alto Barinas Sur y uno para Ciudad Tavacare, con fechas relativas a la ejecución y duraciones cuatro/cinco y media horas.
-4. No siembra Supabase ni solicita consentimiento remoto. Son escrituras Room separadas, no una única transacción global.
-
-**Identidades que importan:** los sectores se identifican como `sec_a_alto_barinas_1`, `sec_c_alto_barinas_2`, etc.; los seis históricos usan `sector_alto_barinas_norte`, `sector_alto_barinas_sur` y `sector_ciudad_tavacare`. No hay sectores con esos tres IDs entre los 63 sembrados. Como la predicción consulta por ID exacto, esos ejemplos no alimentan las predicciones de los sectores semilla correspondientes. No hay clave foránea que detecte la desconexión.
-
-**Límites:** el nombre “IfEmpty” no equivale a su condición real `< 60`: una base válida con 59 sectores recibirá 63 valores de demostración y reemplazará filas coincidentes. La precarga y la sincronización de nube se arrancan en coroutines distintas; no existe orden garantizado para sus escrituras. Las fechas recientes de la semilla no indican actividad real recién recibida. Para retirar demostración conviene una migración/marcador explícito, no cambiar arbitrariamente el umbral.
+El umbral `<60` sigue siendo una regla del catálogo local. No significa tabla vacía ni garantiza que cada ID antiguo exista en Supabase. Una propuesta comunitaria necesita aprobación administrativa para formar parte del directorio remoto.
 
 ### 8.3 `getPredictionForSector(sectorId)` — L210
 
@@ -507,29 +484,11 @@ Los tres getters de nube pueden provocar la creación lazy de `cloudSync`, pero 
 
 ### 8.4 `submitReport(sectorId, sectorName, hasPower, reportType, voltage, observation = null)` — L226
 
-**Entrada:** ID/nombre del sector; disponibilidad; categoría libre; voltaje opcional; observación opcional. **Retorno:** `Result<Unit>` de Kotlin, suspendido en IO. `success` significa que terminó el flujo local y su intento de envío sin un error exterior capturado; no garantiza sincronización. Lo llama la acción de reporte del ViewModel.
+`submitReport(sectorId, sectorName, hasPower, reportType, voltage, observation)` guarda primero una fila Room con la fecha original y **conserva el ID devuelto por insertReport**. Después actualiza el sector local de forma optimista, utilizando `ReportSemantics.status`: una falla irregular puede conservar alimentación y debe seguir siendo irregular.
 
-**Pasos exactos:**
+Programa el worker conectado y realiza un intento inmediato de subida. Ambos caminos reusan `reportedAtMillis` y `localReportId`. Si la subida inmediata tiene éxito marca exactamente ese ID Room como sincronizado; no utiliza el último elemento de una lista susceptible a reportes simultáneos. Si falla, mantiene la fila para reintentar. `Result.success` confirma el flujo local, no garantiza entrega remota.
 
-1. Inserta `PendingReportEntity` con fecha original actual, observación y `isSynced = false`. Ignora el ID `Long` devuelto por Room.
-2. Busca sector local. Si existe, decide estado `NORMAL` con energía; sin energía usa `IRREGULAR_OUTAGE` solo para `FALLA_IRREGULAR` o `AVERIA`, y `SCHEDULED_OUTAGE` para el resto. Voltaje: el aportado o 118/0 según disponibilidad.
-3. Incrementa contador en uno. Reduce porcentaje sin luz en ocho puntos con energía, acotado a cero; aumenta catorce sin energía, acotado a cien. Es una regla fija de feedback visual, no cálculo de una muestra ciudadana.
-4. Actualiza sector y su fecha. Si no existe sector, conserva igualmente el reporte y continúa.
-5. Crea trabajo de `ReportPowerWorker`, adjunta ID, disponibilidad, categoría y voltaje —cero cuando fue nulo—, exige red `CONNECTED` y lo encola como trabajo único `WORK_NAME` con `APPEND_OR_REPLACE`.
-6. Intenta inmediatamente `cloudSync.uploadCitizenReport`. Para el nombre usa `sector?.name ?: sectorId`, aunque en Room guardó el `sectorName` del parámetro; la observación sí se pasa.
-7. Si el uploader devuelve `true`, vuelve a leer todos los pendientes, toma el último y lo marca sincronizado. Si devuelve `false` o se captura error dentro de este intento, deja pendientes y continúa.
-8. Devuelve `Result.success(Unit)`; cualquier excepción del `try` exterior devuelve `Result.failure(e)`.
-
-**Persistencia/red:** escritura de reporte y sector en Room, registro durable de trabajo en WorkManager y una petición Supabase. No usa Retrofit. El envío inmediato se espera, pese al comentario “non-blocking”.
-
-**Defectos que deben conservarse visibles en el manual hasta corregirlos:**
-
-- Marca el último pendiente, no el insertado/enviado. Con dos envíos concurrentes puede confirmar B después de subir A y dejar B sin reintento.
-- Worker e intento inmediato pueden enviar la misma fila; no hay reserva ni identificador idempotente del evento en el servidor.
-- El worker repite la actualización optimista y sus reintentos pueden incrementar de nuevo el contador; sus reglas de porcentaje/estado difieren de estas.
-- Un fallo tras insertar en Room puede devolver `failure` aunque el evento quedó guardado. Repetir el botón puede crear otro evento.
-- La observación no se adjunta como `Data` al worker porque este relee el reporte Room; no debe borrarse la fila antes de que el worker la haya leído.
-- No se crean/cierran `OutageRecordEntity` al reportar un corte o retorno. Modificar este método no actualiza automáticamente el histórico de duración.
+Los contadores optimistas locales son provisionales; el servidor vuelve a calcular métricas a partir de reportes reales. El worker ya no recalcula el estado ni incrementa otra vez los contadores. Los informes guardados conservan la observación original y una identidad remota estable durante los reintentos.
 
 ### 8.5 `syncPendingReportsNow()` — L326
 
@@ -574,7 +533,7 @@ Fuente: [CloudSyncRepository.kt](https://github.com/Ralag/luz-barinas-android/bl
 
 **`SupabaseSector.resolvedIsCommunity` — getter L68.** Sin argumentos, devuelve `Boolean`: prioriza `isCommunity` cuando no sea nulo —incluido `false`—; luego `is_community`; si ninguno está presente, acepta IDs con prefijo `sec_com_` o `sec_community_`. La utilizan la descarga completa y `updateLocalSector`. No escribe datos; resuelve compatibilidad de dos convenciones. Si ambos campos discrepan, camelCase gana silenciosamente.
 
-**`SupabaseCitizenReport` — L77.** Campos: `sectorId: String`, `sectorName: String`, `hasPower: Boolean`, `reportType: String`, `voltage: Double`, `observation: String? = null`, `deviceOrigin: String` y `timestamp: Long`. Es el contrato activo para insertar/consultar `citizen_reports`. No contiene ID de evento, ID local Room ni fecha de recepción separada. `deviceOrigin` es una etiqueta fija de aplicación, no una identidad única y verificable de cada dispositivo.
+**`SupabaseCitizenReport` — L77.** Campos: `sectorId: String`, `sectorName: String`, `hasPower: Boolean`, `reportType: String`, `voltage: Double? = null`, `observation: String? = null`, `deviceOrigin: String? = null` y `timestamp: Long`. Es el contrato activo para insertar/consultar `citizen_reports`. Incluye ahora `id: String?`, con UUID estable para eventos procedentes de Room; `voltage` y `deviceOrigin` son opcionales para leer registros históricos. No incluye fecha de recepción separada. `deviceOrigin` es una etiqueta fija de aplicación, no una identidad única y verificable de cada dispositivo.
 
 **`SupabaseCommunityLocation` — L89.** Campos obligatorios: `id`, `name`, `municipio`, `parroquia`, `block`, `circuitCode`, `status`, `rotationBlock` como `String`; `voltage: Double`; `confirmedReportsCount: Int`; `withoutPowerPercentage: Int`; `submittedAt: Long`. Representa lo enviado a `community_locations`. No hay campo de aprobación en este modelo; el código rellena estado eléctrico, contador y bloque incluso para una solicitud nueva.
 
@@ -598,31 +557,13 @@ Las propiedades de solo lectura protegen el setter del flujo, pero sus valores P
 
 ### 9.3 `startRealtimeSync()` — L141
 
-**Contrato:** sin parámetros, devuelve `Unit` enseguida después de lanzar coroutine. La llama el `init` del ViewModel. Que la llamada retorne no significa que haya conectado.
+`startRealtimeSync()` inicia una reconciliación HTTP independiente del WebSocket y evita duplicar el bucle si ya está activo. Cada 60 segundos obtiene configuración y sectores directamente de Supabase. Una configuración malformada se registra y no impide procesar las otras. Los fallos de configuración y de sectores se capturan por separado; el siguiente ciclo reintenta sin reiniciar la app.
 
-**Secuencia en IO:**
+En paralelo configura Realtime para `app_config` y para la tabla global `sectors`, con callbacks de Insert/Update. Así recibe los cambios con poca demora cuando el socket funciona y se recupera mediante HTTP cuando una red lo bloquea o se pierde un evento. El arranque conserva también la comprobación de actualizaciones GitHub.
 
-1. Conecta Realtime.
-2. Obtiene canal `public-app_config`, configura `postgresChangeFlow<PostgresAction>` para tabla `app_config` y lo lanza en el scope; guarda ese colector en `appConfigJob`.
-3. Ante `Insert` o `Update` procesa el registro mediante `handleConfigChange`; ignora otros eventos, incluidos `Delete`.
-4. Se suscribe al canal. Descarga después todas las filas de `app_config`, decodifica y llama a `processConfig` para cada una.
-5. Descarga todas las filas de `sectors` con un `select` sin paginación explícita. Para cada una busca si existe en Room. Si existe, copia estado/cifras y campos opcionales presentes; si es nueva, crea entidad con nombre/circuito/bloque de respaldo, fecha válida o actual y un mismo polígono fijo de ejemplo.
-6. Inserta/reemplaza por lote esas entidades. No borra las filas locales que ya no estén en el resultado remoto.
-7. Crea canal `public-sectors-global`, escucha `Insert` y `Update` de toda `sectors`, decodifica con `jsonFormat` y llama a `updateLocalSector`. Ignora `Delete`. Lanza colector en `scope`, sin guardar su `Job`, y se suscribe.
-8. Consulta `AppUpdater.checkForUpdates`; si devuelve información, la publica en `_updateInfoFlow`.
-9. Cualquier excepción que alcance el `try` de esta coroutine se registra como fallo de inicio.
+`pacScheduleUpdatedFlow` usa replay=1: un colector que empieza después de la descarga inicial recibe la última versión. El ViewModel usa el estado actual de la operación `update` al reconstruir snapshots, para no sobrescribir cambios simultáneos de interfaz.
 
-**Efectos:** conexión WebSocket, varias consultas HTTP, escrituras Room, eventual actualización de preferencias y notificaciones al procesar configuración, consulta GitHub. La descarga inicial escribe aun si el contenido coincide; el manejador incremental usa comparación.
-
-**Límites:**
-
-- Todo el arranque está en una misma secuencia: fallar al leer configuración impide descargar/suscribir la tabla global y comprobar GitHub en ese intento. No hay bucle de reintento de la instantánea ni observador de conectividad que repita `startRealtimeSync`.
-- La suscripción global se crea después de descargar sectores: hay una ventana entre lectura y escucha. La reconexión del WebSocket, si la gestiona el SDK, no constituye por sí sola una reconciliación completa de todas las filas.
-- No hay guardia de inicio idempotente en este repositorio. Repetir la llamada puede volver a hacer descargas y registrar colectores; el comportamiento exacto de reutilizar canales pertenece al SDK.
-- El `try` exterior no envuelve cada evento futuro del colector global, lanzado por separado. Un registro que no decodifique correctamente puede terminar su colección; no hay `catch`/reintento dentro de ese flujo.
-- Ignorar borrados deja sectores y configuración obsoletos localmente. Tampoco se consultan tombstones ni una versión por fila para resolver conflictos.
-- El servidor puede limitar la cantidad de filas devueltas; aquí no hay recorrido paginado para garantizar una lista mayor al límite configurado.
-- GitHub puede sobrescribir un aviso de actualización recibido antes desde `app_config`; no hay selección explícita de la versión más alta entre ambas fuentes.
+Límites: las peticiones HTTP y los sockets consumen cuotas de Supabase; no son operaciones sin coste. La cancelación explícita debe acompañar al ciclo de vida del repositorio. La suscripción de sector seleccionado es adicional a la global y sigue siendo un punto de simplificación futura.
 
 ### 9.4 `handleConfigChange(record)` — L235, privada
 
@@ -662,11 +603,11 @@ No consulta red dentro de la función. No compara versiones o fecha para rechaza
 
 ### 9.8 `uploadCitizenReport(sectorId, sectorName, hasPower, reportType, voltage, observation = null)` — L377
 
-Textos de identidad/categoría, disponibilidad, voltaje opcional y observación → `Boolean`, suspendida en IO. Consumidores: intento inmediato del repositorio, sincronización manual y `ReportPowerWorker`.
+`uploadCitizenReport` recibe los datos del reporte, `reportedAtMillis` (fecha del evento) y `localReportId` opcional. Normaliza el tipo mediante `canonicalType`, conserva observación y voltaje opcional, y escribe un evento en `citizen_reports` bajo el rol ciudadano. No escribe sectores.
 
-Construye `SupabaseCitizenReport`: usa el voltaje dado o 118/0 según disponibilidad, lo convierte a `Double`, conserva observación y fija `deviceOrigin` a una etiqueta constante. **Fija `timestamp = System.currentTimeMillis()` en el momento de enviar**, no recibe el tiempo original Room. Inserta en `citizen_reports`; si termina devuelve `true`, ante excepción registra error y devuelve `false`.
+`reportId(localReportId, timestamp)` genera un UUID determinista a partir del ID de instalación persistido, el ID Room y la fecha original. Si no existe ID local genera uno aleatorio. El ID de instalación no es una cuenta autenticada ni una prueba de identidad humana. El envío utiliza upsert con `onConflict=id` e `ignoreDuplicates=true`, equivalente a INSERT ON CONFLICT DO NOTHING: repetir un evento no exige conceder UPDATE anónimo ni aumenta dos veces la muestra.
 
-Es una escritura HTTP; no marca Room, no actualiza `sectors`, no calcula agregado ni crea histórico. Los comentarios que sugieren triggers no implementan triggers en Android: si existen deben verificarse en el backend. No hay ID idempotente, comprobación de duplicados, autenticación de ciudadano ni control de tasa aquí. Un error se reduce a Boolean, por lo que el llamador no distingue falta de red, rechazo de permisos, schema inválido o timeout. El defecto temporal afecta especialmente el significado de los reportes offline y la predicción por hora.
+La función retorna Boolean y captura fallos de red/RLS. Un acuse perdido puede provocar otro intento con el mismo UUID. La agregación del estado compartido corresponde al trigger privado descrito en el capítulo 06. Los reportes antiguos conservan su fecha y pueden archivarse sin convertirlos en una falla recién ocurrida.
 
 ### 9.9 `fetchWeeklyCitizenReports(sectorId = null)` — L411
 
@@ -690,19 +631,13 @@ Ya no hace upsert ni escribe el directorio público `sectors`; aprobación/publi
 
 ### 9.12 `applyRemotePacScheduleJson(obj)` — L489, privada
 
-Objeto JSON de cronograma → `Unit`. Solo la llama `processConfig` para `pac_schedule`.
+`applyRemotePacScheduleJson(obj)` analiza primero un `PacScheduleSnapshot` completo. Rechaza filas incompatibles, bloques desconocidos y horas inválidas sin modificar el estado activo. `parseRevision` admite marcas numéricas y fechas ISO; `fingerprint` calcula SHA-256 de los datos normalizados, sin incluir la revisión.
 
-1. Lee `version` como `Long` o cero; `updatedAt` como `Long` o el valor de versión. Lee marcador local `last_applied_pac_updated_at`.
-2. Acepta si `updatedAt` supera el último aplicado, **o** si versión supera `PacScheduleData.scheduleVersion`, **o** si hay fecha remota positiva y la versión del singleton es cero.
-3. Si `slots` existe y no está vacío, vacía `activeSlots` y agrega por posición `PacSlot`; defaults por campo: etiqueta `Turno N`, inicio cero, final cuatro.
-4. Si `matrixRows` no está vacío, construye filas desde cada objeto `cells`; cuando falta cells utiliza siete `-`. Si no se usa ese formato y hay `matrix`, copia sus arrays de cadenas. Un array vacío no borra la matriz anterior.
-5. Para cada `sectorsA/B/C/D` presente, vacía y repone la lista correspondiente; aquí sí un array vacío deja lista vacía.
-6. Asigna `scheduleVersion = remoteUpdatedAt`, guarda marcador de última aplicación, llama `PacSchedulePrefs.saveSchedule` y hace `tryEmit(remoteUpdatedAt)`.
-7. Captura/loguea cualquier excepción, sin devolver un estado ni revertir pasos anteriores.
+Bajo el monitor de `PacScheduleData` compara huella y revisión remota: ignora una huella ya aplicada y una revisión estrictamente anterior después de inicializar el nuevo marcador. Acepta cambios de contenido con la misma marca, porque algunos editores antiguos reutilizaban versiones. Una primera huella migra el control de versiones anterior. `scheduleVersion` local aumenta con `max(reloj, versión anterior+1)` para invalidar las memorias de Compose.
 
-Efectos: mutación global, preferencias locales y evento de cambio. Después de guardar con `PacSchedulePrefs.saveSchedule`, el receptor remoto llama `PacAlarmScheduler.scheduleNextAlarm(context)`: cancela programación anterior y recalcula para la selección real. La UI colecta además el evento para snapshots/predicción. No devuelve un ACK de entrega de cada alarma al servidor.
+Aplica matriz, franjas y asignaciones con `applySnapshot`, guarda la instantánea coherente y los marcadores, y emite la nueva versión. Después recalcula alarmas. Los lectores de ventanas y snapshots están sincronizados para no observar listas vacías a mitad de una sustitución. Esto no implementa una transacción entre archivos de preferencias ni un acuse de cada teléfono.
 
-Límites: no valida cantidad de columnas/filas, igualdad matriz/franjas, horas, bloques, solapamientos ni orden cronológico. Una excepción después de `activeSlots.clear()` deja estado parcial, y las listas mutables pueden leerse mientras se reconstruyen. Las dos nociones de versión/fecha se comparan con OR, pero al guardar se conserva solo `updatedAt` como versión efectiva; no hay una versión de esquema separada. Guardar primero el marcador y después el cronograma no es una transacción entre archivos de preferencias. `tryEmit` no garantiza que un consumidor tardío vea un evento pasado, ya que no hay replay.
+`resolvedCoordinates(sector, existing)` prefiere latitud/longitud remotas finitas y dentro de sus rangos. Conserva una ubicación previa válida si no hay coordenadas nuevas, pero descarta el polígono idéntico de demostración. La interfaz marca las referencias municipales aproximadas; no afirma límites oficiales de un sector.
 
 ### 9.13 `stopRealtimeSync()` — L555
 
@@ -750,7 +685,7 @@ Fuente: [TelemetryDtos.kt](https://github.com/Ralag/luz-barinas-android/blob/7a8
 
 **`SectorDto` — L7.** Todos sus campos son obligatorios: `id: String → id`; `name: String → name`; `circuitCode: String → circuit_code`; `status: String → status`; `voltage: Float → voltage`; `confirmedReports: Int → confirmed_reports`; `withoutPowerPercentage: Int → without_power_percentage`; `lastUpdated: Long → last_updated`; `rotationBlock: String → rotation_block`; `polygonPoints: String → polygon_points`. No incluye `isCommunity`, municipio o parroquia ni función `toDomain`. Si se reactiva, hay que implementar conversión y aclarar unidad temporal de `last_updated` con el backend.
 
-**`TelemetryReportRequest` — L21.** `sectorId: String → sector_id`; `hasPower: Boolean → has_power`; `timestamp: Long → timestamp`; `reportType: String → report_type`; `voltageReading: Float? = null → voltage_reading`; `observation: String? = null → observation`; `clientDeviceId: String = "barinas_citizen_app" → client_device_id`. Este contrato sí permite proporcionar fecha original, pero no se usa actualmente para resolver el defecto temporal del uploader Supabase. La etiqueta por defecto de dispositivo tampoco identifica un dispositivo único.
+**`TelemetryReportRequest` — L21.** `sectorId: String → sector_id`; `hasPower: Boolean → has_power`; `timestamp: Long → timestamp`; `reportType: String → report_type`; `voltageReading: Float? = null → voltage_reading`; `observation: String? = null → observation`; `clientDeviceId: String = "barinas_citizen_app" → client_device_id`. Este contrato conserva la fecha original; el uploader Supabase también la conserva ahora. La etiqueta por defecto de dispositivo tampoco identifica un dispositivo único.
 
 **`TelemetryReportResponse` — L32.** `success: Boolean → success`, resultado de negocio; `message: String → message`, explicación; `updatedSectorStatus: String? → updated_sector_status`, estado opcional; `totalSectorReports: Int? → total_sector_reports`, contador opcional. Los dos campos nulos no tienen valor por defecto en el constructor: aceptar `null` no significa que todos los servidores/serializadores permitan omitir la propiedad sin más. No actualiza por sí mismo sectores o reportes locales.
 
@@ -834,7 +769,7 @@ Las tareas locales se pueden solicitar desde la raíz con `gradlew.bat :app:test
 ### 13.1 Inicio con datos locales y llegada de nube
 
 1. El ViewModel construye repositorio, carga PAC de preferencias y copia snapshots a su estado.
-2. Arranca `startRealtimeSync` y, en otra coroutine, `initializePreloadedDataIfEmpty`.
+2. Ejecuta `initializePreloadedDataIfEmpty` y después arranca `startRealtimeSync`, para que una semilla local no sobrescriba datos recién descargados.
 3. Colecta lista de sectores Room. La semilla o la nube disparan nuevas emisiones y selección/predicción.
 4. La nube procesa configuración y escribe sectores. El consumidor de `pacScheduleUpdatedFlow` reconstruye snapshots y predicción.
 5. Selección de sector abre además `listenToSector`, aunque ya exista escucha global.
@@ -848,8 +783,8 @@ Ejemplo: ciudadano del sector S reporta sin luz a las 19:10 con observación “
 1. `submitReport` guarda hora 19:10, categoría y texto en `pending_reports`.
 2. Modifica solo el estado local de S y registra worker conectado.
 3. Si el envío inmediato falla, la fila queda pendiente y el historial local puede mostrarla.
-4. A las 23:00, el worker lee esa misma observación y sube el evento. La implementación actual lo fecha a las 23:00; ese comportamiento debe corregirse para preservar 19:10.
-5. Al aceptar el servidor, el worker marca el ID Room enviado. Si hay fallo/ACK perdido, lo reintentará sin identidad remota estable y puede duplicarlo.
+4. A las 23:00, el worker lee esa misma observación y sube el evento. La subida conserva la fecha original de las 19:10; no lo presenta como un evento nuevo de las 23:00.
+5. Al aceptar el servidor, el worker marca el ID Room enviado. Si hay fallo/ACK perdido, lo reintenta con el mismo UUID remoto; ON CONFLICT DO NOTHING evita duplicarlo.
 
 Para seguir el texto revisar `CitizenReport.observation`, `PendingReportEntity.observation`, migración 2→3, parámetros de `submitReport`, worker, `SupabaseCitizenReport` y uploader. No se necesita incorporar observación al payload WorkManager si sigue releyendo Room; sí se necesita conservar la fila. Para proteger contenido personal, evitar logs de cuerpo si se reactiva el cliente Retrofit en debug.
 
@@ -923,6 +858,46 @@ En `PacScheduleRegressionTest`, `setUp` y `tearDown` restauran preset antes/desp
 | `planHonorsIndependentAlertSwitchesAndSchedulesFutureWhileCurrentCutIsActive` | Solo retorno agenda final actual; solo sirena agenda previa futura sin validación; todo apagado da plan vacío |
 
 **Resultado efectivo:**16 tests JUnit/Robolectric aprobados en CI, incluidos los12 nuevos, y lintDebug completado sin errores. Hay76 advertencias de versiones, recursos, atributos y mejoras de estilo que siguen pendientes. El harness JVM sobre normalizador/horario/motor aprobó19 comprobaciones; solo sustituye anotaciones de presentación para compilar el dominio aislado. El fallo local de caché no afecta el resultado del runner preparado. Los reportes descargados, caché y arnés permanecen bajo build/app/build, ignorados.
+
+## Ventana de recompensa publicitaria y configuración de producto
+
+Fuentes: [AdFreeRewardWindow.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ads/AdFreeRewardWindow.kt), [AdFreeRewardStore.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/main/java/com/example/ads/AdFreeRewardStore.kt) y [AdFreeRewardWindowTest.kt](https://github.com/Ralag/luz-barinas-android/blob/main/app/src/test/java/com/example/AdFreeRewardWindowTest.kt). El flujo UI y SDK completo está en la sección 10 del capítulo 03.
+
+`AdFreeRewardWindow(grantedAtMillis, expiresAtMillis)` representa un intervalo local. `isActive(nowMillis)` exige fechas positivas coherentes, duración máxima de 24 horas y comienzo incluido/final excluido. Un reloj anterior al momento del premio no concede tiempo. `grant(nowMillis, hours, current)` conserva una recompensa ya activa, evitando apilar días o extender tiempo si el SDK repite un evento; si venció, crea un intervalo nuevo. La duración se limita a 1–24 horas y se comprueba que sumar no desborde Long.
+
+`AdsConfiguration.rewardHours` lee `ADMOB_REWARD_HOURS` mediante `resolveRewardHours`, usa **12 horas** si no se puede convertir y limita configuraciones personalizadas a 1–24. El valor debe fijarse al compilar y coincidir con la descripción del premio en la unidad AdMob: cantidad 1, elemento «12 horas sin anuncios». Cambiar la duración no recorta premios previamente guardados. `resolveAdUnitId(debug, format, configured)` impide tráfico de producción desde debug y deshabilita formatos release sin una unidad válida. `AdFormat` distingue BANNER, INTERSTITIAL, APP_OPEN y REWARDED; las constantes de prueba son las oficiales, no anuncios que generen ingresos.
+
+`AdFreeRewardStore.initialize(context)` lee una vez las preferencias `pac_ad_free_reward` (`granted_at`, `expires_at`) con contexto de aplicación y expone `window` como StateFlow. `isActive(context, nowMillis)` permite la misma decisión en todos los managers. `grantEarnedReward(context)` es interno y solo se invoca desde el callback de recompensa del SDK; publica el estado y guarda ambas fechas con `commit`. Si el dispositivo no logra persistir, el premio se honra en memoria y la UI explica que podría perderse al cerrar el proceso. No guarda datos personales ni hace peticiones de red.
+
+Es un incentivo local de bajo impacto: borrar datos, desinstalar o cambiar el reloj puede afectar su continuidad; no equivale a una compra ni a un derecho sincronizado entre dispositivos y no debe presentarse como verificación antifraude. Si más adelante el premio tuviese valor monetario o debiera sincronizarse, necesitaría un diseño de validación en servidor y una revisión del flujo. No se añadió un servidor ni dependencia de Vercel para este beneficio.
+
+Pruebas de dominio, sin cargar publicidad:
+
+| Prueba | Riesgo que cubre |
+|---|---|
+| `defaultRewardIs12HoursAndConfigurationCannotExceedOneDay` | Duración de producto por defecto de 12 horas y límites de configuración |
+| `oneRewardRemovesAdsForExactly24HoursWithoutStacking` | Inclusión del comienzo, exclusión del final y callback repetido sin extensión |
+| `expiredRewardCanBeEarnedAgainAndConfiguredDurationIsBounded` | Renovación tras vencer y configuración limitada a 1–24 horas |
+| `corruptPreferencesOrClockBeforeTheGrantDoNotCreateUnlimitedAdFreeTime` | Datos incoherentes, duración excesiva y reloj anterior |
+| `debugAlwaysUsesTheOfficialTestUnitForEveryFormatEvenWithProductionConfiguration` | IDs reales del entorno nunca se usan en debug |
+| `releaseDisablesAFormatUntilAValidProductionUnitIsConfigured` | Ausencia de unidad real, placeholders y unidad de prueba no activan producción |
+| `earnedRewardPersistsTheSameWindowUsedByAllAdGatesAndDoesNotExtendOnDuplicateCallback` | Robolectric comprueba las preferencias reales, la misma ventana observable de todas las puertas y que un premio repetido no extiende el vencimiento |
+
+## Instantáneas completas, clasificación y tutorial
+
+`PacScheduleSnapshot.parse(obj)` es un parser sin escrituras. Exige 1–24 franjas y exactamente siete columnas por fila; las cantidades de filas y franjas deben coincidir. Inicio 0–23, final 0–24; inicio igual a fin y el turno de día completo se rechazan. Acepta A–D, Bloque A–D y representaciones libres convertidas a guion. Valida nombres de asignaciones si están presentes. Todavía no prohíbe franjas solapadas: ante solapamiento, la búsqueda usa el inicio más temprano.
+
+`fingerprint()` serializa campos normalizados en orden estable y calcula SHA-256. `parseRevision(value)` interpreta Long positivo o fechas ISO con/sin milisegundos; devuelve cero si no reconoce el formato. Ninguna de las dos funciones concede autorización.
+
+`PacScheduleData.getScheduleSnapshot()` copia matriz, franjas, listas y versión bajo un mismo monitor; `applySnapshot(snapshot, version)` sustituye las cuatro piezas bajo ese monitor, manteniendo asignaciones omitidas. Los lectores y mutadores públicos están sincronizados; `scheduleVersion` es volátil. `getCurrentSlotIndex` devuelve -1 en un hueco, sin inventar una de las seis franjas predeterminadas. Las ventanas reales admiten final 24:00 y atribuyen turnos nocturnos a su fecha de inicio.
+
+`ReportSemantics.status(reportType, hasPower)` da prioridad a FALLA/FALLA_IRREGULAR/IRREGULAR_OUTAGE/AVERIA/BAJON sobre el booleano, luego a los tipos de apagón; con tipo no reconocido usa la disponibilidad declarada. `canonicalType` devuelve NORMAL, SIN_LUZ, FALLA_IRREGULAR o BAJON para insertar. `remoteStatus` interpreta estados almacenados y devuelve UNKNOWN para valores desconocidos: no transforma ausencia de información en servicio normal.
+
+`TutorialLink.validate(value)` admite únicamente enlaces HTTPS directos de vídeo en youtube.com/www/m y youtu.be; exige ID de once caracteres y rechaza credenciales en URL, otros hosts/puertos y esquemas ejecutables. `update(value)` publica la URL validada mediante StateFlow. `processConfig` escucha `app_experience.youtubeTutorialUrl`, guarda una copia local y permite que Inicio, bienvenida y Configuración muestren la acción. Si no hay vídeo configurado, no aparece un enlace inventado; sigue disponible la guía de bienvenida.
+
+`PacScheduleSnapshotTest.source(extra)` construye un JSON de prueba con una franja nocturna. `isoAndNumericRevisionsRepresentTheSameUpdate` compara marca ISO/numérica y huella; `invalidPayloadCannotPartiallyChangeTheLiveSchedule` verifica conservación del singleton tras rechazar JSON; `customSlotGapHasNoInventedActiveSlot` prueba medianoche/hueco; `tutorialAllowsOnlyDirectHttpsYoutubeVideoLinks` rechaza dominios falsos y URLs ejecutables; `reportKindsKeepIrregularSupplyEvenWithPower` comprueba prioridad irregular y UNKNOWN. Las pruebas restauran el singleton modificado para no contaminar otros casos.
+
+`olderPersistedScheduleCannotOverrideANewerInMemorySnapshot` guarda un horario, aplica uno más reciente en memoria y comprueba que una recarga de preferencias no lo revierte. La prueba de arranque en frío pone la revisión de memoria en cero, como sucede al crear un proceso, antes de comprobar las alarmas persistidas.
 
 ## 16. Inventario verificable de funciones y declaraciones ejecutables
 

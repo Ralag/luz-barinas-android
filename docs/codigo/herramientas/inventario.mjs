@@ -28,10 +28,14 @@ function walk(dir, accept) {
 }
 function relative(p) { return path.relative(root, p).replaceAll('\\', '/'); }
 function chapter(file) {
+  if (file.endsWith('/report-aggregation-concurrency.cjs')) return '06-base-de-datos-configuracion-y-operacion.md';
+  if (/\/(CompactDialogUiTest|MapBridgeSecurityTest|AppOpenLaunchPolicyTest|AppOpenLaunchHostTest|DashboardStatusUiTest)\.kt$/.test(file)) return '03-android-interfaz-y-segundo-plano.md';
+  if (file.startsWith('supabase/functions/')) return '../OPERACION_GATEWAY_SUPABASE.md';
   if (/^app\/src\/(test|androidTest)/.test(file) || /^app\/src\/main\/java\/com\/example\/(data|engine|utils)\//.test(file)) return '02-android-datos-y-motor.md';
   if (file.endsWith('/assets/map/map.html')) return '03-android-interfaz-y-segundo-plano.md';
   if (file.startsWith('app/')) return '03-android-interfaz-y-segundo-plano.md';
-  if (file === 'admin-web/public/app.js' || file === 'admin-web/app.js') return '05-panel-clasico.md';
+  if (file === 'admin-web/public/app.js' || file === 'admin-web/app.js' || file === 'admin-web/public/pac-map-core.js') return '05-panel-clasico.md';
+  if (file === 'admin-web/public/pac-schedule-core.js' || file.startsWith('admin-web/server/legacy/')) return '04-web-react-y-api.md';
   if (file.startsWith('admin-web/src/') || file.startsWith('admin-web/api/') || file.startsWith('admin-web/scripts/') || file.startsWith('admin-web/tests/') || file === 'admin-web/public/admin-security.js' || file === 'admin-web/vite.config.mjs') return '04-web-react-y-api.md';
   return '06-base-de-datos-configuracion-y-operacion.md';
 }
@@ -42,7 +46,7 @@ function add(file, source, name, start, kind, scope = '', offset = 0) {
 }
 function parseJavaScript(file, source, offset = 0) {
   let ast;
-  try { ast = parseAst(source, { lang: file.endsWith('.jsx') ? 'jsx' : 'js' }, relative(file)); }
+  try { ast = parseAst(source, { lang: file.endsWith('.jsx') ? 'jsx' : file.endsWith('.ts') ? 'ts' : 'js' }, relative(file)); }
   catch (error) { errors.push({ file: relative(file), error: error.message.split('\n')[0] }); return; }
   function visit(node, parent = null, scope = '') {
     if (!node || typeof node !== 'object') return;
@@ -68,12 +72,15 @@ function parseJavaScript(file, source, offset = 0) {
 
 const kotlin = walk(path.join(root, 'app/src'), p => p.endsWith('.kt'));
 const javascript = [
+  ...walk(path.join(root, 'app/src/main/assets/map'), p => /pac-map.*\.js$/.test(p)),
+  ...walk(path.join(root, 'supabase/functions'), p => /\.(mjs|js|ts)$/.test(p)),
+  ...walk(path.join(root, 'admin-web/server/legacy'), p => p.endsWith('.js')),
   ...walk(path.join(root, 'admin-web/src'), p => /\.(jsx?|mjs)$/.test(p)),
   ...walk(path.join(root, 'admin-web/api'), p => p.endsWith('.js')),
   ...walk(path.join(root, 'admin-web/scripts'), p => /\.(mjs|js)$/.test(p)),
   ...walk(path.join(root, 'admin-web/tests'), p => /\.(mjs|cjs|js)$/.test(p)),
   ...fs.readdirSync(root).filter(n => n.endsWith('.js')).map(n => path.join(root, n)),
-  ...['public/app.js', 'public/admin-security.js', 'app.js', 'vite.config.mjs', 'patch_donations.js'].map(n => path.join(root, 'admin-web', n))
+  ...['public/app.js', 'public/admin-security.js', 'public/pac-map-core.js', 'public/pac-schedule-core.js', 'app.js', 'vite.config.mjs', 'patch_donations.js'].map(n => path.join(root, 'admin-web', n))
 ];
 for (const file of kotlin) {
   const source = fs.readFileSync(file, 'utf8');

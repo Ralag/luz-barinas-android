@@ -92,10 +92,12 @@ fun PacScheduleView(
             timeKey = System.currentTimeMillis() / 60_000L
         }
     }
-    val cal = remember(timeKey) { Calendar.getInstance() }
+    val cal = remember(timeKey) { Calendar.getInstance(TimeZone.getTimeZone("America/Caracas")) }
     val todayIdx = remember(timeKey) { PacScheduleData.getDayIndex(cal.get(Calendar.DAY_OF_WEEK)) }
-    val currentSlotIdx = remember(timeKey) { 
-        PacScheduleData.getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE)) 
+    val currentSlotIdx = remember(timeKey, pacSlots) {
+        val index = PacScheduleData.getCurrentSlotIndex(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
+        val slot = pacSlots.getOrNull(index)
+        if (slot != null && slot.startHour >= slot.endHour && cal.get(Calendar.HOUR_OF_DAY) < slot.startHour) -1 else index
     }
 
     var selectedDayIdx by remember { mutableIntStateOf(todayIdx) }
@@ -119,6 +121,10 @@ fun PacScheduleView(
         }
     }
 
+    val weekMatrix = remember(pacMatrix, currentWeekNumber) {
+        pacMatrix.indices.map { pacMatrix[(it + currentWeekNumber - 1) % pacMatrix.size] }
+    }
+
     val selectedMonthName = remember(selectedMonthIdx) {
         PacScheduleData.MONTH_NAMES.getOrElse(selectedMonthIdx) { "Mes" }
     }
@@ -132,7 +138,7 @@ fun PacScheduleView(
         tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
-    val monthlyWeeks: List<PacWeekPlan> = remember(selectedMonthName, selectedMonthDays, PacScheduleData.scheduleVersion) {
+    val monthlyWeeks: List<PacWeekPlan> = remember(selectedMonthName, selectedMonthDays, pacMatrix, pacSlots) {
         PacScheduleData.getMonthlyWeeks(selectedMonthName, selectedMonthDays)
     }
 
@@ -285,7 +291,7 @@ fun PacScheduleView(
                         0 -> {
                             PacOfficialMatrixCard(
                                 title = "SEMANA EN CURSO • ROTACIÓN PAC",
-                                matrix = pacMatrix,
+                                matrix = weekMatrix,
                                 slots = pacSlots,
                                 highlightToday = true,
                                 todayIdx = todayIdx,
@@ -383,7 +389,7 @@ fun PacScheduleView(
 
                                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                         pacSlots.forEachIndexed { slotIdx, slot ->
-                                            val block = pacMatrix.getOrNull(slotIdx)?.getOrNull(selectedDayIdx) ?: "A"
+                                            val block = weekMatrix.getOrNull(slotIdx)?.getOrNull(selectedDayIdx) ?: "-"
                                             val isCutForUser = block.equals(userBlock, ignoreCase = true)
                                             val isNow = selectedDayIdx == todayIdx && slotIdx == currentSlotIdx
                                             val blockColor = getBlockColor(block)

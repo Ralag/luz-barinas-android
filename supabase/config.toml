@@ -1,0 +1,2 @@
+[functions.pac-api]
+verify_jwt = false

@@ -105,8 +105,9 @@ object PacScheduleData {
     val activeSlots: MutableList<PacSlot> = DEFAULT_SLOTS.map { it.copy() }.toMutableList()
 
     val SLOTS: List<PacSlot>
-        get() = activeSlots
+        get() = getSlotsSnapshot()
 
+    @Synchronized
     fun updateSlot(slotIdx: Int, newTimeLabel: String, startHour: Int, endHour: Int) {
         if (slotIdx in activeSlots.indices) {
             activeSlots[slotIdx] = PacSlot(slotIdx, newTimeLabel.trim(), startHour, endHour)
@@ -139,21 +140,44 @@ object PacScheduleData {
         Array(7) { c -> DEFAULT_MATRIX[r][c] }
     }
 
+    @Volatile
     var scheduleVersion: Long = 0L
 
     val MATRIX: Array<Array<String>>
-        get() = activeMatrix
+        get() = getMatrixSnapshot().map { it.toTypedArray() }.toTypedArray()
 
+    @Synchronized
+    fun getScheduleSnapshot(): PacScheduleSnapshot = PacScheduleSnapshot(
+        activeSlots.map { it.copy() }, activeMatrix.map { it.toList() },
+        mapOf("sectorsA" to SECTORS_BLOQUE_A.toList(), "sectorsB" to SECTORS_BLOQUE_B.toList(),
+            "sectorsC" to SECTORS_BLOQUE_C.toList(), "sectorsD" to SECTORS_BLOQUE_D.toList()), scheduleVersion
+    )
+
+    @Synchronized
+    fun applySnapshot(snapshot: PacScheduleSnapshot, version: Long) {
+        activeMatrix = snapshot.matrix.map { it.toTypedArray() }.toTypedArray()
+        activeSlots.clear()
+        activeSlots.addAll(snapshot.slots)
+        mapOf("sectorsA" to SECTORS_BLOQUE_A, "sectorsB" to SECTORS_BLOQUE_B,
+            "sectorsC" to SECTORS_BLOQUE_C, "sectorsD" to SECTORS_BLOQUE_D).forEach { (key, target) ->
+            snapshot.assignments[key]?.let { target.clear(); target.addAll(it) }
+        }
+        scheduleVersion = version
+    }
+
+    @Synchronized
     fun getMatrixSnapshot(): List<List<String>> {
         return activeMatrix.map { row -> row.toList() }
     }
 
+    @Synchronized
     fun getSlotsSnapshot(): List<PacSlot> {
         return activeSlots.map { it.copy() }
     }
 
+    @Synchronized
     fun updateMatrix(newMatrix: Array<Array<String>>) {
-        for (r in 0 until minOf(6, newMatrix.size)) {
+        for (r in 0 until minOf(activeMatrix.size, newMatrix.size)) {
             for (c in 0 until minOf(7, newMatrix[r].size)) {
                 activeMatrix[r][c] = newMatrix[r][c].uppercase().trim()
             }
@@ -161,6 +185,7 @@ object PacScheduleData {
         scheduleVersion = System.currentTimeMillis()
     }
 
+    @Synchronized
     fun updateCell(slotIdx: Int, dayIdx: Int, block: String) {
         if (slotIdx in activeMatrix.indices && dayIdx in 0..6) {
             val clean = block.uppercase().trim()
@@ -169,6 +194,7 @@ object PacScheduleData {
         }
     }
 
+    @Synchronized
     fun deleteSlot(slotIdx: Int): Boolean {
         if (activeSlots.size <= 1 || slotIdx !in activeSlots.indices) return false
         activeSlots.removeAt(slotIdx)
@@ -184,6 +210,7 @@ object PacScheduleData {
         return true
     }
 
+    @Synchronized
     fun addSlot(label: String, startHour: Int, endHour: Int): PacSlot {
         val newIdx = activeSlots.size
         val newSlot = PacSlot(index = newIdx, timeLabel = label.ifBlank { "Turno ${newIdx + 1}" }, startHour = startHour, endHour = endHour)
@@ -197,6 +224,7 @@ object PacScheduleData {
     /**
      * Revisa cuántas veces se va la luz por bloque en un día específico (1 sola vez o 2 veces).
      */
+    @Synchronized
     fun getDayTurnAudit(dayIdx: Int): DayTurnAudit {
         val counts = mutableMapOf("A" to 0, "B" to 0, "C" to 0, "D" to 0)
         var total = 0
@@ -222,6 +250,7 @@ object PacScheduleData {
      * Borra un turno y reasigna inteligentemente el mismo revisando si los bloques
      * se van 2 veces o 1 sola vez en el día, garantizando balance y equidad en el PAC.
      */
+    @Synchronized
     fun deleteTurnAndRebalance(slotIdx: Int, dayIdx: Int): RebalanceResult {
         val currentBlock = activeMatrix.getOrNull(slotIdx)?.getOrNull(dayIdx)?.uppercase()?.trim() ?: "A"
         val dayObj = DAYS.getOrElse(dayIdx) { DAYS[0] }
@@ -288,6 +317,7 @@ object PacScheduleData {
     /**
      * Aplica el esquema de 1 solo corte al día (4 horas por bloque) a toda la semana.
      */
+    @Synchronized
     fun applySingleTurnPreset() {
         // En esquema de 1 solo corte (4 hrs), cada bloque A, B, C, D tiene exactamente 1 turno diario rotativo (4 turnos con corte, 2 libres)
         val singleMatrix = arrayOf(
@@ -306,6 +336,7 @@ object PacScheduleData {
         scheduleVersion = System.currentTimeMillis()
     }
 
+    @Synchronized
     fun applyDoubleTurnPreset() {
         activeSlots.clear()
         for (slot in DEFAULT_SLOTS) {
@@ -317,6 +348,7 @@ object PacScheduleData {
         scheduleVersion = System.currentTimeMillis()
     }
 
+    @Synchronized
     fun resetToDefault() {
         applyDoubleTurnPreset()
     }
@@ -491,6 +523,7 @@ object PacScheduleData {
         "Urb. Codazzi"
     )
 
+    @Synchronized
     fun addSectorToBlock(sectorName: String, blockCode: String) {
         val cleanName = sectorName.trim()
         if (cleanName.isEmpty()) return
@@ -508,6 +541,7 @@ object PacScheduleData {
         scheduleVersion = System.currentTimeMillis()
     }
 
+    @Synchronized
     fun removeSectorFromBlock(sectorName: String, blockCode: String) {
         when (blockCode.uppercase().trim()) {
             "A" -> SECTORS_BLOQUE_A.remove(sectorName)
@@ -518,6 +552,7 @@ object PacScheduleData {
         scheduleVersion = System.currentTimeMillis()
     }
 
+    @Synchronized
     fun reassignSector(sectorName: String, targetBlock: String) {
         SECTORS_BLOQUE_A.remove(sectorName)
         SECTORS_BLOQUE_B.remove(sectorName)
@@ -538,6 +573,7 @@ object PacScheduleData {
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
     )
 
+    @Synchronized
     fun getMonthlyWeeks(monthName: String, totalDays: Int): List<PacWeekPlan> {
         val rows = activeMatrix.size.coerceAtLeast(1)
         val upperMonth = monthName.uppercase()
@@ -583,6 +619,7 @@ object PacScheduleData {
     }
 
 
+    @Synchronized
     fun getDayIndex(calendarDayOfWeek: Int): Int {
         return when (calendarDayOfWeek) {
             Calendar.MONDAY -> 0
@@ -596,6 +633,7 @@ object PacScheduleData {
         }
     }
 
+    @Synchronized
     fun getWeekOffsetForDayOfMonth(dayOfMonth: Int): Int {
         return when (dayOfMonth) {
             in 1..7 -> 0
@@ -605,6 +643,7 @@ object PacScheduleData {
         }
     }
 
+    @Synchronized
     fun getBlockForDate(slotIdx: Int, dayIdx: Int, dayOfMonth: Int = -1): String {
         val totalSlots = activeMatrix.size.coerceAtLeast(1)
         val weekOffset = if (dayOfMonth > 0) getWeekOffsetForDayOfMonth(dayOfMonth) else 0
@@ -612,6 +651,7 @@ object PacScheduleData {
         return activeMatrix.getOrNull(rotatedRow)?.getOrNull(dayIdx) ?: "-"
     }
 
+    @Synchronized
     fun getCurrentSlotIndex(hourOfDay: Int, minuteOfHour: Int = 0): Int {
         val totalMinutes = hourOfDay * 60 + minuteOfHour
         val found = activeSlots.indexOfFirst { slot ->
@@ -625,16 +665,10 @@ object PacScheduleData {
         }
         if (found >= 0) return found
 
-        return when {
-            hourOfDay in 3..6 -> 0
-            hourOfDay in 7..10 -> 1
-            hourOfDay in 11..14 -> 2
-            hourOfDay in 15..18 -> 3
-            hourOfDay in 19..22 -> 4
-            else -> 5 // 23:00 to 02:59
-        }
+        return -1 // A gap in the published schedule has no active slot.
     }
 
+    @Synchronized
     fun getActiveBlockNow(currentTimeMillis: Long = System.currentTimeMillis()): String {
         return listOf("A", "B", "C", "D").firstOrNull { block ->
             findScheduledWindowForBlock(block, currentTimeMillis)?.isCurrentlyActive == true
@@ -642,6 +676,7 @@ object PacScheduleData {
     }
 
     /** Actual scheduled windows only. Overnight ownership belongs to the start date. */
+    @Synchronized
     fun findScheduledWindowForBlock(
         targetBlock: String,
         currentTimeMillis: Long = System.currentTimeMillis(),
@@ -663,7 +698,7 @@ object PacScheduleData {
             val dayOfMonth = testCal.get(Calendar.DAY_OF_MONTH)
             val weekShift = getWeekOffsetForDayOfMonth(dayOfMonth)
             for ((slotIdx, slot) in slots.withIndex()) {
-                if (slot.startHour !in 0..23 || slot.endHour !in 0..23 || slot.startHour == slot.endHour) continue
+                if (slot.startHour !in 0..23 || slot.endHour !in 0..24 || slot.startHour == slot.endHour) continue
                 val blockInSlot = PacBlock.normalize(matrix[(slotIdx + weekShift) % matrix.size][dayIdx])
                 if (blockInSlot == cleanBlock) {
                     val slotCalStart = Calendar.getInstance(timezone).apply {
@@ -712,6 +747,7 @@ object PacScheduleData {
     }
 
     // Compatibility for the legacy prediction/UI contract. Alarm code uses the nullable API.
+    @Synchronized
     fun findNextWindowForBlock(
         targetBlock: String,
         currentTimeMillis: Long = System.currentTimeMillis()

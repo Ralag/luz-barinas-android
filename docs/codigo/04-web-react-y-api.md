@@ -2,7 +2,7 @@
 
 Fecha de actualización del código y del capítulo: **16 de octubre de 2026**. Este capítulo describe la implementación local existente, sus conexiones y sus límites. No representa una comprobación del despliegue ni del contenido actual de Supabase, Firebase, Google Play o Vercel. Los ejemplos HTTP son ilustrativos y no se ejecutaron contra servicios reales. Se omiten deliberadamente contraseñas, claves y datos de pago. La autenticación y emisión push ahora tienen controles compartidos; su puesta en servicio requiere la migración y configuración descritas en el capítulo 06.
 
-El alcance incluye **todos los archivos de `admin-web/src`**, el núcleo compartido `public/admin-security.js`, los tests `tests/*.test.cjs`, los tres archivos de `admin-web/api`, el generador `scripts/blog-prerender.mjs`, `vite.config.mjs`, `index.html`, `package.json`, `vercel.json` y `firebase.json`. El panel antiguo `admin.html`/`public/app.js`, su copia raíz y el SQL se explican en otros capítulos; aquí aparecen únicamente cuando condicionan al código React. `dist`, dependencias instaladas y recursos binarios no son fuentes de esta explicación.
+El alcance incluye **todos los archivos de `admin-web/src`**, el núcleo compartido `public/admin-security.js`, los tests `tests/*.test.cjs`, el envío activo de `admin-web/api`, las dos implementaciones históricas de `server/legacy` y el gateway Supabase, el generador `scripts/blog-prerender.mjs`, `vite.config.mjs`, `index.html`, `package.json`, `vercel.json` y `firebase.json`. El panel antiguo `admin.html`/`public/app.js`, su copia raíz y el SQL se explican en otros capítulos; aquí aparecen únicamente cuando condicionan al código React. `dist`, dependencias instaladas y recursos binarios no son fuentes de esta explicación.
 
 ## Índice de lectura
 
@@ -290,15 +290,17 @@ Recibe el objeto calculado por el hook, desestructura día, franja, bloque actua
 
 La tarjeta representa el cronograma referencial. No valida por sí misma que haya llegado información reciente de campo; la animación del punto de conexión es presentación.
 
-### 3.8 `CitizenReportsTicker({reports = [],totalCount = 2002})` — `src/components/telemetry/CitizenReportsTicker.jsx:5`
+### 3.8 `CitizenReportsTicker({reports = [],totalCount = 0})`
 
 Fuente: [CitizenReportsTicker.jsx](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/src/components/telemetry/CitizenReportsTicker.jsx#L5), 184 líneas.
 
 Mantiene `modalOpen`. Muestra hasta diez reportes en una banda horizontal y un botón que abre un modal de historial con los reportes ya recibidos. El historial no hace una consulta nueva ni descarga toda la historia de la base: con el hook actual dispone de un máximo de veinte. Usa `formatRelativeTime` para sus marcas temporales. Cerrar el modal modifica el estado local; no elimina datos.
 
-**`getStatusBadge(report)` — línea 8.** Recibe un reporte y devuelve `{label,icon,badgeClass,dotClass}`. Primero considera corte cuando falta energía o `reportType === 'SIN_LUZ'`; después fluctuación si `reportType === 'IRREGULAR'` o voltaje positivo fuera de 100–130; de lo contrario servicio. Esta prioridad significa que un reporte simultáneamente sin luz e irregular se presenta como corte. Los tipos `FALLA_IRREGULAR`/`IRREGULAR_OUTAGE` usados en otras capas no se reconocen aquí por nombre, salvo que el voltaje o `hasPower` lo hagan caer en otra rama.
+**`getStatusBadge(report)`** devuelve `{label,icon,badgeClass,dotClass}` utilizando `reportPresentation` de `src/lib/reportSemantics.js`. La falla irregular se clasifica antes de `hasPower`, de modo que FALLA_IRREGULAR/IRREGULAR_OUTAGE/IRREGULAR/AVERIA/BAJON no desaparecen bajo una etiqueta de corte o suministro normal. Una variante desconocida sin booleano de suministro se muestra gris como “Sin estado”. El componente no deduce una falla únicamente de un voltaje ni acredita que el reporte haya sido validado. Cero voltios finitos se muestran como cero; no se sustituyen por una tensión inventada.
 
-No tiene persistencia ni red. El conteo por defecto y la palabra «validados» son presentación, no una comprobación de moderación. El modal no implementa por sí mismo una gestión completa de foco, Escape y restauración de foco.
+No tiene persistencia ni red propia. El conteo por defecto es cero, y el texto describe reportes voluntarios sin afirmar una moderación inexistente. El modal no implementa por sí mismo una gestión completa de foco, Escape y restauración de foco.
+
+`reportStatus(report)` comparte `PacMapCore.normalizeStatus` mediante importación del núcleo del mapa. Lee `reportType`, `report_type` y `status`; prioriza falla irregular, luego corte explícito o `hasPower`/`has_power` estrictamente false, luego normal explícito o booleano true, y por último UNKNOWN. No convierte la cadena “false” en un booleano ni la ausencia en suministro normal. `reportPresentation(report)` devuelve `{status,label,dotClass,lightClass,darkClass}`; centraliza las etiquetas y clases para el feed y los seis temas TV. No guarda estado ni hace solicitudes.
 
 ### 3.9 `CircuitStabilityWidget({circuits = [],activeCutBlock = 'B'})` — `src/components/telemetry/CircuitStabilityWidget.jsx:5`
 
@@ -509,7 +511,9 @@ Previene formulario, activa carga y exige una sesión/rol actuales. Guarda app_c
 
 ### 6.7 Filtros del feed
 
-Los botones cambian reportsFilter y el render usa filter/map locales. La consulta usa ahora timestamp y la tabla correcta. Persisten diferencias de representación por report_type, has_power, sector_name/comment/created_at frente a reportType, hasPower, sectorName/observation/timestamp. Se conserva esa deuda explícita; no hay moderación o eliminación en esta pestaña. JSX escapa el texto y no usa plantillas innerHTML para entradas ciudadanas.
+Los botones cambian reportsFilter y delegan la lista en **AdminReportsList({reports = [],filter = 'ALL'})**. Este componente de presentación no consulta la red ni modifica registros. Filtra NORMAL, OUTAGE e IRREGULAR mediante reportStatus y utiliza reportPresentation para compartir etiquetas y colores con los feeds públicos. La falla irregular tiene prioridad sobre el booleano de suministro; los estados desconocidos conservan una etiqueta explícita en la vista completa.
+
+Lee sectorName/sector_name/sector, observation/comment, voltage/voltage_reading y timestamp/created_at para admitir los campos de Supabase y variantes antiguas. Conserva cero voltios, muestra solo voltajes numéricos finitos y no inventa una tensión. Las fechas numéricas (incluido cero) o ISO válidas se presentan en America/Caracas dentro de un elemento time con ISO; una fecha ausente o inválida produce “Sin fecha registrada”. La lista vacía distingue falta de reportes de un filtro sin coincidencias. JSX escapa los nombres y observaciones; las filas permiten ajuste de línea para nombres largos. No hay moderación o eliminación en esta pestaña.
 
 ### 6.8 handleSendBroadcast(e)
 
@@ -606,7 +610,7 @@ Todos reciben las mismas props: `{clockData,pacTime,circuits,totalReportsCount,s
 
 Las seis dibujan alguna combinación de estado local, bloques actual/siguiente, cuenta regresiva, resumen de circuitos, franjas del día y banda de reportes. Sus callbacks de `map` calculan filas/tarjetas; no hacen escrituras. Las franjas recalculan `weekShift` usando **`new Date().getDate()` del navegador**, mientras `dayIndex` procede de Caracas. En equipos fuera de esa zona puede mezclar fechas distintas cerca de medianoche o cambio de semana/mes. La lógica repetida debe revisarse en las seis si cambia la regla PAC.
 
-La cuenta regresiva común expresa final de la franja activa. Un titular que la presente como «tiempo para tu corte» sin cambiar el cálculo puede inducir a error. El ticker suele evaluar falta de energía y `SIN_LUZ`, y algunas vistas también `IRREGULAR`; no existe normalización compartida de los tipos del servidor.
+La cuenta regresiva común expresa final de la franja activa. Un titular que la presente como «tiempo para tu corte» sin cambiar el cálculo puede inducir a error. Los seis tickers utilizan `reportPresentation`: FALLA_IRREGULAR y sus variantes se muestran como falla irregular aunque el reporte también indique ausencia de luz; las entradas sin estado se presentan como tales. Las vistas conservan sus estilos de tema y la clasificación está centralizada.
 
 ### 7.7 `RadarTheme(...)` — `src/pages/tv/RadarTheme.jsx:11`
 
@@ -659,6 +663,8 @@ Vista oscura de tarjetas grafito, acento cobalto y montañas hechas con SVG loca
 El texto del cuerpo menciona cronograma «oficial» de cuatro horas, aunque el resto del sistema insiste en independencia y carácter referencial. Ese texto no convierte la matriz en fuente oficial. El tema no valida duración, disponibilidad de datos ni dominio; recibe lo mismo que los otros cinco.
 
 ## 8. APIs serverless
+
+Los apartados Node de cálculo siguientes describen la implementación histórica conservada en server/legacy. Las consultas activas usan ahora el gateway Supabase; el envío administrativo continúa en Vercel. El núcleo compartido explicado más abajo rige las ventanas actuales.
 
 Los tres módulos de `admin-web/api` usan CommonJS. Las dos consultas públicas asignan un handler anónimo a **`module.exports`**; el inventario AST puede denominarlo `exports` por el destino de la asignación. El envío administrativo exporta el resultado de **`createHandler()`** y expone esa factoría para pruebas por inyección; su función interna se llama **`sendPushAlert(req,res)`**. El alojamiento ejecuta estos handlers al recibir una solicitud HTTP; importarlos no equivale a tener un servidor local escuchando.
 
@@ -1007,6 +1013,41 @@ No se aplicó una migración ni se emitió una notificación mediante estas prue
 
 Las regresiones de aprobación comprueban que un ID ciudadano igual al de un sector oficial no lo sobrescribe; los nuevos sectores reciben ID administrativo y se insertan. Los clusters distinguen origen fijado localmente, incluso si una propuesta trae un campo _source falso; no borran sectores por ID ciudadano o por nombre. Se exige PAC cargado antes de mutar y se conserva la cola ante fallo de publicación. Las pruebas de avisos comprueban que un error Supabase no oculta el aviso ni borra el formulario. El límite transaccional de estas secuencias se explica en el capítulo 05.
 
+
+### 10.7 Regresión de mapa y estados ciudadanos
+
+`tests/pac-map.test.cjs` verifica alias irregulares, bloques estrictos, coordenadas presentes/ausentes, referencias aproximadas, agrupación de sectores coincidentes, prioridad de falla, HTML inerte, densidad y cero voltaje. `makeMapHarness()` crea un entorno local de DOM/Leaflet para ejecutar el adaptador Android cuando el repositorio de la app está presente. `element`, `appendChild`, `addEventListener` y `setAttribute` simulan nodos; los métodos `map`, `getZoom`, `setView`, `fitBounds`, `removeLayer`, `invalidateSize` y `remove` registran efectos del mapa. `layerGroup`, `addTo`, `addLayer` y `hasLayer` mantienen sus marcadores; `divIcon`, `tileLayer`, `on`, `heatLayer`, `marker`, `setLatLng`, `setIcon`, `getPopup`, `bindPopup`, `setPopupContent`, `getLatLng` y `openPopup` modelan las operaciones mínimas de Leaflet. `getElementById`, `createElement`, `onMapReady` y `onSectorClicked` completan el contrato de documento/puente. El test conserva la selección y el pan ante datos nuevos y permite elegir todas las entradas de una referencia agrupada; no descarga teselas ni modifica perfiles reales.
+
+`tests/report-semantics.test.cjs` inicia Vite en modo middleware para cargar los módulos JSX y renderizarlos con `renderToStaticMarkup`. Sus fixtures prueban `reportStatus`/`reportPresentation`, CitizenReportsTicker y los seis temas TV con una falla irregular, una entrada desconocida y un nombre hostil. Exige las etiquetas “Falla irregular” y “Sin estado”, el escape del nombre y cero voltaje cuando corresponde. El callback `getBlockBadgeClass` devuelve una clase vacía de prueba. No simula que un render de servidor compruebe todos los gestos de un navegador ni contacta Supabase. El cierre libera el servidor de pruebas.
+
+La presentación compartida del mapa clásico se documenta en el capítulo 05 y el puente nativo en el apartado 9 del capítulo 03. La cartografía externa conserva sus condiciones de uso; el mapa integrado no es una descarga offline completa.
+
+## Núcleo PAC compartido y edición de la semana actual
+
+`src/lib/pacScheduleCore.js`, `public/pac-schedule-core.js` y las copias Edge contienen el mismo núcleo UMD. `installPacScheduleCore` instala la API en globalThis y CommonJS; `pacScheduleFactory` crea las funciones sin red ni SDK. React importa la copia de src por efectos; el clásico carga la de public antes de app.js.
+
+| Función | Entrada, resultado y reglas |
+|---|---|
+| `civilParts(timestamp)` | Extrae año, mes, día, hora y columna lunes=0 usando Intl con America/Caracas. Independiente de TZ del servidor/dispositivo. |
+| `civilEpoch(year, month, day, hour)` | Resuelve fecha civil venezolana a milisegundos, incluyendo cambio de mes y 24:00. |
+| `normalizeBlock(value)` | A–D/Bloque A–D → letra; desconocido → guion. |
+| `weekOffset(day)` | Días 1–7, 8–14, 15–21 y 22–fin → desplazamientos 0–3. |
+| `editorOffset(now)` | Determina desplazamiento del editor según la fecha actual en Caracas. |
+| `nextRevision(previous, now)` | Máximo del reloj y las marcas anteriores+1; admite ISO antiguo y evita marcas iguales. |
+| `rotateMatrix(matrix, shift)` | Copia las filas con módulo positivo; admite desplazamiento inverso y no modifica la matriz de entrada. |
+| `validateSchedule(config)` | Valida franjas/horas y matriz rectangular de siete días; devuelve copias normalizadas o lanza error. No escribe estado. |
+| `windows(config, now, fromDay, toDay)` | Genera ventanas reales desde ayer hasta catorce días adelante, ordenadas por inicio. Cada ventana usa el día y rotación de su comienzo. Fin exclusivo. |
+| `findWindow(config, block, now)` | Primera ventana activa/futura para un bloque válido, o null. Sin respaldo ficticio. |
+| `monthlyWeeks(config, monthName, totalDays)` | Cuatro planes semanales con desplazamientos 0–3 y etiquetas; valida 28–31 días. |
+| `pacTime(slots, matrix, now)` | Franja activa/futura, bloques de hoy, fecha civil y cuenta regresiva. Un hueco tiene índice -1 y bloque guion. `activeSlotIsToday` evita resaltar una fila de hoy por un corte de ayer. |
+
+`calculatePacTime` delega en este núcleo. PacLiveWidget y los seis temas TV consumen `todayBlocks` y `activeSlotIsToday`; ya no calculan otra rotación usando la fecha local. El contador total de reportes admite cero real, sin respaldo 2000.
+
+AdminPortal presenta la **semana actual**: proyecta la base con `rotateMatrix(base,+editorOffset)`. Al guardar aplica el inverso y conserva los campos de configuración previamente cargados. Guarda matrix y matrixRows coherentes y la misma marca numérica para version/updatedAt, tras validar. Los APK antiguos siguen recibiendo la base que esperan rotar una sola vez.
+
+La API activa pública reside en [el gateway Supabase](../OPERACION_GATEWAY_SUPABASE.md). Los antiguos getMonthlyWeeks/getOutagePrediction Node se conservan en server/legacy para referencia y no se despliegan como funciones Vercel. El único endpoint Node que se conserva mientras se prepara el secreto Edge es el envío administrativo de alertas.
+
+En pruebas, `fetchImpl` simula respuestas REST/OAuth/FCM y registra llamadas; `fetchOverride` introduce fallos y payloads específicos por caso; `sendPushImpl` captura envíos sin llamar a Firebase. No son implementaciones alternativas de producción. La prueba criptográfica genera una clave RSA efímera y verifica firma, audiencia y alcance.
 
 ## 11. Índice de funciones y cobertura
 

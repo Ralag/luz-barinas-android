@@ -15,8 +15,8 @@ android {
     applicationId = "com.ralag.pacbarinas"
     minSdk = 24
     targetSdk = 36
-    versionCode = 7
-    versionName = "1.3.1"
+    versionCode = 8
+    versionName = "1.4.0"
     
     // AdMob Production ID
     manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-7639154379634043~9373028299"
@@ -37,6 +37,9 @@ android {
   }
 
   buildTypes {
+    debug {
+      manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-3940256099942544~3347511713"
+    }
     release {
       isCrunchPngs = true
       isMinifyEnabled = true
@@ -89,6 +92,7 @@ secrets {
 // This makes it easy to add them back in the future if needed.
 dependencies {
   implementation(libs.play.services.ads)
+  implementation("com.google.android.ump:user-messaging-platform:4.0.0")
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.compose.material.icons.core)

@@ -98,11 +98,9 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             )
         }
 
-        // Start real-time cloud sync with Firestore (live citizen reports & PAC updates)
-        repository.cloudSync.startRealtimeSync()
-
         viewModelScope.launch {
             repository.initializePreloadedDataIfEmpty()
+            repository.cloudSync.startRealtimeSync()
         }
 
         // Collect sectors reactively from Room
@@ -149,7 +147,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         // Collect real-time PAC schedule updates from cloud (instantly updates UI without restart)
         viewModelScope.launch {
             repository.pacScheduleUpdatedFlow.collectLatest { _ ->
-                _uiState.update { buildPacStateCopy() }
+                _uiState.update { current -> buildPacStateCopy(current = current) }
                 _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
             }
         }
@@ -364,16 +362,16 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    private fun buildPacStateCopy(userMsg: String? = null): LuzBarinasUiState {
-        val current = _uiState.value
+    private fun buildPacStateCopy(userMsg: String? = null, current: LuzBarinasUiState = _uiState.value): LuzBarinasUiState {
+        val snapshot = PacScheduleData.getScheduleSnapshot()
         return current.copy(
-            scheduleVersion = PacScheduleData.scheduleVersion,
-            pacMatrix = PacScheduleData.getMatrixSnapshot(),
-            pacSlots = PacScheduleData.getSlotsSnapshot(),
-            sectorsA = PacScheduleData.SECTORS_BLOQUE_A.toList(),
-            sectorsB = PacScheduleData.SECTORS_BLOQUE_B.toList(),
-            sectorsC = PacScheduleData.SECTORS_BLOQUE_C.toList(),
-            sectorsD = PacScheduleData.SECTORS_BLOQUE_D.toList(),
+            scheduleVersion = snapshot.revision,
+            pacMatrix = snapshot.matrix,
+            pacSlots = snapshot.slots,
+            sectorsA = snapshot.assignments.getValue("sectorsA"),
+            sectorsB = snapshot.assignments.getValue("sectorsB"),
+            sectorsC = snapshot.assignments.getValue("sectorsC"),
+            sectorsD = snapshot.assignments.getValue("sectorsD"),
             userMessage = userMsg ?: current.userMessage
         )
     }
@@ -386,7 +384,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         PacScheduleData.updateCell(slotIdx, dayIdx, block)
         PacSchedulePrefs.saveSchedule(getApplication())
         com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
-        _uiState.update { buildPacStateCopy() }
+        _uiState.update { current -> buildPacStateCopy(current = current) }
         _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
         viewModelScope.launch { repository.cloudSync.publishPacScheduleToCloud() }
     }
@@ -395,7 +393,7 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
         PacScheduleData.updateSlot(slotIdx, newLabel, startHour, endHour)
         PacSchedulePrefs.saveSchedule(getApplication())
         com.example.notification.PacAlarmScheduler.scheduleNextAlarm(getApplication())
-        _uiState.update { buildPacStateCopy() }
+        _uiState.update { current -> buildPacStateCopy(current = current) }
         _uiState.value.selectedSector?.let { refreshPrediction(it.id) }
         viewModelScope.launch { repository.cloudSync.publishPacScheduleToCloud() }
     }
@@ -526,6 +524,13 @@ class LuzBarinasViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
     }
+
+    fun completeOnboarding() {
+        userPrefs.edit().putBoolean("onboarding_done", true).apply()
+        _uiState.update { it.copy(isOnboardingOpen = false) }
+    }
+
+    fun showUserMessage(message: String) { _uiState.update { it.copy(userMessage = message) } }
 
     fun setOnboardingOpen(isOpen: Boolean) {
         _uiState.update { it.copy(isOnboardingOpen = isOpen) }

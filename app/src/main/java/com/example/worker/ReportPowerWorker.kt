@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.data.local.AppDatabase
-import com.example.data.remote.ApiClient
-import com.example.data.remote.dto.TelemetryReportRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -17,38 +15,8 @@ class ReportPowerWorker(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val database = AppDatabase.getInstance(applicationContext)
         val pendingDao = database.pendingReportDao()
-        val sectorDao = database.sectorDao()
-
-        // Check if individual report params were passed
-        val sectorId = inputData.getString(KEY_SECTOR_ID)
-        val hasPower = inputData.getBoolean(KEY_HAS_POWER, true)
-        val reportType = inputData.getString(KEY_REPORT_TYPE) ?: if (hasPower) "NORMAL" else "SIN_LUZ"
-        val voltage = inputData.getFloat(KEY_VOLTAGE, if (hasPower) 118f else 0f)
-
-        // If specific params passed, ensure it is in Room or process it
-        if (sectorId != null) {
-            // Also update local Sector entity to give instant optimistic offline response
-            val sector = sectorDao.getSectorById(sectorId)
-            if (sector != null) {
-                val newStatus = if (hasPower) "NORMAL" else "SCHEDULED_OUTAGE"
-                val newVoltage = if (hasPower) 118f else 0f
-                val newCount = sector.confirmedReportsCount + 1
-                val newNoPowerPct = if (hasPower) {
-                    (sector.withoutPowerPercentage - 10).coerceAtLeast(0)
-                } else {
-                    (sector.withoutPowerPercentage + 15).coerceAtMost(100)
-                }
-                sectorDao.updateSector(
-                    sector.copy(
-                        status = newStatus,
-                        voltage = newVoltage,
-                        confirmedReportsCount = newCount,
-                        withoutPowerPercentage = newNoPowerPct,
-                        lastUpdatedMillis = System.currentTimeMillis()
-                    )
-                )
-            }
-        }
+        // Transport the saved event only. Reapplying its optimistic state here
+        // used to erase irregular faults and increment counters a second time.
 
         // Process all unsynced reports in Room
         val unsyncedList = pendingDao.getUnsyncedReports()
@@ -63,7 +31,9 @@ class ReportPowerWorker(
                     hasPower = report.hasPower,
                     reportType = report.reportType,
                     voltage = report.voltageObserved,
-                    observation = report.observation
+                    observation = report.observation,
+                    reportedAtMillis = report.reportedAtMillis,
+                    localReportId = report.id
                 )
 
                 if (success) {

@@ -6,6 +6,8 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
+    <!-- A rewarded pause belongs to this installation, not a restored account/device. -->
+    <exclude domain="sharedpref" path="pac_ad_free_reward.xml" />
     <!--
    <include domain="sharedpref" path="."/>
    <exclude domain="sharedpref" path="device.xml"/>

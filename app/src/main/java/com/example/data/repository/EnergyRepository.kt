@@ -132,78 +132,17 @@ class EnergyRepository(
                 SectorEntity("sec_d_ciudad_tavacare_d", "Cdad Tavacare D", "Ciudad Tavacare Terrazas B-D", "NORMAL", 117.0f, 64, 6, now - 18 * 60 * 1000, "Bloque D", "8.670,-70.265;8.680,-70.250;8.665,-70.240;8.655,-70.255"),
                 SectorEntity("sec_d_boconoito", "Boconoito", "Circuito Boconoito Intercomunal", "NORMAL", 113.0f, 22, 13, now - 80 * 60 * 1000, "Bloque D", "8.710,-69.820;8.725,-69.805;8.705,-69.790;8.695,-69.810")
             )
-            sectorDao.insertOrUpdateSectors(initialSectors)
+            sectorDao.insertOrUpdateSectors(initialSectors.map { it.copy(status = "UNKNOWN", voltage = 0f, confirmedReportsCount = 0, withoutPowerPercentage = 0, lastUpdatedMillis = 0L, polygonPointsRaw = "") })
         }
 
-        // Client-side cloud seeding removed to prevent write quota exhaustion.
-        // Seeding should only be performed via the admin python script (seed_supabase.py).
-
-        // Seed realistic historical records for modular arithmetic calculations
-        if (outageDao.getCount() == 0) {
-            val now = System.currentTimeMillis()
-            val hourMs = 3600 * 1000L
-            val dayMs = 24 * hourMs
-
-            val historicalRecords = listOf(
-                // Alto Barinas Norte: 4h outages every day shifting cyclically
-                OutageRecordEntity(
-                    sectorId = "sector_alto_barinas_norte",
-                    sectorName = "Alto Barinas Norte",
-                    statusType = "SCHEDULED_OUTAGE",
-                    startTimeMillis = now - (dayMs * 1) - (hourMs * 6),
-                    endTimeMillis = now - (dayMs * 1) - (hourMs * 2),
-                    durationHours = 4.0f,
-                    notes = "PAC Bloque A Rotación"
-                ),
-                OutageRecordEntity(
-                    sectorId = "sector_alto_barinas_norte",
-                    sectorName = "Alto Barinas Norte",
-                    statusType = "SCHEDULED_OUTAGE",
-                    startTimeMillis = now - (dayMs * 2) - (hourMs * 10),
-                    endTimeMillis = now - (dayMs * 2) - (hourMs * 6),
-                    durationHours = 4.0f,
-                    notes = "PAC Bloque A Rotación"
-                ),
-                OutageRecordEntity(
-                    sectorId = "sector_alto_barinas_norte",
-                    sectorName = "Alto Barinas Norte",
-                    statusType = "SCHEDULED_OUTAGE",
-                    startTimeMillis = now - (dayMs * 3) - (hourMs * 14),
-                    endTimeMillis = now - (dayMs * 3) - (hourMs * 10),
-                    durationHours = 4.0f,
-                    notes = "PAC Bloque A Rotación"
-                ),
-                // Alto Barinas Sur: active outage now
-                OutageRecordEntity(
-                    sectorId = "sector_alto_barinas_sur",
-                    sectorName = "Alto Barinas Sur",
-                    statusType = "SCHEDULED_OUTAGE",
-                    startTimeMillis = now - (hourMs * 2),
-                    endTimeMillis = null,
-                    durationHours = 4.0f,
-                    notes = "PAC Bloque B en curso"
-                ),
-                OutageRecordEntity(
-                    sectorId = "sector_alto_barinas_sur",
-                    sectorName = "Alto Barinas Sur",
-                    statusType = "SCHEDULED_OUTAGE",
-                    startTimeMillis = now - (dayMs * 1) - (hourMs * 6),
-                    endTimeMillis = now - (dayMs * 1) - (hourMs * 2),
-                    durationHours = 4.0f,
-                    notes = "PAC Bloque B"
-                ),
-                // Ciudad Tavacare: Irregular transformer fault
-                OutageRecordEntity(
-                    sectorId = "sector_ciudad_tavacare",
-                    sectorName = "Ciudad Tavacare",
-                    statusType = "IRREGULAR_OUTAGE",
-                    startTimeMillis = now - (hourMs * 3),
-                    endTimeMillis = null,
-                    durationHours = 5.5f,
-                    notes = "Falla de Transformador en Subestación"
-                )
-            )
-            outageDao.insertOutages(historicalRecords)
+        // Older builds bundled demonstration polygons/measurements. Remove those
+        // local placeholders once; profiles and pending citizen reports are retained.
+        val prefs = context.getSharedPreferences("cloud_sync_prefs", Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("demo_geometry_removed_v1", false)) {
+            val placeholders = sectorDao.getAllSectorsList().filter { it.polygonPointsRaw.contains(';') }
+            sectorDao.insertOrUpdateSectors(placeholders.map { it.copy(status = "UNKNOWN", voltage = 0f,
+                confirmedReportsCount = 0, withoutPowerPercentage = 0, lastUpdatedMillis = 0L, polygonPointsRaw = "") })
+            prefs.edit().putBoolean("demo_geometry_removed_v1", true).apply()
         }
     }
 
@@ -243,17 +182,13 @@ class EnergyRepository(
                 observation = observation,
                 isSynced = false
             )
-            pendingDao.insertReport(entity)
+            val pendingId = pendingDao.insertReport(entity)
 
             // 2. Optimistic local update for instant UI feedback
             val sector = sectorDao.getSectorById(sectorId)
             if (sector != null) {
-                val updatedStatus = if (hasPower) {
-                    "NORMAL"
-                } else {
-                    if (reportType == "FALLA_IRREGULAR" || reportType == "AVERIA") "IRREGULAR_OUTAGE" else "SCHEDULED_OUTAGE"
-                }
-                val newVoltage = voltage ?: if (hasPower) 118f else 0f
+                val updatedStatus = com.example.data.model.ReportSemantics.status(reportType, hasPower).name
+                val newVoltage = voltage ?: if (hasPower) sector.voltage else 0f
                 val newCount = sector.confirmedReportsCount + 1
                 val newPct = if (hasPower) {
                     (sector.withoutPowerPercentage - 8).coerceAtLeast(0)
@@ -303,14 +238,13 @@ class EnergyRepository(
                     hasPower = hasPower,
                     reportType = reportType,
                     voltage = voltage,
-                    observation = observation
+                    observation = observation,
+                    reportedAtMillis = entity.reportedAtMillis,
+                    localReportId = pendingId
                 )
 
                 if (firestoreSynced) {
-                    val latest = pendingDao.getUnsyncedReports().lastOrNull()
-                    if (latest != null) {
-                        pendingDao.markAsSynced(latest.id)
-                    }
+                    pendingDao.markAsSynced(pendingId)
                 } else {
                 }
             } catch (e: Exception) {
@@ -334,7 +268,9 @@ class EnergyRepository(
                     hasPower = item.hasPower,
                     reportType = item.reportType,
                     voltage = item.voltageObserved,
-                    observation = item.observation
+                    observation = item.observation,
+                    reportedAtMillis = item.reportedAtMillis,
+                    localReportId = item.id
                 )
                 if (success) {
                     pendingDao.markAsSynced(item.id)
@@ -367,7 +303,7 @@ class EnergyRepository(
                 withoutPowerPercentage = 0,
                 lastUpdatedMillis = System.currentTimeMillis(),
                 rotationBlock = block.trim(),
-                polygonPointsRaw = "8.625,-70.220;8.635,-70.208;8.620,-70.202;8.615,-70.215",
+                polygonPointsRaw = "",
                 isCommunity = true
             )
             sectorDao.insertOrUpdateSector(newSector)

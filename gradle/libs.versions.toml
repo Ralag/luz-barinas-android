@@ -34,7 +34,7 @@ roborazzi = "1.59.0"
 secretsGradlePlugin = "2.0.1"
 workRuntimeKtx = "2.10.0"
 glance = "1.1.1"
-playServicesAds = "23.6.0"
+playServicesAds = "25.5.0"
 supabase = "3.0.2"
 ktor = "3.0.0"
 
