@@ -43,6 +43,16 @@ La auditoría encontró reportes con IDs antiguos que no existen en el directori
 
 Los cambios se revisan por separado en [PR Android #2](https://github.com/Ralag/luz-barinas-android/pull/2) y [PR web #2](https://github.com/Ralag/pac-barinas/pull/2). Sus comprobaciones enlazan los resultados de GitHub y el despliegue web. El inventario registra **1024 declaraciones en 170 archivos**, con cobertura nominal, enlaces y copias documentales sin incidencias; la coincidencia de nombres no sustituye revisar el significado de las explicaciones.
 
+## Cierre de publicación — 20 de octubre de 2026
+
+Ambos PR quedaron integrados en sus ramas `main`, manteniendo los repositorios separados: [Android e8d004e](https://github.com/Ralag/luz-barinas-android/commit/e8d004e97e6a7c27a073d88ef10f0730f1974ad0) y [web aa1e66c](https://github.com/Ralag/pac-barinas/commit/aa1e66ce61d75a3518a97d92ab701fb4c52fb612). Pasaron las comprobaciones finales de [Android](https://github.com/Ralag/luz-barinas-android/actions/runs/39455367941) y [web/base de datos](https://github.com/Ralag/pac-barinas/actions/runs/39455376278). La publicación automática web produjo un [despliegue de producción READY](https://vercel.com/jorluis255-7238s-projects/pac-barinas/2Re1mebZwPBZXQoEo7R2uaWp6Trg).
+
+Se comprobaron catorce respuestas HTTP de producción: inicio, administración y núcleo del mapa 200; consulta mensual válida 200 e inválida 400; directorio de 119 sectores, detalle y estimación 200; envío GET 405, POST sin sesión 401 y preflight permitido 204. Las lecturas presentan la referencia del proyecto Supabase en sus cabeceras y el envío conserva la respuesta Node de Vercel. No se envió ninguna alerta real. Los dominios `pac-barinas.vercel.app`, `luz-barinas-admin-web.vercel.app` y `pacbarinas.site` conservaron ruta/parámetros y terminaron en `www.pacbarinas.site` con consulta mensual 200.
+
+Además de las 48 pruebas completas, se ejecutaron las cinco pruebas de interfaz compacta con grabación Roborazzi y se inspeccionaron las tres imágenes generadas: Guardar sector a 320×480 dp, acciones del actualizador en horizontal y reporte irregular con texto grande. Esto no sustituye las pruebas físicas de teclado, AdMob o comportamiento de cada fabricante.
+
+Android sigue siendo una actualización de **código** preparada como 1.4.0/código 8: no se generó ni publicó un APK de distribución ni una versión de Google Play. El traslado de lecturas puede beneficiar a versiones antiguas que usen esas rutas; los cambios del mapa, interfaz y anuncios requieren instalar una nueva versión.
+
 ## Mantenimiento
 
 Leer los capítulos [datos](codigo/02-android-datos-y-motor.md), [interfaz](codigo/03-android-interfaz-y-segundo-plano.md), [web](codigo/04-web-react-y-api.md), [panel](codigo/05-panel-clasico.md), [operación](codigo/06-base-de-datos-configuracion-y-operacion.md) y la [guía del gateway](OPERACION_GATEWAY_SUPABASE.md). Regenerar inventario y sincronizar copias con las herramientas del manual después de modificar código compartido.
