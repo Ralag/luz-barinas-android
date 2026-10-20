@@ -727,7 +727,7 @@ fun PacOfficialMatrixCard(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 // Slot Rows
-                for (slotIdx in 0 until minOf(6, slots.size)) {
+                for (slotIdx in slots.indices) {
                     val slot = slots[slotIdx]
                     val isCurrentSlot = highlightToday && slotIdx == currentSlotIdx
 
@@ -757,7 +757,7 @@ fun PacOfficialMatrixCard(
 
                         // Day Cells (A, B, C, D)
                         for (dayIdx in 0..6) {
-                            val block = matrix.getOrNull(slotIdx)?.getOrNull(dayIdx) ?: "A"
+                            val block = matrix.getOrNull(slotIdx)?.getOrNull(dayIdx) ?: "-"
                             val isSelectedDay = dayIdx == selectedDayIdx
                             val blockColor = if (isSelectedDay) getBlockColor(block) else getBlockColor(block).copy(alpha = 0.5f)
                             val isCellNow = highlightToday && dayIdx == todayIdx && slotIdx == currentSlotIdx

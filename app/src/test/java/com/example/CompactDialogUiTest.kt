@@ -10,6 +10,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Density
 import com.example.data.model.Sector
 import com.example.data.model.ServiceStatus
+import com.example.data.model.PacSlot
+import com.example.ui.components.PacOfficialMatrixCard
 import com.example.ui.components.BarinasAddressDialog
 import com.example.ui.components.OnboardingFlowDialog
 import com.example.ui.components.UpdatePromptContent
@@ -40,6 +42,18 @@ class CompactDialogUiTest {
             LocalConfiguration provides configuration,
             LocalDensity provides Density(density.density, fontScale = 1.6f)
         ) { MyApplicationTheme(darkTheme = true, content = content) }
+    }
+
+    @Test
+    fun weeklyMatrixShowsSeventhSlotAndMissingCellsAsUnassigned() {
+        val slots = List(7) { index -> PacSlot(index, "Franja ${index + 1}", index * 3, index * 3 + 2) }
+        compose.setContent {
+            MyApplicationTheme(darkTheme = true) {
+                PacOfficialMatrixCard("Semana", slots = slots, matrix = List(6) { List(7) { "B" } })
+            }
+        }
+        compose.onNodeWithText("Franja 7").assertExists()
+        compose.onAllNodesWithText("-", useUnmergedTree = true).assertCountEquals(7)
     }
 
     @Test

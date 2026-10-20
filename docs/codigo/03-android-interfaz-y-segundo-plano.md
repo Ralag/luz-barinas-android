@@ -4,7 +4,7 @@ Revisión del código local: 16 de octubre de 2026. Este capítulo explica cómo
 
 ## Cómo leer este capítulo
 
-El directorio base de las referencias Kotlin es `E:\LUZ BARINAS\app\src\main\java\com\example`. Una referencia `L180` significa la línea 180 del archivo enlazado al comienzo del apartado. Las líneas corresponden a esta revisión; al editar el código pueden desplazarse. El índice final conserva los nombres exactos de las declaraciones de este alcance, incluidos overrides y JavaScript propio del mapa. Los bloques anónimos se explican con su función contenedora: no tienen un nombre adicional que pueda buscarse en Kotlin.
+El directorio base de las referencias Kotlin es `E:\LUZ BARINAS\app\src\main\java\com\example`. Una referencia `L180` sirve como orientación en la revisión enlazada; las posiciones y firmas vigentes del código local se consultan en el [índice 07](07-indice-funciones.md). Las explicaciones de este capítulo describen la implementación actual, incluidos overrides y JavaScript propio del mapa. Los bloques anónimos se explican con su función contenedora: no tienen un nombre adicional que pueda buscarse en Kotlin.
 
 Las funciones `@Composable` aquí descritas retornan `Unit`: su resultado es una descripción de interfaz que Compose dibuja. Los callbacks como `(Sector) -> Unit` representan una acción que el padre entrega al componente. No equivalen a una escritura en servidor: hay que seguir el callback hasta el ViewModel y después hasta el repositorio. El capítulo [02, datos y motor](02-android-datos-y-motor.md) explica la implementación interna de esos repositorios, modelos y utilidades.
 
@@ -13,7 +13,8 @@ Las funciones `@Composable` aquí descritas retornan `Unit`: su resultado es una
 ```mermaid
 flowchart TD
   A[Android inicia MainActivity] --> B[onCreate: canales, anuncios, trabajo periódico]
-  B --> C[MainAppScreen observa uiState]
+  B --> Q[AppOpenLaunchHost: entrada y protección de interacción]
+  Q --> C[MainAppScreen observa uiState]
   C --> D[Hoy: DashboardScreen]
   C --> E[Horarios: PacScheduleView]
   C --> F[Mapa: MapScreen y WebView]
@@ -66,11 +67,11 @@ Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81
 
 ### `MainActivity.onCreate(savedInstanceState: Bundle?): Unit` — L85
 
-`onCreate` crea canales de notificación, inicia UMP/AdMob y programa la comprobación predictiva periódica. `setContent` observa el ViewModel, resuelve tema y escala, y muestra `AppOpenLaunchGate` antes de componer la pantalla principal. Un flag `rememberSaveable(launchGeneration)` evita repetir el arranque por una simple recomposición o recreación.
+`onCreate` restaura la generación publicitaria guardada, crea canales de notificación, inicia UMP/AdMob y programa la comprobación predictiva periódica. `setContent` observa el ViewModel, resuelve tema y escala y monta `AppOpenLaunchHost`. El host espera la entrada inicial antes de componer `MainAppScreen`; una vez montada, conserva esa pantalla incluso durante las compuertas de regreso. Su estado guardable evita repetir la entrada por una simple recomposición o recreación.
 
-`onStop` registra el instante monotónico de salida y precarga apertura si no se está mostrando otro anuncio y no es un cambio de configuración. `onStart` solicita un nuevo gate solo al regresar después de al menos cinco minutos; el gestor exige además diez minutos desde la última apertura publicitaria. Cerrar un anuncio no se interpreta como volver a abrir la app. No existe ya un Handler de dos segundos que intente mostrar sobre la navegación.
+`onStop` registra el instante monotónico de salida y precarga apertura si no se está mostrando otro anuncio y no es un cambio de configuración. `onStart` solicita una nueva generación solo al regresar después de al menos cinco minutos, con elegibilidad publicitaria y sin edición, diálogo o alarma protegida; el gestor exige además diez minutos desde la última apertura publicitaria. El host la superpone conservando los estados de la pantalla. `onSaveInstanceState` guarda la generación para que una rotación no produzca otra apertura. Cerrar un anuncio no se interpreta como volver a abrir la app. No existe ya un Handler de dos segundos que intente mostrar sobre la navegación.
 
-El tema mantiene la escala elegida por el usuario. MainAppScreen solo empieza después de continuar desde el gate: no solicita permisos ni abre selección de dirección detrás de la pantalla de entrada.
+El tema mantiene la escala elegida por el usuario. En una entrada normal, `MainAppScreen` solo empieza después de continuar desde el gate; una alarma activa omite esa espera. La app no solicita permisos ni abre automáticamente selección de dirección detrás de la pantalla de entrada. En retornos posteriores la pantalla sigue montada, de modo que el host conserva los formularios recordados.
 
 ### `MainAppScreen(viewModel: LuzBarinasViewModel): Unit` — L136
 
@@ -113,14 +114,14 @@ Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/bl
 
 `LuzBarinasViewModel(application: Application)` (L70) crea `EnergyRepository`, abre las preferencias `luz_barinas_user_prefs` y publica `StateFlow` de solo lectura. El estado inicial lee dirección, perfil, existencia de trabajo, modo, paleta y escala, y marca carga. `isDarkMode` comienza con su default y no se deriva en esa construcción de `themeMode`/sistema; algunos componentes pueden usar una bandera distinta al esquema real del tema.
 
-El bloque `init` L90 no es una función invocable separada. Carga el PAC persistido antes de tomar sus copias, inicia sincronización remota, lanza precarga local y crea colectores:
+El bloque `init` no es una función invocable separada. Carga el PAC persistido antes de tomar sus copias; una corutina prepara/migra el catálogo local y después inicia sincronización remota. También crea los colectores:
 
 | Colector | Actualización y efecto |
 |---|---|
 | Sectores Room | Reemplaza catálogo y resuelve solo ID del perfil activo; Casa admite ID general heredado. Ya no elige Alto Barinas I ni primer elemento como selección implícita. Sin coincidencia deja selección nula; quita carga. Si cambia ID escuchado recalcula/conecta sector. |
 | Pendientes, L137 | Copia el contador a `unsyncedReportsCount`. |
 | Reportes locales, L144 | Copia el listado a `recentReports`; es historial del dispositivo, no una descarga del feed global. |
-| Actualización del PAC, L151 | Reconstruye copias y predicción. Este bloque no llama explícitamente a rearmar alarmas. |
+| Actualización del PAC | Reconstruye matriz, franjas, asignaciones y versión desde un snapshot coherente y recalcula predicción. El rearmado remoto se solicita en `CloudSyncRepository` después de aplicar y guardar el horario; este colector no lo duplica. |
 | Avisos, L159 | Publica `activeBroadcastNotice`. |
 | Versión remota, L166 | Publica `updateAvailable`. |
 | Donaciones, L173 | Publica `donationConfig`. |
@@ -160,7 +161,7 @@ Todas las siguientes funciones retornan `Unit`, salvo la constructora privada de
 
 ### Edición del PAC y funciones administrativas presentes
 
-`buildPacStateCopy(userMsg: String? = null): LuzBarinasUiState` L351 es privada. Lee estado actual y singleton y retorna copia con versión, matriz, franjas y listas A–D; mantiene el mensaje anterior si no se proporciona uno. No guarda ni publica. La usan recolector remoto y acciones de edición.
+`buildPacStateCopy(userMsg: String? = null, current: LuzBarinasUiState = _uiState.value): LuzBarinasUiState` es privada. Obtiene un snapshot coherente del singleton y retorna una copia de `current` con versión, matriz, franjas y listas A–D; mantiene el mensaje anterior si no se proporciona uno. El colector remoto le entrega el estado de la actualización atómica para conservar cambios concurrentes. No guarda ni publica. La usan ese colector y las acciones de edición.
 
 El patrón común de edición es **mutar PAC → guardar preferencias → solicitar rearmado de alarmas → publicar snapshots UI → recalcular predicción → lanzar publicación remota**. La última función sigue siendo stub sin escritura; el rearmado sí utiliza el horario local persistido y cancela lo previo. Los callbacks están destinados a AdminScreen, aún sin montaje principal.
 
@@ -192,7 +193,7 @@ Las preferencias del PAC y alertas son otros almacenes manejados por `PacSchedul
 
 Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/DashboardScreen.kt).
 
-**`DashboardScreen` L85** recibe `sectors`, `selectedSector`, dirección opcional, `prediction`, `unsyncedCount`, aviso opcional, perfil/existencia de trabajo, callbacks de perfil, aviso, selección, reporte de cuatro argumentos, dirección, horarios y alarma, más `modifier`. Retorna `Unit`. La monta Hoy. No escribe Room: todas las acciones durables salen por callbacks. `unsyncedCount` está en la firma pero no se dibuja aquí como tarjeta de sincronización.
+**`DashboardScreen`** recibe `sectors`, `selectedSector`, dirección opcional, `prediction`, `unsyncedCount`, aviso opcional, perfil/existencia de trabajo, callbacks de perfil, aviso, selección, reporte de cuatro argumentos, dirección, horarios, alarma y tutorial opcional, más `modifier` y `scheduleVersion`. Retorna `Unit`. La monta Hoy. No escribe Room: todas las acciones durables salen por callbacks. `unsyncedCount` está en la firma pero no se dibuja aquí como tarjeta de sincronización.
 
 Mantiene feedback de reporte, texto de observación y su apertura; normaliza bloque con `PacBlock.normalize`, sin A por defecto. Un `LaunchedEffect(Unit)` espera diez segundos repetidamente y publica la clave del minuto; con ella crea `Calendar` en `America/Caracas`. `scheduleVersion` invalida el snapshot y las ventanas recordadas al publicar un cronograma. `findScheduledWindowForBlock` resuelve el turno activo y el siguiente con las franjas publicadas, incluidos los cruces de medianoche. La banda principal describe el estado comunitario guardado: normal, sin luz, falla irregular o desconocido; su texto secundario muestra por separado la franja PAC activa o siguiente. Un corte previsto no convierte por sí mismo un reporte normal en un corte observado, y un estado desconocido no se presenta como corte programado.
 
@@ -203,9 +204,9 @@ Mantiene feedback de reporte, texto de observación y su apertura; normaliza blo
 | Casa/Trabajo L194 | Si existe trabajo, dos botones llaman `onSwitchProfile`; si no, “Agregar” cambia a trabajo y abre dirección. |
 | Tarjeta de hoy L250 | Nombre de selección o dirección, distintivo comunitario/PAC, circuito, bloque y “Cambiar”. El nombre dispone de todo el ancho y hasta dos líneas con elipsis; circuito hasta dos líneas y chips se ajustan con `FlowRow`. |
 | Banda de estado | Texto y color se derivan del estado comunitario: verde para normal, rojo para sin luz, morado para falla irregular y neutro para desconocido. La descripción accesible usa ese mismo texto. Debajo muestra la referencia PAC activa o siguiente, sin afirmar que sea una medición eléctrica. |
-| Cronograma diario L447 | Recorre `PacScheduleData.SLOTS`, muestra bloque de cada franja, AHORA y corte del usuario; “Ver mensual” llama a navegación. |
+| Cronograma diario | Recorre todas las franjas del snapshot y aplica la rotación correspondiente a la fecha Caracas. AHORA identifica solo una franja que haya comenzado hoy; el turno nocturno de ayer se explica en la referencia PAC superior. “Ver más” llama a navegación. |
 | Acceso a alertas L559 | Lee `PacAlertPrefs` con `remember`; muestra modo/anticipación y abre diálogo. Ese recuerdo no observa automáticamente cambios de preferencias. |
-| Reportes L632 | Con Luz→`true,NORMAL,118f,obs`; Sin Luz→`false,SIN_LUZ,0f,obs`; Falla→`false,FALLA_IRREGULAR,0f,obs` con descripción de respaldo. Limpia texto/cierra observación y muestra agradecimiento inmediatamente. |
+| Reportes | Con Luz→`true,NORMAL,null,obs`; Sin Luz→`false,SIN_LUZ,0f,obs`; Falla→`false,FALLA_IRREGULAR,0f,obs` con descripción de respaldo. El reporte normal de un toque no inventa una tensión observada. Limpia texto/cierra observación y muestra agradecimiento inmediatamente. |
 | Observación L728 | Toggle, cuatro sugerencias que sustituyen el texto y campo libre; no hay medición de voltaje ni validación de veracidad. |
 | Atajo y pie L823/L839 | Abre horarios y muestra independencia del proyecto/fuentes; es texto local. |
 
@@ -217,11 +218,11 @@ Si `onWatchTutorial` tiene valor aparece un acceso adicional al tutorial. Sin de
 
 Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/PacScheduleView.kt).
 
-**`PacScheduleView` L81.** Entradas: selección nullable, `modifier`, `onSectorClicked: (String) -> Unit` opcional, `pacMatrix: List<List<String>>` y `pacSlots: List<PacSlot>` con copias por defecto. Retorna `Unit`. La monta la pestaña Horarios. Mantiene minuto, día seleccionado, subpestaña, mes seleccionado y obtiene mes/año/día de `Calendar`. Actualiza clave cada diez segundos. Calcula días del mes con calendario Caracas y semanas mediante `getMonthlyWeeks`, recordadas por mes/días/versión.
+**`PacScheduleView`.** Entradas: selección nullable, `modifier`, `onSectorClicked: (String) -> Unit` opcional, `pacMatrix: List<List<String>>` y `pacSlots: List<PacSlot>` con copias por defecto. Retorna `Unit`. La monta la pestaña Horarios. Mantiene minuto, día seleccionado, subpestaña y mes seleccionado; obtiene mes/año/día con `Calendar` en `America/Caracas` y actualiza la clave cada diez segundos. El día del mes determina la semana PAC. `weekMatrix` rota la matriz base por esa semana; las semanas mensuales de `getMonthlyWeeks` se recuerdan por mes, cantidad de días, matriz y franjas. Una franja nocturna que comenzó ayer no se resalta como si comenzara hoy.
 
-Su subpestaña **Semanal** muestra una matriz de `pacMatrix`, permite seleccionar cabecera o chip de día y dibuja detalle de franjas del día con indicación del bloque propio/turno actual. El detalle semanal lee la matriz entregada; el mensual usa las matrices generadas por el motor, por lo que hay que verificar consistencia con rotación de fecha al modificar el modelo. Entre bloques de contenido incorpora un banner. La subpestaña **Mensual** permite elegir cualquiera de los doce meses del año actual y dibuja cuatro semanas calculadas; resalta la que corresponde al mes y semana actuales. **Circuitos** muestra las listas A–D con selección de nombre. Los selectores solo cambian estado de presentación; no publican un cronograma.
+Su subpestaña **Semanal** muestra `weekMatrix`, permite seleccionar cabecera o chip de día y dibuja todas las franjas del detalle diario con indicación del bloque propio/turno actual. Las celdas ausentes del detalle se muestran como `-`. La matriz semanal y las mensuales parten de la misma base y aplican su rotación de semana. Entre bloques de contenido incorpora un banner. La subpestaña **Mensual** permite elegir cualquiera de los doce meses del año actual y dibuja cuatro semanas calculadas; resalta la que corresponde al mes y semana actuales. **Circuitos** muestra las listas A–D con selección de nombre. Los selectores solo cambian estado de presentación; no publican un cronograma.
 
-**`PacOfficialMatrixCard` L618.** Entradas: `title`, `modifier`, matriz, franjas, `highlightToday`, `todayIdx`, `currentSlotIdx`, `userBlock`, `selectedDayIdx` y callback de cabecera nullable. Retorna `Unit`. La usa semanal y cada semana mensual. Dibuja título, tabla con desplazamiento horizontal, días, un máximo de seis filas y leyenda A–D. Para celdas ausentes usa A; día/turno actual y bloque del usuario cambian bordes y fondos. Pulsar cabecera invoca callback si existe; no cambia datos por sí misma. El padre no le pasa siempre `selectedDayIdx`, por lo que el resaltado de selección y el detalle no deben darse por sincronizados automáticamente.
+**`PacOfficialMatrixCard`.** Entradas: `title`, `modifier`, matriz, franjas, `highlightToday`, `todayIdx`, `currentSlotIdx`, `userBlock`, `selectedDayIdx` y callback de cabecera nullable. Retorna `Unit`. La usa semanal y cada semana mensual. Dibuja título, tabla con desplazamiento horizontal, días y leyenda A–D; día/turno actual y bloque del usuario cambian bordes y fondos. Recorre todas las franjas recibidas y representa una celda ausente mediante `-`, sin asignarle A. Pulsar cabecera invoca callback si existe; no cambia datos por sí misma. El padre no le pasa siempre `selectedDayIdx`, por lo que el resaltado de selección y el detalle no deben darse por sincronizados automáticamente.
 
 **`PacBlockSectorsGrid` L839.** `modifier`, `onSectorClicked` opcional; retorna `Unit`. La llama la vista de circuitos. Lee directamente `PacScheduleData.SECTORS_BLOQUE_A/B/C/D` y crea cuatro `BlockSectorsCard`; D incluye una nota. No recibe las copias A–D del ViewModel ni consulta Room.
 
@@ -476,7 +477,7 @@ Esto requiere configurar y publicar los mensajes correspondientes al App ID en *
 
 `AdsConfiguration.unitId` selecciona la variable BuildConfig según `AdFormat` y delega la validación en `resolveAdUnitId`. DEBUG siempre usa las unidades oficiales de prueba para banner, intersticial, apertura y recompensa, aunque el entorno tenga unidades reales. Release exige un ID con estructura de unidad AdMob y rechaza unidades oficiales de prueba. Un valor vacío, `DISABLED` o inválido deshabilita ese formato. No se utiliza reflexión para leer BuildConfig, evitando que la optimización R8 elimine campos que solo se accedían por nombre.
 
-Las variables son `ADMOB_BANNER_UNIT_ID`, `ADMOB_INTERSTITIAL_UNIT_ID`, `ADMOB_APP_OPEN_UNIT_ID` y `ADMOB_REWARDED_UNIT_ID`. Esta última queda `DISABLED` hasta que el operador cree la unidad real. El ID de aplicación es una configuración distinta del ID de una unidad. La ausencia de inventario, las restricciones de la cuenta y la aprobación en AdMob siguen dependiendo del proveedor; una compilación correcta no demuestra anuncios disponibles en producción.
+Las variables son `ADMOB_BANNER_UNIT_ID`, `ADMOB_INTERSTITIAL_UNIT_ID`, `ADMOB_APP_OPEN_UNIT_ID` y `ADMOB_REWARDED_UNIT_ID`. La unidad con bonificación suministrada por el titular ya figura en la configuración de ejemplo y `ADMOB_REWARD_HOURS=12` define la pausa solicitada. El ID de aplicación es una configuración distinta del ID de una unidad. La ausencia de inventario, las restricciones de la cuenta y la aprobación en AdMob siguen dependiendo del proveedor; una compilación correcta no demuestra anuncios disponibles en producción.
 
 ### Banner e intersticial
 
