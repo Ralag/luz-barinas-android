@@ -9,13 +9,13 @@ Las líneas corresponden al código local leído; al cambiarlo, regenera este í
 | Capítulo | Declaraciones |
 |---|---:|
 | [../OPERACION_GATEWAY_SUPABASE.md](../OPERACION_GATEWAY_SUPABASE.md) | 31 |
-| [02-android-datos-y-motor.md](02-android-datos-y-motor.md) | 138 |
-| [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md) | 222 |
-| [04-web-react-y-api.md](04-web-react-y-api.md) | 317 |
+| [02-android-datos-y-motor.md](02-android-datos-y-motor.md) | 139 |
+| [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md) | 240 |
+| [04-web-react-y-api.md](04-web-react-y-api.md) | 324 |
 | [05-panel-clasico.md](05-panel-clasico.md) | 280 |
 | [06-base-de-datos-configuracion-y-operacion.md](06-base-de-datos-configuracion-y-operacion.md) | 10 |
 
-Archivos examinados: **166**. Declaraciones identificadas: **998**. Errores de análisis: **0**.
+Archivos examinados: **170**. Declaraciones identificadas: **1024**. Errores de análisis: **0**.
 
 ## admin-web/admin.html
 
@@ -673,18 +673,19 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `AdminPortal` | 13 | FunctionDeclaration |
-| `fetchAdminData` | 79 | `AdminPortal` |
-| `handleLogin` | 146 | `AdminPortal` |
-| `handleLogout` | 160 | `AdminPortal` |
-| `cycleCell` | 170 | `AdminPortal` |
-| `handleSavePac` | 186 | `AdminPortal` |
-| `handleSaveDonations` | 220 | `AdminPortal` |
-| `handleAddSector` | 242 | `AdminPortal` |
-| `handleRemoveSector` | 252 | `AdminPortal` |
-| `handleSendBroadcast` | 260 | `AdminPortal` |
-| `pingApi` | 275 | `AdminPortal` |
-| `getBadgeClass` | 369 | `AdminPortal` |
+| `AdminReportsList` | 14 | FunctionDeclaration |
+| `AdminPortal` | 53 | FunctionDeclaration |
+| `fetchAdminData` | 119 | `AdminPortal` |
+| `handleLogin` | 186 | `AdminPortal` |
+| `handleLogout` | 200 | `AdminPortal` |
+| `cycleCell` | 210 | `AdminPortal` |
+| `handleSavePac` | 226 | `AdminPortal` |
+| `handleSaveDonations` | 260 | `AdminPortal` |
+| `handleAddSector` | 282 | `AdminPortal` |
+| `handleRemoveSector` | 292 | `AdminPortal` |
+| `handleSendBroadcast` | 300 | `AdminPortal` |
+| `pingApi` | 315 | `AdminPortal` |
+| `getBadgeClass` | 409 | `AdminPortal` |
 
 ## admin-web/src/pages/Blog.jsx
 
@@ -895,33 +896,38 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 | `error` | 236 | FunctionExpression |
 | `from` | 237 | FunctionExpression |
 | `upsert` | 237 | ArrowFunctionExpression |
-| `divIcon` | 288 | ArrowFunctionExpression |
-| `marker` | 288 | ArrowFunctionExpression |
-| `bindPopup` | 288 | `marker` |
-| `addTo` | 288 | `marker.bindPopup` |
-| `clearLayers` | 289 | FunctionExpression |
-| `addLayer` | 289 | FunctionExpression |
-| `editSector` | 302 | ArrowFunctionExpression |
-| `closest` | 306 | ArrowFunctionExpression |
-| `preventDefault` | 306 | FunctionExpression |
-| `approvalFixture` | 319 | FunctionDeclaration |
-| `randomUUID` | 325 | `approvalFixture` |
-| `getItem` | 326 | `approvalFixture` |
-| `setItem` | 326 | `approvalFixture` |
-| `alert` | 327 | `approvalFixture` |
-| `from` | 328 | `approvalFixture` |
-| `insert` | 329 | `approvalFixture.from` |
-| `upsert` | 330 | `approvalFixture.from` |
-| `delete` | 331 | `approvalFixture.from` |
-| `eq` | 331 | `approvalFixture.from.delete` |
-| `name` | 333 | `approvalFixture` |
-| `publishPacSchedule` | 334 | `approvalFixture` |
-| `setApprovalFields` | 340 | FunctionDeclaration |
-| `alert` | 414 | ArrowFunctionExpression |
-| `hideActiveBroadcast` | 415 | ArrowFunctionExpression |
-| `from` | 416 | ArrowFunctionExpression |
-| `upsert` | 416 | `from` |
-| `preventDefault` | 421 | FunctionExpression |
+| `getElementById` | 254 | ArrowFunctionExpression |
+| `requireAdmin` | 254 | ArrowFunctionExpression |
+| `alert` | 256 | FunctionExpression |
+| `from` | 257 | FunctionExpression |
+| `upsert` | 257 | ArrowFunctionExpression |
+| `divIcon` | 339 | ArrowFunctionExpression |
+| `marker` | 339 | ArrowFunctionExpression |
+| `bindPopup` | 339 | `marker` |
+| `addTo` | 339 | `marker.bindPopup` |
+| `clearLayers` | 340 | FunctionExpression |
+| `addLayer` | 340 | FunctionExpression |
+| `editSector` | 353 | ArrowFunctionExpression |
+| `closest` | 357 | ArrowFunctionExpression |
+| `preventDefault` | 357 | FunctionExpression |
+| `approvalFixture` | 370 | FunctionDeclaration |
+| `randomUUID` | 376 | `approvalFixture` |
+| `getItem` | 377 | `approvalFixture` |
+| `setItem` | 377 | `approvalFixture` |
+| `alert` | 378 | `approvalFixture` |
+| `from` | 379 | `approvalFixture` |
+| `insert` | 380 | `approvalFixture.from` |
+| `upsert` | 381 | `approvalFixture.from` |
+| `delete` | 382 | `approvalFixture.from` |
+| `eq` | 382 | `approvalFixture.from.delete` |
+| `name` | 384 | `approvalFixture` |
+| `publishPacSchedule` | 385 | `approvalFixture` |
+| `setApprovalFields` | 391 | FunctionDeclaration |
+| `alert` | 465 | ArrowFunctionExpression |
+| `hideActiveBroadcast` | 466 | ArrowFunctionExpression |
+| `from` | 467 | ArrowFunctionExpression |
+| `upsert` | 467 | `from` |
+| `preventDefault` | 472 | FunctionExpression |
 
 ## admin-web/tests/pac-edge-api.test.cjs
 
@@ -1011,7 +1017,8 @@ Explicación: [04-web-react-y-api.md](04-web-react-y-api.md).
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `getBlockBadgeClass` | 58 | ArrowFunctionExpression |
+| `render` | 74 | ArrowFunctionExpression |
+| `getBlockBadgeClass` | 101 | ArrowFunctionExpression |
 
 ## admin-web/tests/sendPushAlert.test.cjs
 
@@ -1169,6 +1176,17 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | `acquire` | 119 | Kotlin fun |
 | `release` | 125 | Kotlin fun |
 
+## app/src/main/java/com/example/ads/AppOpenInteractionGuard.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `canOpenAfterReturn` | 14 | Kotlin fun |
+| `acquire` | 18 | Kotlin fun |
+| `release` | 24 | Kotlin fun |
+| `AppOpenInteractionProtection` | 32 | Kotlin fun |
+
 ## app/src/main/java/com/example/ads/AppOpenLaunchGate.kt
 
 Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
@@ -1176,6 +1194,14 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | Función | Línea | Contexto |
 |---|---:|---|
 | `AppOpenLaunchGate` | 23 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/AppOpenLaunchHost.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `AppOpenLaunchHost` | 15 | Kotlin fun |
 
 ## app/src/main/java/com/example/ads/AppOpenLaunchPolicy.kt
 
@@ -1486,9 +1512,10 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | Función | Línea | Contexto |
 |---|---:|---|
 | `onStart` | 87 | Kotlin fun |
-| `onStop` | 96 | Kotlin fun |
-| `onCreate` | 104 | Kotlin fun |
-| `MainAppScreen` | 147 | Kotlin fun |
+| `onStop` | 97 | Kotlin fun |
+| `onCreate` | 105 | Kotlin fun |
+| `onSaveInstanceState` | 147 | Kotlin fun |
+| `MainAppScreen` | 155 | Kotlin fun |
 
 ## app/src/main/java/com/example/notification/NotificationActionReceiver.kt
 
@@ -1710,7 +1737,7 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | Función | Línea | Contexto |
 |---|---:|---|
 | `DashboardScreen` | 91 | Kotlin fun |
-| `BroadcastNoticeBanner` | 803 | Kotlin fun |
+| `BroadcastNoticeBanner` | 802 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/screens/LegalScreen.kt
 
@@ -1868,6 +1895,18 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 | `debugAlwaysUsesTheOfficialTestUnitForEveryFormatEvenWithProductionConfiguration` | 51 | Kotlin fun |
 | `releaseDisablesAFormatUntilAValidProductionUnitIsConfigured` | 60 | Kotlin fun |
 
+## app/src/test/java/com/example/AppOpenLaunchHostTest.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `FakeGate` | 30 | Kotlin fun |
+| `returnOverlayPreservesMountedFormAndDraft` | 35 | Kotlin fun |
+| `protectedReturnIsSkippedAndNotDeferredUntilFormCloses` | 60 | Kotlin fun |
+| `activeAlarmBypassesInitialGateAndAlwaysBlocksReturn` | 91 | Kotlin fun |
+| `closingOneProtectedSurfaceCannotReleaseAnother` | 110 | Kotlin fun |
+
 ## app/src/test/java/com/example/AppOpenLaunchPolicyTest.kt
 
 Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
@@ -1886,11 +1925,25 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `LargeText` | 36 | Kotlin fun |
-| `registerSectorSaveRemainsReachableWithLargeText` | 46 | Kotlin fun |
-| `updateActionsRemainReachableWithLongReleaseNotesInLandscape` | 71 | Kotlin fun |
-| `welcomeCanBeSkippedWithoutOpeningPermissionSetup` | 91 | Kotlin fun |
-| `longSectorNameKeepsChangeActionAndIrregularReportUsable` | 106 | Kotlin fun |
+| `LargeText` | 38 | Kotlin fun |
+| `weeklyMatrixShowsSeventhSlotAndMissingCellsAsUnassigned` | 48 | Kotlin fun |
+| `registerSectorSaveRemainsReachableWithLargeText` | 60 | Kotlin fun |
+| `updateActionsRemainReachableWithLongReleaseNotesInLandscape` | 85 | Kotlin fun |
+| `welcomeCanBeSkippedWithoutOpeningPermissionSetup` | 105 | Kotlin fun |
+| `longSectorNameKeepsChangeActionAndIrregularReportUsable` | 120 | Kotlin fun |
+
+## app/src/test/java/com/example/DashboardStatusUiTest.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `publishActivePacForTheWholeDay` | 29 | Kotlin fun |
+| `restoreSchedule` | 38 | Kotlin fun |
+| `showStatus` | 40 | Kotlin fun |
+| `unknownServiceIsNotReportedAsAnObservedOutageDuringPac` | 55 | Kotlin fun |
+| `normalCommunityReportRemainsDistinctFromTheActivePac` | 62 | Kotlin fun |
+| `irregularFaultKeepsItsLabelDuringAnActiveScheduledCut` | 69 | Kotlin fun |
 
 ## app/src/test/java/com/example/ExampleRobolectricTest.kt
 
@@ -1942,10 +1995,11 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 | `selectProfile` | 66 | Kotlin fun |
 | `repairsLegacyCachedBlockFromTheSelectedRoomSector` | 78 | Kotlin fun |
 | `coldStartLoadsPersistedScheduleBeforeArmingActualAlarmTimes` | 93 | Kotlin fun |
-| `changingProfileReplacesOldAlarmsAndRejectsAnAlreadyQueuedOldIntent` | 109 | Kotlin fun |
-| `disabledSettingsCancelPreviouslyScheduledAlarmsAndUnscheduledDArmsNothing` | 138 | Kotlin fun |
-| `exactAndPeriodicDeliveryShareADurableKeyButDifferentProfilesAreIndependent` | 156 | Kotlin fun |
-| `planHonorsIndependentAlertSwitchesAndSchedulesFutureWhileCurrentCutIsActive` | 166 | Kotlin fun |
+| `olderPersistedScheduleCannotOverrideANewerInMemorySnapshot` | 109 | Kotlin fun |
+| `changingProfileReplacesOldAlarmsAndRejectsAnAlreadyQueuedOldIntent` | 122 | Kotlin fun |
+| `disabledSettingsCancelPreviouslyScheduledAlarmsAndUnscheduledDArmsNothing` | 151 | Kotlin fun |
+| `exactAndPeriodicDeliveryShareADurableKeyButDifferentProfilesAreIndependent` | 169 | Kotlin fun |
+| `planHonorsIndependentAlertSwitchesAndSchedulesFutureWhileCurrentCutIsActive` | 179 | Kotlin fun |
 
 ## app/src/test/java/com/example/PacScheduleRegressionTest.kt
 

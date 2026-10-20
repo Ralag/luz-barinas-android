@@ -7,7 +7,7 @@ Esta entrega prepara Android **1.4.0 / código 8**. El cambio de código y docum
 | Problema | Corrección |
 |---|---|
 | Apertura intentada siempre a los dos segundos, a menudo sin anuncio listo | Pantalla de entrada vinculada a consentimiento, SDK y callback real. Máximo 3,5 segundos de espera y «Entrar ahora». Nunca muestra una carga tardía sobre contenido. |
-| Volver desde segundo plano no tenía una apertura coordinada | Gate al regresar tras cinco minutos; mínimo diez minutos entre impresiones de apertura. No se activa al cerrar otro anuncio ni por rotar pantalla. |
+| Volver desde segundo plano no tenía una apertura coordinada | Gate al regresar tras cinco minutos; mínimo diez minutos entre impresiones. Conserva pantalla y borradores; se omite durante formularios, ajustes y alarmas. No se activa al cerrar otro anuncio ni por rotar pantalla. |
 | Publicidad sin control común de disponibilidad | UMP antes de peticiones, exclusión de pantalla completa, caché con caducidad, banner adaptable y gestión de ciclo de vida. Debug usa unidades de prueba. |
 | Falta de recompensa | Unidad con bonificación facilitada por el titular: doce horas sin banner, apertura ni intersticial en este teléfono. Se concede solo al callback de recompensa, persiste y no se acumula. |
 | Mapa Android distinto, inestable y con ubicaciones repetidas inventadas | Núcleo/estilos compartidos con web, coordenadas remotas, aproximaciones identificadas, marcadores agrupados y cámara preservada entre actualizaciones. |
@@ -16,6 +16,7 @@ Esta entrega prepara Android **1.4.0 / código 8**. El cambio de código y docum
 | El servidor no agregaba reportes al mapa | Trigger por sentencia calcula muestra de dos horas para IDs exactos, con bloqueo de sector y prioridad de una edición administrativa más reciente. |
 | «Hoy» no reflejaba siempre el cambio semanal | Instantáneas validadas y coherentes, evento con replay, reconciliación HTTP de 60 s y actualización Compose por versión. |
 | Doble rotación al editar la semana actual | Editores presentan la semana actual y convierten de vuelta a base antes de guardar. Portal, TV y API comparten cálculos de Caracas, noche y cambio de mes. |
+| Tabla semanal limitada a seis franjas y celdas vacías asignadas a A | Representa todas las franjas y muestra `-` cuando no hay una celda; no inventa un bloque. |
 | Botones ocultos en pantallas pequeñas | Diálogos con contenido desplazable, acciones inferiores accesibles, soporte de teclado/insets, nombres limitados y acciones adaptadas. |
 | Bienvenida insistente | Breve, animada y opcional; omitir se recuerda y no abre obligatoriamente ubicación ni permisos. |
 | Tutorial futuro | app_experience.youtubeTutorialUrl permite un enlace HTTPS de YouTube validado. Sin URL configurada no aparece un vídeo ficticio. |
@@ -30,17 +31,17 @@ Una llamada antigua al dominio Vercel puede beneficiarse de la reescritura mante
 
 ## Verificación y límites
 
-Las pruebas web cubren permisos, contratos HTTP, firma RSA/OAuth simulada, semántica irregular, render React de seis temas, puente del mapa, noche, huecos y cambios de mes. La compilación web genera correctamente portal, panel y blog. En navegador Chromium se comprobaron inicio a 375 px sin desbordamiento y mapa con agrupación de dos sectores, conservación de cámara al actualizar/cambiar base y cero excepciones JavaScript. Los anuncios reales se bloquearon durante la prueba de navegador.
+Las **132 pruebas web** cubren permisos, contratos HTTP, firma RSA/OAuth simulada, semántica irregular, render React de seis temas y tabla administrativa, puente del mapa, noche, huecos y cambios de mes. La compilación web genera correctamente portal, panel y blog. En navegador Chromium se comprobaron inicio a 375 px sin desbordamiento y mapa con agrupación de dos sectores, conservación de cámara al actualizar/cambiar base y cero excepciones JavaScript. Los anuncios reales se bloquearon durante la prueba de navegador.
 
-Android aprobó **40 pruebas** y `lintDebug` sin errores, con **83 advertencias** pendientes. La prueba compacta cubre guardar sector, acciones del actualizador, omitir bienvenida y reporte irregular con nombre largo. Se reparó también la prueba de arranque en frío para representar una revisión inicial de memoria cero, y se añadió una regresión contra la recarga de preferencias antiguas sobre un horario más reciente.
+Android aprobó **48 pruebas** y `lintDebug` sin errores, con **83 advertencias** pendientes. Las pruebas de interfaz cubren guardar sector, acciones del actualizador, omitir bienvenida, reporte irregular con nombre largo, séptima franja, estados separados del PAC y conservación de formularios al regresar. Se reparó también la prueba de arranque en frío para representar una revisión inicial de memoria cero, y se añadió una regresión contra la recarga de preferencias antiguas sobre un horario más reciente.
 
-La prueba de agregación ejecutó **168 sentencias** en PostgreSQL18.6/PGlite. GitHub ejecuta el fixture separado sobre PostgreSQL16. No se enviaron alertas FCM ni se insertaron reportes ciudadanos de prueba en producción. Los ensayos SQL locales no acreditan una prueba simultánea de dos conexiones reales.
+La prueba de agregación ejecutó **168 sentencias** en PostgreSQL18.6/PGlite. GitHub aprobó el fixture separado sobre **PostgreSQL16** y una prueba de **dos conexiones simultáneas**, con inserciones de sectores en orden inverso y comprobación del recuento y estado final. No se enviaron alertas FCM ni se insertaron reportes ciudadanos de prueba en producción.
 
 Los anuncios se validan con unidades oficiales de prueba; faltan pruebas físicas de disponibilidad/consentimiento por modelo de teléfono. AdMob puede devolver falta de inventario, red o restricciones de cuenta: el código garantiza entrada sin bloqueo y diagnóstico, no una impresión en cada apertura ni ingresos determinados. No había un teléfono Android conectado durante esta validación.
 
 La auditoría encontró reportes con IDs antiguos que no existen en el directorio remoto. No se reasignan por parecido de nombre. El motor predictivo Android conserva heurísticas que no son probabilidades calibradas. El actualizador abre Google Play; esta entrega no implementa instalación silenciosa ni descarga OTA propia.
 
-Los resultados definitivos de Android, documentación, CI y despliegue se registran al completar la entrega y pueden contrastarse con los PR de cada repositorio.
+Los cambios se revisan por separado en [PR Android #2](https://github.com/Ralag/luz-barinas-android/pull/2) y [PR web #2](https://github.com/Ralag/pac-barinas/pull/2). Sus comprobaciones enlazan los resultados de GitHub y el despliegue web. El inventario registra **1024 declaraciones en 170 archivos**, con cobertura nominal, enlaces y copias documentales sin incidencias; la coincidencia de nombres no sustituye revisar el significado de las explicaciones.
 
 ## Mantenimiento
 

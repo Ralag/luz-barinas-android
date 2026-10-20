@@ -27,7 +27,7 @@ La ruta Retrofit definida en `data/remote` es residual: **no se encontraron llam
 
 ### 2.1 `PowerStatus.kt`
 
-Fuente: [PowerStatus.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/model/PowerStatus.kt#L1).
+Fuente: [PowerStatus.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/model/PowerStatus.kt).
 
 Son modelos de transporte dentro de la aplicación. Sus constructores no consultan red ni disco y no validan por sí mismos rangos, relaciones o consistencia. Las funciones generadas de las `data class` —`copy`, igualdad, desestructuración y representación textual— son las de Kotlin; no añaden persistencia. `@Immutable` informa a Compose de la intención de inmutabilidad, sin convertir otros objetos globales en seguros para concurrencia.
 
@@ -101,11 +101,11 @@ La observación viaja de la UI al repositorio, se persiste en Room y se incluye 
 
 ### 2.2 Configuración económica y respuesta mensual
 
-Fuente: [DonationConfig.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/model/DonationConfig.kt#L3).
+Fuente: [DonationConfig.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/model/DonationConfig.kt).
 
 **`DonationConfig` — L3.** Cinco cadenas con valor inicial vacío: `paypal` y `binance` identifican los datos configurados de esos métodos; `pmBank`, `pmPhone` y `pmId` son banco, teléfono e identificación del pago móvil. `CloudSyncRepository.processConfig` construye este objeto desde `donations_config`; el ViewModel lo observa y el diálogo lo presenta. No comprueba titularidad, formato bancario ni que un enlace sea accesible; no hace pagos ni guarda comprobantes.
 
-Fuente: [MonthlyWeeksResponse.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/model/MonthlyWeeksResponse.kt#L9).
+Fuente: [MonthlyWeeksResponse.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/model/MonthlyWeeksResponse.kt).
 
 **`MonthlyWeeksResponse` — L9.** Un campo `weeks: List<PacWeekPlan>`. `@Keep` y `@JsonClass(generateAdapter = true)` preparan el modelo para conservación/serialización Moshi en el contrato Retrofit. La vista mensual actual llama al cálculo local, no a este endpoint.
 
@@ -113,7 +113,7 @@ Fuente: [MonthlyWeeksResponse.kt](https://github.com/Ralag/luz-barinas-android/b
 
 ### 3.1 Entidades y sus convertidores
 
-Fuente: [SectorEntity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/local/entity/SectorEntity.kt#L8).
+Fuente: [SectorEntity.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/local/entity/SectorEntity.kt).
 
 **`SectorEntity` — L9, tabla `sectors`.** Su clave primaria es `id: String`, no autogenerada. Guarda `name`, `circuitCode`, `status: String`, `voltage`, `confirmedReportsCount`, `withoutPowerPercentage`, `lastUpdatedMillis`, `rotationBlock`, `polygonPointsRaw: String` e `isCommunity: Boolean = false`. Salvo `status` y el polígono, equivalen a los campos de `Sector`. `polygonPointsRaw` codifica `lat,lng;lat,lng;...`. No hay claves foráneas declaradas a reportes o históricos, índices geográficos ni municipio/parroquia persistidos en esta entidad.
 
@@ -126,21 +126,21 @@ Fuente: [SectorEntity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81
 
 La llaman el flujo de sectores, la consulta de predicción y el alta comunitaria del repositorio. No escribe ni usa red. Los vértices inválidos se descartan silenciosamente; no comprueba límites de latitud/longitud ni que haya suficientes puntos para un polígono. Un estado remoto nuevo o mal escrito se presenta como servicio normal, lo cual puede ocultar un problema de contrato.
 
-Fuente: [OutageRecordEntity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/local/entity/OutageRecordEntity.kt#L9).
+Fuente: [OutageRecordEntity.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/local/entity/OutageRecordEntity.kt).
 
 **`OutageRecordEntity` — L13, tabla `outage_records`.** `id: Long = 0` es clave autogenerada. Los otros campos son `sectorId`, `sectorName`, `statusType: String`, `startTimeMillis`, `endTimeMillis: Long?`, `durationHours` y `notes`. Hay un índice compuesto por `sectorId` y `startTimeMillis`, útil para las consultas recientes por sector. No se fuerza que la duración coincida con la diferencia de fechas.
 
 **`OutageRecordEntity.toDomain()` — L23.** Sin parámetros; devuelve `OutageRecord`. Intenta convertir `statusType` a `ServiceStatus`; si falla utiliza `SCHEDULED_OUTAGE` y después copia el resto. La usa `EnergyRepository.getPredictionForSector`. No persiste ni consulta red. Al cambiar los nombres de estados hay que revisar este fallback, diferente del de `SectorEntity`.
 
-Fuente: [PendingReportEntity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/local/entity/PendingReportEntity.kt#L8).
+Fuente: [PendingReportEntity.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/local/entity/PendingReportEntity.kt).
 
-**`PendingReportEntity` — L12, tabla `pending_reports`.** `id: Long = 0` es clave autogenerada. Persiste todos los campos de `CitizenReport`, incluidos `observation: String? = null` e `isSynced: Boolean = false`, más `retryCount: Int = 0`. Índice compuesto por `isSynced` y `reportedAtMillis`, adecuado para buscar pendientes en orden temporal. La identidad local no se envía al servidor en el contrato activo, por lo que no aporta idempotencia remota.
+**`PendingReportEntity` — tabla `pending_reports`.** `id: Long = 0` es clave autogenerada. Persiste todos los campos de `CitizenReport`, incluidos `observation: String? = null` e `isSynced: Boolean = false`, más `retryCount: Int = 0`. Índice compuesto por `isSynced` y `reportedAtMillis`, adecuado para buscar pendientes en orden temporal. El uploader combina ID local, fecha original e identificador persistente de instalación para derivar el UUID remoto estable; el servidor ignora conflictos de ese UUID y la confirmación marca exactamente este pendiente.
 
 **`PendingReportEntity.toDomain()` — L24.** Sin parámetros; devuelve `CitizenReport` con copia directa de todos sus campos correspondientes. Omite `retryCount`. La usa `EnergyRepository.allReportsFlow`. Sin red, escritura o conversión de categoría; categorías y observaciones se conservan literalmente.
 
 ### 3.2 `AppDatabase`: creación y evolución
 
-Fuente: [AppDatabase.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/local/AppDatabase.kt#L14).
+Fuente: [AppDatabase.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/local/AppDatabase.kt).
 
 **`AppDatabase` — L23.** Subclase abstracta de `RoomDatabase`; declara las tres entidades anteriores, `version = 3` y `exportSchema = false`. Room genera la implementación en compilación. El archivo es `luz_barinas.db`, creado con el contexto de aplicación.
 
@@ -156,7 +156,7 @@ Fuente: [AppDatabase.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b
 
 ### 3.3 `SectorDao`: todas las consultas
 
-Fuente: [SectorDao.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/local/dao/SectorDao.kt#L11). Cada método es un contrato abstracto implementado por Room. Sus errores SQL/disco se propagan al llamador; no hay captura dentro del DAO. Las consultas `Flow` se ejecutan al colectarse y vuelven a emitir ante invalidaciones de la tabla. Ninguna usa la red.
+Fuente: [SectorDao.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/local/dao/SectorDao.kt). Cada método es un contrato abstracto implementado por Room. Sus errores SQL/disco se propagan al llamador; no hay captura dentro del DAO. Las consultas `Flow` se ejecutan al colectarse y vuelven a emitir ante invalidaciones de la tabla. Ninguna usa la red.
 
 | Función y línea | Parámetros / retorno | SQL o pasos internos | Quién la usa y límites |
 |---|---|---|---|
@@ -171,7 +171,7 @@ Fuente: [SectorDao.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07
 
 ### 3.4 `OutageRecordDao`: todas las consultas
 
-Fuente: [OutageRecordDao.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/local/dao/OutageRecordDao.kt#L10).
+Fuente: [OutageRecordDao.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/local/dao/OutageRecordDao.kt).
 
 | Función y línea | Parámetros / retorno | SQL o escritura | Uso y límites |
 |---|---|---|---|
@@ -183,7 +183,7 @@ Fuente: [OutageRecordDao.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### 3.5 `PendingReportDao`: todas las consultas
 
-Fuente: [PendingReportDao.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/local/dao/PendingReportDao.kt#L11).
+Fuente: [PendingReportDao.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/local/dao/PendingReportDao.kt).
 
 | Función y línea | Parámetros / retorno | SQL o escritura | Uso y límites |
 |---|---|---|---|
@@ -211,7 +211,7 @@ Los conjuntos de preferencias eliminan duplicados y no guardan orden; al restaur
 
 ### 4.2 `PacAlertSettings` y `PacAlertPrefs`
 
-Fuente: [PacAlertSettings.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/model/PacAlertSettings.kt).
+Fuente: [PacAlertSettings.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/model/PacAlertSettings.kt).
 
 **`PacAlertSettings` — L5.** Modelo con `advanceMinutes: Int = 10`, minutos de anticipación; `isNotificationEnabled = true`, permiso lógico del usuario para notificaciones PAC; `isAlarmEnabled = false`, modo de sirena; `isRestoreAlarmEnabled = false`, aviso de retorno; `isVibrationEnabled = true`; `useLegacyAlarmSiren = false`, compatibilidad con el ajuste antiguo. Estos valores no son los permisos del sistema Android. Guardar `true` no concede `POST_NOTIFICATIONS` ni permiso de alarma exacta.
 
@@ -223,7 +223,7 @@ Fuente: [PacAlertSettings.kt](https://github.com/Ralag/luz-barinas-android/blob/
 
 ## 5. Catálogo territorial: direcciones, municipios y búsqueda
 
-Fuente: [BarinasLocationsData.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/model/BarinasLocationsData.kt#L1), leído completo, incluidas sus listas iniciales.
+Fuente: [BarinasLocationsData.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/model/BarinasLocationsData.kt), leído completo, incluidas sus listas iniciales.
 
 ### 5.1 Modelos y declaraciones de datos
 
@@ -278,7 +278,7 @@ Para añadir una dirección utilizable offline, crear un `BarinasLocation` con I
 
 ## 6. `PacSchedule.kt`: estructura y reglas del cronograma
 
-Fuente: [PacSchedule.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/model/PacSchedule.kt).
+Fuente: [PacSchedule.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/model/PacSchedule.kt).
 
 ### 6.1 Modelos auxiliares, campo a campo
 
@@ -414,7 +414,7 @@ No lee disco ni inventa turnos. Los puntos de entrada de fondo cargan preferenci
 
 ## 7. Motor predictivo: algoritmo completo y significado de la confianza
 
-Fuente: [OutagePredictionEngine.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/engine/OutagePredictionEngine.kt#L1).
+Fuente: [OutagePredictionEngine.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/engine/OutagePredictionEngine.kt).
 
 **`OutagePredictionEngine` — L12** es un singleton sin estado mutable propio. Constantes: `DEFAULT_OUTAGE_DURATION_HOURS = 4.0f` y `MODULO_DAY_HOURS = 24`. El motor no hace peticiones ni lee Room; el repositorio obtiene los insumos. Tampoco entrena un modelo, aprende pesos o persiste correcciones.
 
@@ -449,7 +449,7 @@ Ejemplo didáctico: sin histórico, una ventana teórica 07–11 produce duraci�
 
 ## 8. `EnergyRepository`: coordinador de Room y nube
 
-Fuente: [EnergyRepository.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/repository/EnergyRepository.kt#L31).
+Fuente: [EnergyRepository.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/repository/EnergyRepository.kt).
 
 ### 8.1 Constructor y propiedades observables
 
@@ -508,7 +508,7 @@ El municipio y parroquia se usan en la petición remota, pero `SectorEntity` no 
 
 ## 9. `CloudSyncRepository`: modelos remotos, configuración y Realtime
 
-Fuente: [CloudSyncRepository.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/repository/CloudSyncRepository.kt). Este archivo contiene tanto los modelos serializables como el cliente de sincronización. No se reproducen aquí valores de llaves, tokens o credenciales. Sus nombres y responsabilidades bastan para mantener el código.
+Fuente: [CloudSyncRepository.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/repository/CloudSyncRepository.kt). Este archivo contiene tanto los modelos serializables como el cliente de sincronización. No se reproducen aquí valores de llaves, tokens o credenciales. Sus nombres y responsabilidades bastan para mantener el código.
 
 ### 9.1 Modelos serializables y propiedad calculada
 
@@ -649,7 +649,7 @@ No cancela el scope completo, no conserva/cancela explícitamente el Job de sect
 
 ### 10.1 `ApiClient`
 
-Fuente: [ApiClient.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/remote/ApiClient.kt#L10).
+Fuente: [ApiClient.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/remote/ApiClient.kt).
 
 `ApiClient` — L10 — es un singleton con construcción lazy. No define funciones nombradas; su comportamiento vive en inicializadores de propiedades:
 
@@ -665,7 +665,7 @@ No hay referencia `ApiClient.api` en las fuentes Android revisadas. Los imports 
 
 ### 10.2 `LuzBarinasApi`: cada operación declarada
 
-Fuente: [LuzBarinasApi.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/remote/LuzBarinasApi.kt#L12).
+Fuente: [LuzBarinasApi.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/remote/LuzBarinasApi.kt).
 
 Son funciones suspendidas de interfaz, implementadas dinámicamente por Retrofit. Todas **carecen de llamadores activos encontrados**. La tabla describe el contrato Android, no acredita que cada ruta exista o acepte actualmente ese payload en el servidor.
 
@@ -681,7 +681,7 @@ Cada operación implicaría red y decodificación, sin persistir Room automátic
 
 ### 10.3 `TelemetryDtos.kt`: contrato JSON campo a campo
 
-Fuente: [TelemetryDtos.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/remote/dto/TelemetryDtos.kt#L1). Las tres clases usan `@JsonClass(generateAdapter = true)` y anotaciones `@Json` explícitas. Sus nombres JSON **no son** los nombres camelCase usados por el contrato Supabase activo.
+Fuente: [TelemetryDtos.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/remote/dto/TelemetryDtos.kt). Las tres clases usan `@JsonClass(generateAdapter = true)` y anotaciones `@Json` explícitas. Sus nombres JSON **no son** los nombres camelCase usados por el contrato Supabase activo.
 
 **`SectorDto` — L7.** Todos sus campos son obligatorios: `id: String → id`; `name: String → name`; `circuitCode: String → circuit_code`; `status: String → status`; `voltage: Float → voltage`; `confirmedReports: Int → confirmed_reports`; `withoutPowerPercentage: Int → without_power_percentage`; `lastUpdated: Long → last_updated`; `rotationBlock: String → rotation_block`; `polygonPoints: String → polygon_points`. No incluye `isCommunity`, municipio o parroquia ni función `toDomain`. Si se reactiva, hay que implementar conversión y aclarar unidad temporal de `last_updated` con el backend.
 
@@ -691,7 +691,7 @@ Fuente: [TelemetryDtos.kt](https://github.com/Ralag/luz-barinas-android/blob/7a8
 
 ## 11. `AppUpdater`: detección GitHub y apertura de Google Play
 
-Fuente: [AppUpdater.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/utils/AppUpdater.kt#L13).
+Fuente: [AppUpdater.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/utils/AppUpdater.kt).
 
 **`AppUpdater` — L13** es un objeto utilitario sin estado persistente. El modelo devuelto, `AppUpdateInfo`, se define en el ViewModel y contiene `versionCode: Int`, `versionName: String`, `releaseNotes: String`, `downloadUrl: String` e `isMandatory: Boolean`. Es una dependencia de utilidades/datos hacia el paquete UI que conviene tener presente al reorganizar capas.
 
@@ -724,7 +724,7 @@ Estas fichas documentan las pruebas presentes. El intento Gradle local se detuvo
 
 ### 12.1 `ExampleUnitTest.kt`
 
-Fuente: [ExampleUnitTest.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/test/java/com/example/ExampleUnitTest.kt).
+Fuente: [ExampleUnitTest.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/test/java/com/example/ExampleUnitTest.kt).
 
 **`ExampleUnitTest`** agrupa la prueba del motor. `restoreSchedule` anotada Before y `resetSchedule` anotada After restauran matriz/franjas antes/después; sin red/disco. El nombre exacto sigue siendo `test modular arithmetic outage prediction engine`, aunque comprueba teoría en curso, no la rama modular de bloque desconocido.
 
@@ -734,7 +734,7 @@ No utiliza Room/red ni prueba la fórmula modular para bloque desconocido. Las r
 
 ### 12.2 `ExampleRobolectricTest.kt`
 
-Fuente: [ExampleRobolectricTest.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/test/java/com/example/ExampleRobolectricTest.kt#L15).
+Fuente: [ExampleRobolectricTest.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/test/java/com/example/ExampleRobolectricTest.kt).
 
 **`ExampleRobolectricTest` — L17** usa `RobolectricTestRunner` y `@Config(sdk = [36])`: emula APIs Android en prueba local.
 
@@ -744,17 +744,17 @@ Fuente: [ExampleRobolectricTest.kt](https://github.com/Ralag/luz-barinas-android
 
 ### 12.3 `GreetingScreenshotTest.kt`
 
-Fuente: [GreetingScreenshotTest.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/test/java/com/example/GreetingScreenshotTest.kt#L17).
+Fuente: [GreetingScreenshotTest.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/test/java/com/example/GreetingScreenshotTest.kt).
 
 **`GreetingScreenshotTest` — L20** usa Robolectric con gráficos nativos, cualificadores Pixel8 y SDK 36. **`composeTestRule` — L22** es regla JUnit creada con `createComposeRule`, que administra el contenido Compose de la prueba.
 
 **`greeting_screenshot()` — L25.** Sin parámetros/retorno de negocio. JUnit configura contenido con `MyApplicationTheme(darkTheme = true)` y un `StatusBadge(NORMAL, isLarge = true)`, luego captura la raíz con `captureRoboImage(filePath = "src/test/screenshots/greeting.png")`. Efecto: captura/artefacto gráfico del entorno de test; el modo de registrar/comparar imágenes depende de cómo se invoquen tareas Roborazzi. El nombre “greeting” no refleja que hoy captura una insignia. No captura dashboard, flujos offline, accesibilidad, múltiples densidades o todos los estados.
 
-La imagen existente está en [greeting.png](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/test/screenshots/greeting.png). No se regeneró ni modificó al documentar.
+La imagen existente está en [greeting.png](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/test/screenshots/greeting.png). No se regeneró ni modificó al documentar.
 
 ### 12.4 `ExampleInstrumentedTest.kt`
 
-Fuente: [ExampleInstrumentedTest.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/androidTest/java/com/example/ExampleInstrumentedTest.kt#L14).
+Fuente: [ExampleInstrumentedTest.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/androidTest/java/com/example/ExampleInstrumentedTest.kt).
 
 **`ExampleInstrumentedTest` — L15** usa `AndroidJUnit4` y requiere dispositivo/emulador con instrumentación. **`useAppContext()` — L17**, sin parámetros/retorno de negocio, obtiene `InstrumentationRegistry.getInstrumentation().targetContext` y compara su `packageName` con `BuildConfig.APPLICATION_ID`. Solo comprueba el contexto del paquete instalado para prueba; no valida firmado, API, red o datos.
 
@@ -821,7 +821,7 @@ En cualquier cambio temporal usar `America/Caracas` de forma consistente y decid
 
 ## 15. Normalización y resolución de alertas
 
-Fuentes: [PacBlock.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/model/PacBlock.kt) y [PacAlertTargetResolver.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/data/PacAlertTargetResolver.kt).
+Fuentes: [PacBlock.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/model/PacBlock.kt) y [PacAlertTargetResolver.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/data/PacAlertTargetResolver.kt).
 
 **`PacBlock.normalize(value: String?): String?`.** La llaman selección/vistas y búsqueda de ventanas; scheduler/worker acceden mediante resolver/ventanas. Recorta, convierte a mayúsculas con Locale.ROOT, elimina prefijo BLOQUE y vuelve a recortar. Solo devuelve uno de `validCodes` A/B/C/D; nulo, vacío o texto distinto producen nulo. Sin disco ni valor por defecto. “Bloque C” produce C, nunca la primera B de la palabra.
 
@@ -833,7 +833,7 @@ Tras consultar comprueba que perfil/selección no cambiaron durante suspensión.
 
 ### Regresiones nuevas: todos los casos y helpers
 
-Fuentes: [PacScheduleRegressionTest.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/test/java/com/example/PacScheduleRegressionTest.kt) y [PacAlertsPersistenceTest.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/test/java/com/example/PacAlertsPersistenceTest.kt).
+Fuentes: [PacScheduleRegressionTest.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/test/java/com/example/PacScheduleRegressionTest.kt) y [PacAlertsPersistenceTest.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/test/java/com/example/PacAlertsPersistenceTest.kt).
 
 En `PacScheduleRegressionTest`, `setUp` y `tearDown` restauran preset antes/después. `caracas(year, month, day, hour, minute = 0): Long` crea instante fijo con mes humano1–12, Calendar limpio y zona Caracas. Helpers sin disco/red. Cada caso no recibe parámetros: JUnit interpreta éxito por ausencia de AssertionError.
 
@@ -930,4 +930,4 @@ Incluye privadas, contratos abstractos, migración y helpers de test; no cuenta 
 | `app/src/test/java/com/example/PacAlertsPersistenceTest.kt` | `setUp` L44; `tearDown` L57; `insertSector` L62; `selectProfile` L66; `repairsLegacyCachedBlockFromTheSelectedRoomSector` L78; `coldStartLoadsPersistedScheduleBeforeArmingActualAlarmTimes` L93; `changingProfileReplacesOldAlarmsAndRejectsAnAlreadyQueuedOldIntent` L109; `disabledSettingsCancelPreviouslyScheduledAlarmsAndUnscheduledDArmsNothing` L138; `exactAndPeriodicDeliveryShareADurableKeyButDifferentProfilesAreIndependent` L156; `planHonorsIndependentAlertSwitchesAndSchedulesFutureWhileCurrentCutIsActive` L166 |
 | `app/src/test/java/com/example/PacScheduleRegressionTest.kt` | `setUp` L16; `tearDown` L18; `caracas` L20; `normalizesEveryBlockWithoutTakingTheBOfBloque` L28; `findsAnActualWindowForEachOfTheFourBlocks` L41; `missingAndInvalidBlocksNeverInventAnAlarmWindow` L56; `overnightUsesThePreviousStartDateAcrossAMonthBoundaryAndHasExclusiveEnd` L66; `choosesChronologicallyEvenWhenSlotsAreOutOfOrderAndIgnoresDeviceTimezone` L85; `malformedScheduleCannotCreateAWindow` L102 |
 
-Cobertura: **29 archivos Kotlin y 113 funciones fuente**. Modelos sin funciones PowerStatus, DonationConfig, MonthlyWeeksResponse y TelemetryDtos también cubiertos. Getters/lazy explicados junto a cada archivo; notifier/scheduler/receiver en03. El índice global se regenera al cambiar código.
+Cobertura: **35 archivos y 139 funciones fuente**. Modelos sin funciones PowerStatus, DonationConfig, MonthlyWeeksResponse y TelemetryDtos también cubiertos. Getters/lazy explicados junto a cada archivo; notifier/scheduler/receiver en03. El índice global se regenera al cambiar código.

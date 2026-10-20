@@ -63,7 +63,7 @@ Los efectos deben mantenerse fuera del dibujo ordinario para evitar repetir escr
 
 ## 3. Entrada y navegación: MainActivity.kt
 
-Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/MainActivity.kt).
+Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/MainActivity.kt).
 
 ### `MainActivity.onCreate(savedInstanceState: Bundle?): Unit` — L85
 
@@ -104,7 +104,7 @@ La configuración se dibuja encima de la estructura principal en `AnimatedVisibi
 
 ## 4. ViewModel: el intermediario entre pantallas y datos
 
-Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt).
+Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt).
 
 ### Modelos de estado y creación
 
@@ -191,7 +191,7 @@ Las preferencias del PAC y alertas son otros almacenes manejados por `PacSchedul
 
 ### DashboardScreen.kt
 
-Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/DashboardScreen.kt).
+Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/DashboardScreen.kt).
 
 **`DashboardScreen`** recibe `sectors`, `selectedSector`, dirección opcional, `prediction`, `unsyncedCount`, aviso opcional, perfil/existencia de trabajo, callbacks de perfil, aviso, selección, reporte de cuatro argumentos, dirección, horarios, alarma y tutorial opcional, más `modifier` y `scheduleVersion`. Retorna `Unit`. La monta Hoy. No escribe Room: todas las acciones durables salen por callbacks. `unsyncedCount` está en la firma pero no se dibuja aquí como tarjeta de sincronización.
 
@@ -216,7 +216,7 @@ Si `onWatchTutorial` tiene valor aparece un acceso adicional al tutorial. Sin de
 
 ### PacScheduleView.kt
 
-Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/PacScheduleView.kt).
+Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/PacScheduleView.kt).
 
 **`PacScheduleView`.** Entradas: selección nullable, `modifier`, `onSectorClicked: (String) -> Unit` opcional, `pacMatrix: List<List<String>>` y `pacSlots: List<PacSlot>` con copias por defecto. Retorna `Unit`. La monta la pestaña Horarios. Mantiene minuto, día seleccionado, subpestaña y mes seleccionado; obtiene mes/año/día con `Calendar` en `America/Caracas` y actualiza la clave cada diez segundos. El día del mes determina la semana PAC. `weekMatrix` rota la matriz base por esa semana; las semanas mensuales de `getMonthlyWeeks` se recuerdan por mes, cantidad de días, matriz y franjas. Una franja nocturna que comenzó ayer no se resalta como si comenzara hoy.
 
@@ -232,7 +232,7 @@ Su subpestaña **Semanal** muestra `weekMatrix`, permite seleccionar cabecera o 
 
 ### MapScreen.kt
 
-Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/MapScreen.kt#L49).
+Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/MapScreen.kt).
 
 **`MapScreen`** recibe sectores, selección, filtro nullable, callbacks de selección/filtro/reporte rápido y modifier; retorna `Unit`. Memoriza los sectores que pasan el filtro y muestra Todos, Con luz, Sin luz y Falla irregular. Filtrar no elimina una selección guardada; la tarjeta advierte si el seleccionado queda fuera del filtro.
 
@@ -258,7 +258,7 @@ Sin resultados se ofrece copiar la consulta al formulario de «Mi sector». Una 
 
 ### GoogleSearchBar.kt
 
-Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/GoogleSearchBar.kt#L72).
+Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/GoogleSearchBar.kt).
 
 **`GoogleSearchBar` L72** recibe `query: String = ""`, `onQueryChange`, sectores, `onSectorSelected` y modifier; retorna `Unit`, llamada por Dashboard. No usa el buscador de Google ni manda la consulta a Internet: es búsqueda local con aspecto de barra de búsqueda. Tiene foco y consulta interna recordados; usa query externa cuando no está vacía, en otro caso interna. Ese modelo mezcla control externo e interno: el padre debe conocerlo para que limpiar funcione como espera.
 
@@ -280,7 +280,7 @@ El cuerpo se desplaza y las acciones conservan su espacio con `AdaptiveActionDia
 
 ### PacSettingsDialog.kt
 
-Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/PacSettingsDialog.kt).
+Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/PacSettingsDialog.kt).
 
 **`PacSettingsDialog`** recibe abierto, bloque/nombre y cierre → Unit. Mantiene borrador local de anticipación/notificación/sirena/retorno/vibración y guarda solo al aceptar. Preview llama `findScheduledWindowForBlock` recordado por bloque y versión PAC; sin ventana muestra “Sin cortes programados para tu bloque”. No usa el respaldo artificial del motor. La preview puede envejecer por paso de tiempo si no recomponen sus claves.
 
@@ -288,13 +288,13 @@ Muestra próximo corte, anticipación rápida 5/10/15/30/60 o entrada numérica 
 
 ### ThemeSettingsDialog.kt y tema
 
-Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt#L18).
+Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt).
 
 **`ThemeSettingsDialog` L18** recibe abierto, modo/paleta/escala actuales, cierre y callback `(String?,String?,Float?) -> Unit`; retorna `Unit`. No crea borrador: cada toque llama inmediatamente al ViewModel con un valor y los otros dos `null`. El bottom sheet ofrece Claro/Oscuro/Sistema, Predeterminado/Dinámico y Compacto 0,85/Normal 1/Grande 1,15. El comentario de `UiState` menciona `nature`, pero no existe un botón ni una paleta implementada para ella. Cerrar oculta y no revierte cambios.
 
 **`ThemeOptionButton` L151**, privada, recibe texto, seleccionado, clic y modifier, retorna `Unit`. La usa el diálogo para todas sus opciones; superficie de 48 dp, colores/borde de selección y texto. No persiste ni decide el modo; ejecuta el callback.
 
-Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Theme.kt#L66).
+Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Theme.kt).
 
 **`MyApplicationTheme` L66** recibe `darkTheme: Boolean = isSystemInDarkTheme()`, `dynamicColor: Boolean = false` y `content: @Composable () -> Unit`; retorna `Unit`, llamada por MainActivity. En Android S o posterior, si dinámico, toma esquema dinámico del contexto; en otro caso usa `DarkColorScheme` o `LightColorScheme`, y entrega esquema/tipografía/formas a `MaterialTheme`. El resto de componentes puede tener colores fijos, por lo que no todo cambia con la paleta.
 
@@ -302,13 +302,13 @@ Archivos sin funciones que forman parte del contrato visual:
 
 | Archivo | Contenido y uso |
 |---|---|
-| [Color.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Color.kt#L11) | Constantes de marca, bloques y estado, fondos/bordes/textos para claro/oscuro y aliases de compatibilidad. A naranja, B azul, C amarillo y D verde en Compose. El mapa HTML tiene otra asociación de colores; no hay una fuente única. |
-| [Type.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Type.kt#L11) | `AppFontFamily = FontFamily.Default`; `Typography` define display 57/45/36 sp, titulares 32/28/24, títulos 22/16/14, cuerpo 16/14/12 y etiquetas 14/12/11, además de altura/peso/espaciado. No hay una fuente Inter instalada por esa declaración. |
-| [Shape.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Shape.kt#L7) | `AppShapes`: esquinas 4/8/14/20/28 dp. Se aplica mediante MaterialTheme, aunque muchos componentes declaran esquinas propias. |
+| [Color.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Color.kt) | Constantes de marca, bloques y estado, fondos/bordes/textos para claro/oscuro y aliases de compatibilidad. A naranja, B azul, C amarillo y D verde en Compose. El mapa HTML tiene otra asociación de colores; no hay una fuente única. |
+| [Type.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Type.kt) | `AppFontFamily = FontFamily.Default`; `Typography` define display 57/45/36 sp, titulares 32/28/24, títulos 22/16/14, cuerpo 16/14/12 y etiquetas 14/12/11, además de altura/peso/espaciado. No hay una fuente Inter instalada por esa declaración. |
+| [Shape.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Shape.kt) | `AppShapes`: esquinas 4/8/14/20/28 dp. Se aplica mediante MaterialTheme, aunque muchos componentes declaran esquinas propias. |
 
 ### SettingsScreen.kt
 
-Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/SettingsScreen.kt#L25).
+Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/SettingsScreen.kt).
 
 `LegalPage` L25 es un enum con PRIVACY, TERMS, DEVELOPER, REFUND, SYSTEM_DOC, TRANSPARENCIA y GOV_DISCLAIMER. No son rutas externas: son valores del estado local.
 
@@ -322,7 +322,7 @@ La lista agrupa General (oscuro, ubicación, bienvenida), Notificaciones/Alarmas
 
 ### DonationsDialog.kt
 
-Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/DonationsDialog.kt#L30).
+Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/DonationsDialog.kt).
 
 **`DonationsDialog` L30** recibe `config: DonationConfig?` y cierre → `Unit`. La llama MainAppScreen con configuración del flujo remoto. Muestra explicación del apoyo y botón PayPal con URL configurada o respaldo integrado; abre `ACTION_VIEW`. Si Binance no está vacío muestra ID y botón de copiar; si banco/teléfono/documento de pago móvil están todos presentes, muestra tarjeta y copia los tres al portapapeles. Sin configuración remota aún existe el botón de respaldo PayPal. No procesa pago, no verifica recepción y no maneja un resultado de navegador. Cambiar destino de donación es una operación administrativa sensible en la configuración remota.
 
@@ -342,11 +342,11 @@ Fuente: [StatusBadge.kt](https://github.com/Ralag/luz-barinas-android/blob/main/
 
 ### Pruebas de pantallas compactas
 
-`CompactDialogUiTest` usa Robolectric/Compose con un teléfono de 320×480 dp, orientación horizontal de 480×320 dp y escala de fuente 1,6. `LargeText` proporciona la configuración y densidad de prueba; `registerSectorSaveRemainsReachableWithLargeText` escribe un nombre extenso, pulsa Guardar y comprueba los argumentos reales del callback y cierre. `updateActionsRemainReachableWithLongReleaseNotesInLandscape` verifica que actualizar/posponer sigan visibles y funcionen con notas largas. `welcomeCanBeSkippedWithoutOpeningPermissionSetup` verifica el callback de omisión y ausencia del tutorial cuando no hay destino. `longSectorNameKeepsChangeActionAndIrregularReportUsable` comprueba el texto completo accesible, Cambiar y el tipo exacto de reporte irregular. Dos capturas se guardan como artefactos en `app/build/reports/compact-ui/`; no son imágenes basales dentro de Git. Estos tests no simulan el teclado físico ni sustituyen la comprobación en un dispositivo con IME y barras del fabricante.
+`CompactDialogUiTest` usa Robolectric/Compose con un teléfono de 320×480 dp, orientación horizontal de 480×320 dp y escala de fuente 1,6. `LargeText` proporciona la configuración y densidad de prueba; `registerSectorSaveRemainsReachableWithLargeText` escribe un nombre extenso, pulsa Guardar y comprueba los argumentos reales del callback y cierre. `updateActionsRemainReachableWithLongReleaseNotesInLandscape` verifica que actualizar/posponer sigan visibles y funcionen con notas largas. `welcomeCanBeSkippedWithoutOpeningPermissionSetup` verifica el callback de omisión y ausencia del tutorial cuando no hay destino. `longSectorNameKeepsChangeActionAndIrregularReportUsable` comprueba el texto completo accesible, Cambiar y el tipo exacto de reporte irregular. `weeklyMatrixShowsSeventhSlotAndMissingCellsAsUnassigned` monta siete franjas con una fila ausente y exige la séptima etiqueta y sus siete celdas `-`. Las llamadas `captureRoboImage` producen capturas en `app/build/reports/compact-ui/` al activar el modo de grabación Roborazzi; no son imágenes basales dentro de Git. Estos tests no simulan el teclado físico ni sustituyen la comprobación en un dispositivo con IME y barras del fabricante.
 
 ## 7. Páginas legales: contenido, navegación y sus límites
 
-Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/LegalScreen.kt#L31). Todas las funciones de esta sección son composables que retornan `Unit`.
+Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/LegalScreen.kt). Todas las funciones de esta sección son composables que retornan `Unit`.
 
 | Función / línea | Parámetros, qué presenta y efecto |
 |---|---|
@@ -365,7 +365,7 @@ Las páginas las selecciona `SettingsScreen`, no las llama directamente la activ
 
 ### TelemetryScreen.kt
 
-Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/TelemetryScreen.kt#L56).
+Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/TelemetryScreen.kt).
 
 **`TelemetryScreen` L56** recibe `sectors`, `recentReports: List<CitizenReport>`, `unsyncedCount`, `onSyncNow` y modifier → `Unit`. No se encontró invocación desde el código principal. Si se conecta, muestra salud de red calculada por número de sectores NORMAL/total, tarjetas de conteo normal/PAC/avería, pendientes y botón sincronizar. Historial muestra reportes del dispositivo recibidos, voltaje/hora/sector e indicador `isSynced`; lista vacía presenta instrucciones. No descarga reportes de servidor y no mide cobertura geográfica real: porcentaje es proporción de registros NORMAL.
 
@@ -375,7 +375,7 @@ El formateador `dd/MM hh:mm a` usa locale/zona del dispositivo. Colores y texto 
 
 ### AdminScreen.kt
 
-Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/AdminScreen.kt#L79).
+Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/AdminScreen.kt).
 
 **`AdminScreen` L79** es la única función nombrada del archivo, aunque agrupa muchos callbacks. Retorna `Unit`. Recibe sectores, versión, matriz, franjas, listas A–D; callbacks de celda, editar/quitar/añadir franja, presets simple/doble, rebalanceo, alta/baja/traslado de nombre de sector, restaurar, publicar y cerrar, más modifier. `sectors`, `scheduleVersion` y ciertos estados están presentes sin un uso equivalente a una consulta remota; la UI se basa sobre todo en las listas/matriz entregadas.
 
@@ -509,7 +509,7 @@ Hay tres caminos distintos: avisos locales con `NotificationHelper`, alarmas exa
 
 ### NotificationHelper.kt
 
-Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/NotificationHelper.kt#L14).
+Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/NotificationHelper.kt).
 
 `NotificationHelper` es un singleton con canales general `alertas_cortes_barinas`, corte `pac_corte_luz`, retorno `pac_restablecimiento_luz`; IDs 1001 alerta, 1002 confirmación, 1003 predictiva, 1004 aviso y 1005 retorno. Reutilizar ID reemplaza la notificación de ese tipo, no crea un historial por sector. Los métodos de mostrar capturan `SecurityException` si falta permiso; no retornan confirmación de presentación.
 
@@ -525,7 +525,7 @@ Los intents de apertura usan NEW_TASK/CLEAR_TASK y requestCode 0. Pulsar no sele
 
 ### PacAlarmScheduler.kt
 
-Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmScheduler.kt).
+Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmScheduler.kt).
 
 `PacScheduledAlert(action: String, triggerAtMillis: Long, window: PacScheduleWindow)` describe una alarma real: tipo, instante y ventana original. No escribe nada por construirlo. El singleton tiene scope IO con SupervisorJob, bloqueo para serializar programación, generación creciente y mapa PRE→5001, RESTORE→5002, VALIDATION→5003.
 
@@ -544,7 +544,7 @@ La búsqueda nullable no inventa turnos. Al dispararse validación se programa y
 
 ### PacAlarmReceiver.kt
 
-Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmReceiver.kt).
+Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmReceiver.kt).
 
 **`onReceive(context, intent): Unit`.** Android entrega broadcast. Sin action termina. STOP detiene player y cancela previa/retorno. Las otras acciones usan goAsync y coroutine IO; antes de terminar siempre finaliza PendingResult en finally. BOOT solicita directamente el scheduler suspendido, que carga PAC; para alertas primero verifica/entrega con handleScheduledAlert y después rearma. Errores se registran. Manifest añade reinicio, hora/zona modificada, reemplazo de APK y concesión de exactas como puntos de rearmado.
 
@@ -554,7 +554,7 @@ El companion conserva actions y nombres extras previos y agrega `EXTRA_PROFILE`,
 
 ### PacAlertNotifier.kt
 
-Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlertNotifier.kt).
+Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlertNotifier.kt).
 
 Es el camino común de entrega exacta y periódica. Todas sus funciones de presentación retornan Boolean de publicación local, no confirmación de lectura del usuario. Ninguna usa Supabase o comprueba suministro físico.
 
@@ -573,7 +573,7 @@ Notificación previa, sirena y retorno son switches independientes. Sirena puede
 
 ### PacAlarmPlayer.kt
 
-Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmPlayer.kt#L16).
+Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmPlayer.kt).
 
 | Función / línea | Entrada/retorno y efectos |
 |---|---|
@@ -585,7 +585,7 @@ El sonido no sobrevive necesariamente a muerte de proceso por ser un objeto en m
 
 ### NotificationActionReceiver.kt: botón de notificación a cola
 
-Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/NotificationActionReceiver.kt#L20).
+Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/NotificationActionReceiver.kt).
 
 **`onReceive(context: Context,intent: Intent): Unit` L22.** Android lo llama desde PendingIntents de pregunta/validación. Lee ID/nombre y extra booleano, con defaults de Alto Barinas; determina tipo NORMAL/SIN_LUZ y tensión 118/0. No usa `intent.action` para comprobar que coincide con el booleano. Cancela ID1001 y muestra confirmación antes de persistir.
 
@@ -597,7 +597,7 @@ El trabajo de receiver es breve en su punto de entrada, pero `goAsync` no autori
 
 ### ReportPowerWorker.kt
 
-Fuente: [ReportPowerWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/worker/ReportPowerWorker.kt#L12).
+Fuente: [ReportPowerWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/worker/ReportPowerWorker.kt).
 
 `ReportPowerWorker(appContext: Context,workerParams: WorkerParameters)` extiende CoroutineWorker; Android/WorkManager construye la instancia. **`doWork(): ListenableWorker.Result` L17** es suspendida y ejecuta en IO. Obtiene DAOs, lee Data de sector, hasPower, tipo y voltaje. Cuando hay ID, actualiza otra vez el sector optimistamente: +1 contador, -10/+15 porcentaje, fuerza estado por hasPower y 118/0 V. Ese bloque no crea el pendiente ni usa tipo/voltaje leído para preservar avería; el evento ya fue guardado por repositorio/receiver/widget. Repetirlo en cada reintento altera métricas nuevamente.
 
@@ -607,7 +607,7 @@ Sus llamadores son las peticiones de EnergyRepository, NotificationActionReceive
 
 ### PredictiveNotificationWorker.kt
 
-Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt).
+Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt).
 
 **`doWork(): Result`**, suspendida sin parámetros en IO. Carga PAC, espera rearmado del scheduler y lee ajustes. Si previa/sirena están apagadas termina success, conservando la programación independiente de retorno realizada por scheduler. Resuelve perfil/sector desde Room; sin destino o próxima ventana real termina success. Obtiene siguiente ventana futura con fecha absoluta Caracas y, si falta entre1ms y la anticipación configurada, llama `PacAlertNotifier.showPreAlert`. Comparte deduplicación con exactas. CancellationException se propaga; otro error devuelve retry. No usa la zona del dispositivo ni calcula “mañana” con columna de hoy; tampoco usa motor heurístico.
 
@@ -615,7 +615,7 @@ Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-a
 
 ## 13. Widget Glance
 
-Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/glance/LuzBarinasWidget.kt#L45).
+Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/glance/LuzBarinasWidget.kt).
 
 **`LuzBarinasWidget.provideGlance(context: Context,id: GlanceId): Unit` L47** es suspendida. Glance la llama para proporcionar la representación del widget. Obtiene Room y lee en IO el ID fijo `sec_a_alto_barinas_1`; si no existe usa nombre y mensajes de respaldo. No observa el perfil actual. En `provideContent` dibuja fondo oscuro, nombre, tensión de referencia/0 V, estado y dos botones. Cada botón usa `actionRunCallback<ReportPowerActionCallback>` con `has_power` y `sector_id`. El estado se toma antes de componer; no se colecta un Flow continuo de Room aquí.
 
@@ -627,7 +627,7 @@ Para hacer el widget coherente con la app, deben compartirse resolución del per
 
 ## 14. Manifest y recursos que sostienen la interfaz
 
-Fuente: [AndroidManifest.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/AndroidManifest.xml).
+Fuente: [AndroidManifest.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/AndroidManifest.xml).
 
 | Declaración | Uso real y punto de mantenimiento |
 |---|---|
@@ -649,17 +649,17 @@ No hay permisos de GPS en este manifest ni servicio de Firebase Messaging propio
 
 | Recurso | Contenido y relación con código |
 |---|---|
-| [strings.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/values/strings.xml#L2) | Solo `app_name = PAC Barinas`. La mayoría del texto UI está hardcodeado en Kotlin: cambios de nombre/legal/traducción no se resuelven modificando esta única cadena. |
-| [themes.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/values/themes.xml#L4) | Tema Android `Theme.DeviceDefault.NoActionBar` como base de actividad. Los colores/tipos Compose vienen de `MyApplicationTheme`, son otra capa. |
-| [colors.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/values/colors.xml#L3) | Paleta XML de plantilla púrpura/teal/blanco/negro; no es la fuente principal de la paleta Compose. |
-| [luz_barinas_widget_info.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/xml/luz_barinas_widget_info.xml#L2) | Mínimo 180×110dp, objetivo 3×2 celdas, periodo solicitado 1.800.000ms, resize horizontal/vertical, preview icono y categoría home. El refresco por acción se solicita adicionalmente en onAction. |
-| [file_paths.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/xml/file_paths.xml#L2) | Expone rutas posibles Download, raíz externa y archivos externos al usar FileProvider. El alcance es amplio; solo se comparten URIs a las que el código conceda acceso, no todas por declararlas. |
-| [backup_rules.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/xml/backup_rules.xml#L8) | Plantilla sin includes/excludes activos. No existe aquí una exclusión deliberada de pendientes/perfiles. |
-| [data_extraction_rules.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/xml/data_extraction_rules.xml#L6) | Sección cloud-backup sin reglas activas; device-transfer solo comentada. Ajustar copia/restauración con conocimiento de Room y cola. |
-| [ic_notification_bolt.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/drawable/ic_notification_bolt.xml#L1) | Vector de rayo usado como icono pequeño de avisos. `ic_power_on.xml` y `ic_power_off.xml` suministran iconos de estado/acciones. |
-| [ic_launcher.xml](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml#L2) y variante round | Iconos adaptativos combinan fondo y primer plano; existen mipmaps para densidades mdpi a xxxhdpi. Mantener legibilidad en formatos redondos/monocromos. |
+| [strings.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/values/strings.xml) | Solo `app_name = PAC Barinas`. La mayoría del texto UI está hardcodeado en Kotlin: cambios de nombre/legal/traducción no se resuelven modificando esta única cadena. |
+| [themes.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/values/themes.xml) | Tema Android `Theme.DeviceDefault.NoActionBar` como base de actividad. Los colores/tipos Compose vienen de `MyApplicationTheme`, son otra capa. |
+| [colors.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/values/colors.xml) | Paleta XML de plantilla púrpura/teal/blanco/negro; no es la fuente principal de la paleta Compose. |
+| [luz_barinas_widget_info.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/xml/luz_barinas_widget_info.xml) | Mínimo 180×110dp, objetivo 3×2 celdas, periodo solicitado 1.800.000ms, resize horizontal/vertical, preview icono y categoría home. El refresco por acción se solicita adicionalmente en onAction. |
+| [file_paths.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/xml/file_paths.xml) | Expone rutas posibles Download, raíz externa y archivos externos al usar FileProvider. El alcance es amplio; solo se comparten URIs a las que el código conceda acceso, no todas por declararlas. |
+| [backup_rules.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/xml/backup_rules.xml) | Plantilla sin includes/excludes activos. No existe aquí una exclusión deliberada de pendientes/perfiles. |
+| [data_extraction_rules.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/xml/data_extraction_rules.xml) | Sección cloud-backup sin reglas activas; device-transfer solo comentada. Ajustar copia/restauración con conocimiento de Room y cola. |
+| [ic_notification_bolt.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/drawable/ic_notification_bolt.xml) | Vector de rayo usado como icono pequeño de avisos. `ic_power_on.xml` y `ic_power_off.xml` suministran iconos de estado/acciones. |
+| [ic_launcher.xml](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml) y variante round | Iconos adaptativos combinan fondo y primer plano; existen mipmaps para densidades mdpi a xxxhdpi. Mantener legibilidad en formatos redondos/monocromos. |
 | `drawable/ic_pac_barinas_logo.png`, `ic_launcher_foreground.png`, `elmatrushka.png` | Bitmaps de identidad/launcher/créditos. `elmatrushka` se dibuja en DeveloperInfoContent. No son funciones ejecutables. |
-| [assets/map/map.html](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/assets/map/map.html#L1) y dependencias | Documento y bibliotecas locales del mapa, con imágenes de capas y marcadores. Los recursos de teselas se solicitan externamente; no están incluidos como mapa offline completo. |
+| [assets/map/map.html](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/assets/map/map.html) y dependencias | Documento y bibliotecas locales del mapa, con imágenes de capas y marcadores. Los recursos de teselas se solicitan externamente; no están incluidos como mapa offline completo. |
 
 ## 15. Cómo seguir y modificar un comportamiento sin perderse
 
@@ -693,7 +693,7 @@ El índice incluye funciones fuente nombradas, privadas/overrides/helpers y call
 
 ### glance/LuzBarinasWidget.kt
 
-Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/glance/LuzBarinasWidget.kt).
+Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/glance/LuzBarinasWidget.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -702,7 +702,7 @@ Fuente: [LuzBarinasWidget.kt](https://github.com/Ralag/luz-barinas-android/blob/
 
 ### MainActivity.kt
 
-Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/MainActivity.kt).
+Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/MainActivity.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -711,7 +711,7 @@ Fuente: [MainActivity.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81
 
 ### notification/NotificationActionReceiver.kt
 
-Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/NotificationActionReceiver.kt).
+Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/NotificationActionReceiver.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -719,7 +719,7 @@ Fuente: [NotificationActionReceiver.kt](https://github.com/Ralag/luz-barinas-and
 
 ### notification/NotificationHelper.kt
 
-Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/NotificationHelper.kt).
+Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/NotificationHelper.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -731,7 +731,7 @@ Fuente: [NotificationHelper.kt](https://github.com/Ralag/luz-barinas-android/blo
 
 ### notification/PacAlarmPlayer.kt
 
-Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmPlayer.kt).
+Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmPlayer.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -741,7 +741,7 @@ Fuente: [PacAlarmPlayer.kt](https://github.com/Ralag/luz-barinas-android/blob/7a
 
 ### notification/PacAlarmReceiver.kt
 
-Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmReceiver.kt).
+Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmReceiver.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -750,7 +750,7 @@ Fuente: [PacAlarmReceiver.kt](https://github.com/Ralag/luz-barinas-android/blob/
 
 ### notification/PacAlarmScheduler.kt
 
-Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlarmScheduler.kt).
+Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlarmScheduler.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -765,7 +765,7 @@ Fuente: [PacAlarmScheduler.kt](https://github.com/Ralag/luz-barinas-android/blob
 
 ### notification/PacAlertNotifier.kt
 
-Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/notification/PacAlertNotifier.kt).
+Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/notification/PacAlertNotifier.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -780,7 +780,7 @@ Fuente: [PacAlertNotifier.kt](https://github.com/Ralag/luz-barinas-android/blob/
 
 ### ui/components/AdComponents.kt
 
-Fuente: [AdComponents.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/AdComponents.kt).
+Fuente: [AdComponents.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/AdComponents.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -803,7 +803,7 @@ Fuente: [AdComponents.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81
 
 ### ui/components/BarinasAddressDialog.kt
 
-Fuente: [BarinasAddressDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt).
+Fuente: [BarinasAddressDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -811,7 +811,7 @@ Fuente: [BarinasAddressDialog.kt](https://github.com/Ralag/luz-barinas-android/b
 
 ### ui/components/DonationsDialog.kt
 
-Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/DonationsDialog.kt).
+Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/DonationsDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -819,7 +819,7 @@ Fuente: [DonationsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/components/GoogleSearchBar.kt
 
-Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/GoogleSearchBar.kt).
+Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/GoogleSearchBar.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -827,7 +827,7 @@ Fuente: [GoogleSearchBar.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/components/InteractiveBarinasMap.kt
 
-Fuente: [InteractiveBarinasMap.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt).
+Fuente: [InteractiveBarinasMap.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/InteractiveBarinasMap.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -839,7 +839,7 @@ Fuente: [InteractiveBarinasMap.kt](https://github.com/Ralag/luz-barinas-android/
 
 ### ui/components/OnboardingFlowDialog.kt
 
-Fuente: [OnboardingFlowDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt).
+Fuente: [OnboardingFlowDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/OnboardingFlowDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -850,7 +850,7 @@ Fuente: [OnboardingFlowDialog.kt](https://github.com/Ralag/luz-barinas-android/b
 
 ### ui/components/PacScheduleView.kt
 
-Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/PacScheduleView.kt).
+Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/PacScheduleView.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -862,7 +862,7 @@ Fuente: [PacScheduleView.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/components/PacSettingsDialog.kt
 
-Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/PacSettingsDialog.kt).
+Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/PacSettingsDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -870,7 +870,7 @@ Fuente: [PacSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob
 
 ### ui/components/StatusBadge.kt
 
-Fuente: [StatusBadge.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/StatusBadge.kt).
+Fuente: [StatusBadge.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/StatusBadge.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -878,7 +878,7 @@ Fuente: [StatusBadge.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b
 
 ### ui/components/ThemeSettingsDialog.kt
 
-Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt).
+Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/ThemeSettingsDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -887,7 +887,7 @@ Fuente: [ThemeSettingsDialog.kt](https://github.com/Ralag/luz-barinas-android/bl
 
 ### ui/components/UpdatePromptDialog.kt
 
-Fuente: [UpdatePromptDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/components/UpdatePromptDialog.kt).
+Fuente: [UpdatePromptDialog.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/components/UpdatePromptDialog.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -895,7 +895,7 @@ Fuente: [UpdatePromptDialog.kt](https://github.com/Ralag/luz-barinas-android/blo
 
 ### ui/screens/AdminScreen.kt
 
-Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/AdminScreen.kt).
+Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/AdminScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -903,7 +903,7 @@ Fuente: [AdminScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b
 
 ### ui/screens/DashboardScreen.kt
 
-Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/DashboardScreen.kt).
+Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/DashboardScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -912,7 +912,7 @@ Fuente: [DashboardScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/screens/LegalScreen.kt
 
-Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/LegalScreen.kt).
+Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/LegalScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -927,7 +927,7 @@ Fuente: [LegalScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b
 
 ### ui/screens/MapScreen.kt
 
-Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/MapScreen.kt).
+Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/MapScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -936,7 +936,7 @@ Fuente: [MapScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07
 
 ### ui/screens/SettingsScreen.kt
 
-Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/SettingsScreen.kt).
+Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/SettingsScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -946,7 +946,7 @@ Fuente: [SettingsScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a
 
 ### ui/screens/TelemetryScreen.kt
 
-Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/screens/TelemetryScreen.kt).
+Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/screens/TelemetryScreen.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -955,7 +955,7 @@ Fuente: [TelemetryScreen.kt](https://github.com/Ralag/luz-barinas-android/blob/7
 
 ### ui/theme/Theme.kt
 
-Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/theme/Theme.kt).
+Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/theme/Theme.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -963,7 +963,7 @@ Fuente: [Theme.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68
 
 ### ui/viewmodel/LuzBarinasViewModel.kt
 
-Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt).
+Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/ui/viewmodel/LuzBarinasViewModel.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -1001,7 +1001,7 @@ Fuente: [LuzBarinasViewModel.kt](https://github.com/Ralag/luz-barinas-android/bl
 
 ### worker/PredictiveNotificationWorker.kt
 
-Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt).
+Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/worker/PredictiveNotificationWorker.kt).
 
 | Línea | Firma fuente |
 |---|---|
@@ -1010,7 +1010,7 @@ Fuente: [PredictiveNotificationWorker.kt](https://github.com/Ralag/luz-barinas-a
 
 ### worker/ReportPowerWorker.kt
 
-Fuente: [ReportPowerWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/app/src/main/java/com/example/worker/ReportPowerWorker.kt).
+Fuente: [ReportPowerWorker.kt](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/app/src/main/java/com/example/worker/ReportPowerWorker.kt).
 
 | Línea | Firma fuente |
 |---|---|

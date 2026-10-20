@@ -23,13 +23,13 @@ La lectura pública conservada es compatible con los clientes actuales. Esto no 
 
 | Archivo | Uso |
 |---|---|
-| [Migración v3](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/supabase_migration_v3_admin_security.sql) | Actualizar una base existente. Es transaccional y puede repetirse; elimina todas las políticas anteriores de las seis tablas controladas y reinstala grants/políticas previstos. |
-| [Esquema completo](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/supabase_schema.sql) | Instalación nueva sobre un entorno Supabase con `auth.users`, `anon` y `authenticated`. Incluye tablas y la misma seguridad. No usarlo como sustituto de revisar el estado de una base productiva. |
-| [missing_policies.sql](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/missing_policies.sql) | Archivo retirado: únicamente informa qué migración usar; no restaura permisos de escritura anónima. |
+| [Migración v3](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/supabase_migration_v3_admin_security.sql) | Actualizar una base existente. Es transaccional y puede repetirse; elimina todas las políticas anteriores de las seis tablas controladas y reinstala grants/políticas previstos. |
+| [Esquema completo](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/supabase_schema.sql) | Instalación nueva sobre un entorno Supabase con `auth.users`, `anon` y `authenticated`. Incluye tablas y la misma seguridad. No usarlo como sustituto de revisar el estado de una base productiva. |
+| [missing_policies.sql](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/missing_policies.sql) | Archivo retirado: únicamente informa qué migración usar; no restaura permisos de escritura anónima. |
 | Copias en `admin-web/` | Mismo esquema, migración y archivo retirado para que el repositorio web independiente conserve su despliegue y pruebas. Deben mantenerse idénticos. |
-| [Endpoint](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/api/sendPushAlert.js) | Verificación de usuario/rol/cuota antes de inicializar Firebase o enviar. |
-| [Pruebas API](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/tests/sendPushAlert.test.cjs) | Escenarios sin red ni credenciales reales, con dependencias simuladas. |
-| [Fixture SQL](https://github.com/Ralag/luz-barinas-android/blob/7a81b07fd68e1d63b7f7b343ed9babc0ea239aca/tests/sql/admin_security.sql) | Prueba de PostgreSQL en una base vacía desechable; existe copia en `admin-web/tests/sql/` para CI de ese repositorio. Nunca ejecutarla en Supabase de producción. |
+| [Endpoint](https://github.com/Ralag/pac-barinas/blob/5178f7206f40bb5ce701bfb9e98627164fea3e80/api/sendPushAlert.js) | Verificación de usuario/rol/cuota antes de inicializar Firebase o enviar. |
+| [Pruebas API](https://github.com/Ralag/pac-barinas/blob/5178f7206f40bb5ce701bfb9e98627164fea3e80/tests/sendPushAlert.test.cjs) | Escenarios sin red ni credenciales reales, con dependencias simuladas. |
+| [Fixture SQL](https://github.com/Ralag/luz-barinas-android/blob/d3889c9577a9ea779bdebd5b13a4b20d7c7dcbf7/tests/sql/admin_security.sql) | Prueba de PostgreSQL en una base vacía desechable; existe copia en `admin-web/tests/sql/` para CI de ese repositorio. Nunca ejecutarla en Supabase de producción. |
 
 Los scripts v2 anteriores no son el punto de entrada de seguridad. En particular, no copiar recetas históricas `FOR ALL TO anon` ni recrear sus políticas después de aplicar v3. Las políticas permisivas se combinan; una regla antigua abierta podría anular la intención de una nueva restricción. Los grants y RLS deben revisarse juntos según la [guía oficial de RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).
 
@@ -122,7 +122,7 @@ La API acepta preflight OPTIONS del mismo origen sin inicializar servicios. Los 
 
 ## 7. Todas las funciones nuevas del endpoint
 
-Fuente: [sendPushAlert.js](https://github.com/Ralag/pac-barinas/blob/7d5b4b57bc36ff9eb62df2ff6fb94945407ce031/api/sendPushAlert.js). Los límites y decisiones de seguridad deben probarse al cambiar cualquiera de ellas.
+Fuente: [sendPushAlert.js](https://github.com/Ralag/pac-barinas/blob/5178f7206f40bb5ce701bfb9e98627164fea3e80/api/sendPushAlert.js). Los límites y decisiones de seguridad deben probarse al cambiar cualquiera de ellas.
 
 | Función | Entradas, retorno y pasos |
 |---|---|

@@ -47,7 +47,7 @@ Cuando una operación solo altera memoria, está señalado. Cuando devuelve éxi
 
 Incluye el código propio de app/src, admin-web/src, api, scripts, panel clásico, mapa inline, configuración y utilidades de mantenimiento presentes. Se excluye explicar por función el interior de dependencias como AndroidX, React, Supabase y Leaflet, los archivos generados, cachés, node_modules y skills ajenos al producto. Sí se explica la forma en que el proyecto los utiliza.
 
-El inventario actualizado detecta **750 declaraciones** en **133 archivos**, incluidas ambas copias clásicas y los dobles con nombre de las pruebas de seguridad. No representan 750 operaciones únicas de negocio. Los archivos con constantes/modelos/efectos superiores también se explican. Los scripts locales de mantenimiento fuera de Git se identifican expresamente y pueden no existir en un clon.
+El inventario actualizado detecta **1024 declaraciones** en **170 archivos**, incluidas ambas copias clásicas, el gateway y las pruebas con funciones nombradas. No representan 1024 operaciones únicas de negocio. Los archivos con constantes/modelos/efectos superiores también se explican. Los scripts locales de mantenimiento fuera de Git se identifican expresamente y pueden no existir en un clon.
 
 Los enlaces de fuentes versionadas apuntan a revisiones concretas de GitHub para funcionar desde ambos repositorios. El índice conserva las líneas exactas del código local leído; regenerarlo al modificar fuentes. Para ejecutar la verificación conjunta se presupone la disposición descrita en la documentación del sistema.
 

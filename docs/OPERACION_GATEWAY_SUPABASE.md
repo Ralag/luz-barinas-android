@@ -62,18 +62,16 @@ Las lecturas públicas permiten CORS `*` sin credenciales. Reportes y avisos ace
 
 `FirebaseUnavailableError` identifica configuración o autorización Google no disponible y produce 503. Un fallo de envío produce 502. Nunca se devuelven claves, tokens ni mensajes de error internos de Google. Si falta `FIREBASE_SERVICE_ACCOUNT`, los avisos fallan de forma explícita con 503; las rutas públicas pueden funcionar.
 
-## Activación por etapas
+## Activación actual y posible traslado futuro
 
 La configuración actual conserva `/api/sendPushAlert` como función Node de Vercel y reescribe las demás rutas `/api/:path*` hacia Supabase. Los dos endpoints de cálculo Node se movieron a `server/legacy`, fuera del directorio desplegable. El futuro traslado del envío requiere una decisión posterior y guardar el secreto en Supabase; no copiarlo a clientes ni código.
 
-1. Verificar las pruebas Node y la igualdad del núcleo compartido. Desplegar `pac-api` con verificación JWT de plataforma desactivada según `config.toml`, sin retirar todavía el backend anterior.
-2. Comprobar lecturas públicas, datos erróneos, preflight, 401 sin sesión y 403 sin rol mediante la URL directa de la Edge Function. No hace falta enviar una notificación real para comprobar estos rechazos.
-3. Configurar `FIREBASE_SERVICE_ACCOUNT` como secreto de Edge Functions mediante una herramienta privada; nunca pegarlo en el repositorio, navegador ni conversación. La función obtiene URL y clave anon del entorno estándar de Supabase. Configurar `PAC_ALLOWED_ORIGINS` si existen otros dominios de administración autorizados.
-4. Tras verificar el destino, mover los manejadores Node de `admin-web/api/` a una carpeta no desplegada, como `server/legacy/`, conservando pruebas/imports del endpoint protegido como referencia portable.
-5. Cambiar la reescritura de Vercel a un destino fijo `https://<proyecto>.supabase.co/functions/v1/pac-api/api/:path*`. Publicar la web, comprobar las mismas rutas a través del dominio histórico y revisar que el despliegue ya no contenga funciones Node para ellas.
-6. Confirmar disponibilidad y consumo en ambos proveedores. Para volver al backend previo, restaurar sus archivos y la configuración anterior y desplegar nuevamente; no basta con cambiar un destino si se retiraron sus funciones.
+1. `pac-api` está desplegada y las consultas públicas se comprobaron directamente. La verificación JWT de plataforma está desactivada según `config.toml`; la ruta administrativa implementa su propia autorización.
+2. Los dos cálculos históricos están en `server/legacy/`. La excepción `/api/sendPushAlert` precede a la reescritura general `/api/:path*` en Vercel; esa excepción conserva el envío Node y su secreto existente.
+3. En el preview protegido se comprobaron consulta mensual 200, archivo compartido del mapa 200 y GET de envío rechazado con 405. El procedimiento de publicación comprueba también las rutas históricas y el POST sin sesión, sin enviar notificaciones reales.
+4. Revisar disponibilidad y consumo en ambos proveedores. Para volver al backend previo, restaurar sus archivos y la configuración anterior y desplegar nuevamente; no basta con cambiar un destino si se retiraron sus funciones.
 
-No cambiar el tráfico de producción a un destino sin verificar ni anunciar entrega FCM correcta cuando falta su secreto. La aprobación anterior del despliegue web no constituye evidencia de que estas nuevas etapas ya se hayan ejecutado.
+**Solo si se decide trasladar el envío en otra entrega:** configurar `FIREBASE_SERVICE_ACCOUNT` como secreto de Edge Functions mediante un canal privado, comprobar autenticación/rol/cuota y entrega con destinatario de prueba autorizado, y después retirar la excepción Node. Ese secreto no se ha copiado y ese traslado no forma parte de la decisión actual. No anunciar entrega FCM desde Supabase mientras no se haya comprobado.
 
 ## Pruebas y límites pendientes
 

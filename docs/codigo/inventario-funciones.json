@@ -23,7 +23,7 @@
       "chapter": "05-panel-clasico.md",
       "language": "JavaScript/JSX",
       "localOnly": false,
-      "sha256": "ae5816bfd026b5fff920bb67c456241836ed6b351121d4b855961d571dfb4970",
+      "sha256": "4215b9428c71aed999d7be3d126b5674775cfc411d509b17aa1aca42ecf4006f",
       "lines": 3933
     },
     {
@@ -47,7 +47,7 @@
       "chapter": "05-panel-clasico.md",
       "language": "JavaScript/JSX",
       "localOnly": false,
-      "sha256": "ae5816bfd026b5fff920bb67c456241836ed6b351121d4b855961d571dfb4970",
+      "sha256": "4215b9428c71aed999d7be3d126b5674775cfc411d509b17aa1aca42ecf4006f",
       "lines": 3933
     },
     {
@@ -311,8 +311,8 @@
       "chapter": "04-web-react-y-api.md",
       "language": "JavaScript/JSX",
       "localOnly": false,
-      "sha256": "3a20ca7bbe1d7c1309715059a0419612172f81dda595a206c85e59b87c2ed232",
-      "lines": 915
+      "sha256": "e827669a117dbd37c4ebf69a3a898133620f1ee2e1750f2cc376e02c43f4201b",
+      "lines": 940
     },
     {
       "file": "admin-web/src/pages/Blog.jsx",
@@ -439,8 +439,8 @@
       "chapter": "04-web-react-y-api.md",
       "language": "JavaScript/JSX",
       "localOnly": false,
-      "sha256": "cbc720cd3f6c1d5824edf67d49b72942f29cc986b9ac4603edd61bba1baaae4a",
-      "lines": 428
+      "sha256": "278959c13e23051aff68e2494cee98d75ca0abbaf5cfd86b15a0b997337aa198",
+      "lines": 479
     },
     {
       "file": "admin-web/tests/pac-edge-api.test.cjs",
@@ -479,8 +479,8 @@
       "chapter": "04-web-react-y-api.md",
       "language": "JavaScript/JSX",
       "localOnly": false,
-      "sha256": "5462ccf5a22f2c221bddfed65dcef1cb0623032b38ed60c54a5ff658b759ac9a",
-      "lines": 66
+      "sha256": "f35d5570df3784cec9aa0200d1a5940c5a3f9ce34b4cbd7feaf94cb3d0d16e40",
+      "lines": 109
     },
     {
       "file": "admin-web/tests/sendPushAlert.test.cjs",
@@ -587,12 +587,28 @@
       "lines": 127
     },
     {
+      "file": "app/src/main/java/com/example/ads/AppOpenInteractionGuard.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "localOnly": false,
+      "sha256": "94761492abeb7756e4d2caa78fc87a4a949325a10ab6e23989e6959fb88bc54e",
+      "lines": 38
+    },
+    {
       "file": "app/src/main/java/com/example/ads/AppOpenLaunchGate.kt",
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
       "sha256": "ee3ad36a6ed8481d51424d74ea74be4c5662732da2d549c7d049ae395338ba4e",
       "lines": 76
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/AppOpenLaunchHost.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "localOnly": false,
+      "sha256": "c5a049b8f8ea6caf37f7d483f400ea4a715b34ef98a2bf17fcbb354aef17caa2",
+      "lines": 58
     },
     {
       "file": "app/src/main/java/com/example/ads/AppOpenLaunchPolicy.kt",
@@ -823,8 +839,8 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "c96ca3136d99b4bcfcf039e255f232e98174a644d2c3fb8c1c89a3515b86623b",
-      "lines": 564
+      "sha256": "f22b5e561d618e29b5b1b2049d65a40a8c1201a864b3f170773e74ff29f50c04",
+      "lines": 577
     },
     {
       "file": "app/src/main/java/com/example/notification/NotificationActionReceiver.kt",
@@ -935,7 +951,7 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "d69c2060ac80b28452b57a84b2a16e14113c64a510bfc79dae41376168d66f4d",
+      "sha256": "9f05c7aef31e3ffaf2c53ae38412ae241505afac6842105930e311688e17b11d",
       "lines": 1025
     },
     {
@@ -983,8 +999,8 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "4e74c9ea2963c985033dc9e39af4ce3b18fd16a1a92efddc5652efd98800effc",
-      "lines": 899
+      "sha256": "3e68a403e3614e14948324e7ec14ba1092aa3cea2c21fa2c6a5ea06edac175c5",
+      "lines": 898
     },
     {
       "file": "app/src/main/java/com/example/ui/screens/LegalScreen.kt",
@@ -1099,6 +1115,14 @@
       "lines": 69
     },
     {
+      "file": "app/src/test/java/com/example/AppOpenLaunchHostTest.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "localOnly": false,
+      "sha256": "01756b70db3ac9cee66f10fa243e29fb1596e8dcfd1e1e463d2cad51a77a148c",
+      "lines": 125
+    },
+    {
       "file": "app/src/test/java/com/example/AppOpenLaunchPolicyTest.kt",
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
@@ -1111,8 +1135,16 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "512f3f108569a87e2ceb5e79c012ada690be6258ed728caf6bf0d61906ac9ea3",
-      "lines": 130
+      "sha256": "d0d13c476f0ee07daeeb6c3263bd69beb9071040961307bd202cb0fe348ecf99",
+      "lines": 146
+    },
+    {
+      "file": "app/src/test/java/com/example/DashboardStatusUiTest.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "localOnly": false,
+      "sha256": "9f7ba8087b1cfb9799d2f945d963ea183b4a8323c7d56659ed2b5ecbe465c32c",
+      "lines": 75
     },
     {
       "file": "app/src/test/java/com/example/ExampleRobolectricTest.kt",
@@ -1151,8 +1183,8 @@
       "chapter": "02-android-datos-y-motor.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "99616fbb75ed899c0fd0d5461fca379f45b3ab1316340e4f21e82fd20e658451",
-      "lines": 178
+      "sha256": "802cc2902085200316c2ba0b2b0a4eb8b94b67feb1488dc23c3f16be80bb6019",
+      "lines": 191
     },
     {
       "file": "app/src/test/java/com/example/PacScheduleRegressionTest.kt",
@@ -4486,8 +4518,16 @@
     },
     {
       "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "AdminReportsList",
+      "line": 14,
+      "kind": "FunctionDeclaration",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
       "name": "AdminPortal",
-      "line": 13,
+      "line": 53,
       "kind": "FunctionDeclaration",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -4495,7 +4535,7 @@
     {
       "file": "admin-web/src/pages/AdminPortal.jsx",
       "name": "fetchAdminData",
-      "line": 79,
+      "line": 119,
       "kind": "FunctionDeclaration",
       "scope": "AdminPortal",
       "chapter": "04-web-react-y-api.md"
@@ -4503,30 +4543,6 @@
     {
       "file": "admin-web/src/pages/AdminPortal.jsx",
       "name": "handleLogin",
-      "line": 146,
-      "kind": "ArrowFunctionExpression",
-      "scope": "AdminPortal",
-      "chapter": "04-web-react-y-api.md"
-    },
-    {
-      "file": "admin-web/src/pages/AdminPortal.jsx",
-      "name": "handleLogout",
-      "line": 160,
-      "kind": "ArrowFunctionExpression",
-      "scope": "AdminPortal",
-      "chapter": "04-web-react-y-api.md"
-    },
-    {
-      "file": "admin-web/src/pages/AdminPortal.jsx",
-      "name": "cycleCell",
-      "line": 170,
-      "kind": "ArrowFunctionExpression",
-      "scope": "AdminPortal",
-      "chapter": "04-web-react-y-api.md"
-    },
-    {
-      "file": "admin-web/src/pages/AdminPortal.jsx",
-      "name": "handleSavePac",
       "line": 186,
       "kind": "ArrowFunctionExpression",
       "scope": "AdminPortal",
@@ -4534,31 +4550,31 @@
     },
     {
       "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleLogout",
+      "line": 200,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "cycleCell",
+      "line": 210,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleSavePac",
+      "line": 226,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
       "name": "handleSaveDonations",
-      "line": 220,
-      "kind": "ArrowFunctionExpression",
-      "scope": "AdminPortal",
-      "chapter": "04-web-react-y-api.md"
-    },
-    {
-      "file": "admin-web/src/pages/AdminPortal.jsx",
-      "name": "handleAddSector",
-      "line": 242,
-      "kind": "ArrowFunctionExpression",
-      "scope": "AdminPortal",
-      "chapter": "04-web-react-y-api.md"
-    },
-    {
-      "file": "admin-web/src/pages/AdminPortal.jsx",
-      "name": "handleRemoveSector",
-      "line": 252,
-      "kind": "ArrowFunctionExpression",
-      "scope": "AdminPortal",
-      "chapter": "04-web-react-y-api.md"
-    },
-    {
-      "file": "admin-web/src/pages/AdminPortal.jsx",
-      "name": "handleSendBroadcast",
       "line": 260,
       "kind": "ArrowFunctionExpression",
       "scope": "AdminPortal",
@@ -4566,8 +4582,32 @@
     },
     {
       "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleAddSector",
+      "line": 282,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleRemoveSector",
+      "line": 292,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
+      "name": "handleSendBroadcast",
+      "line": 300,
+      "kind": "ArrowFunctionExpression",
+      "scope": "AdminPortal",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/src/pages/AdminPortal.jsx",
       "name": "pingApi",
-      "line": 275,
+      "line": 315,
       "kind": "ArrowFunctionExpression",
       "scope": "AdminPortal",
       "chapter": "04-web-react-y-api.md"
@@ -4575,7 +4615,7 @@
     {
       "file": "admin-web/src/pages/AdminPortal.jsx",
       "name": "getBadgeClass",
-      "line": 369,
+      "line": 409,
       "kind": "ArrowFunctionExpression",
       "scope": "AdminPortal",
       "chapter": "04-web-react-y-api.md"
@@ -5366,8 +5406,48 @@
     },
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
+      "name": "getElementById",
+      "line": 254,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/tests/admin-ui.test.cjs",
+      "name": "requireAdmin",
+      "line": 254,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/tests/admin-ui.test.cjs",
+      "name": "alert",
+      "line": 256,
+      "kind": "FunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/tests/admin-ui.test.cjs",
+      "name": "from",
+      "line": 257,
+      "kind": "FunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/tests/admin-ui.test.cjs",
+      "name": "upsert",
+      "line": 257,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "divIcon",
-      "line": 288,
+      "line": 339,
       "kind": "ArrowFunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5375,7 +5455,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "marker",
-      "line": 288,
+      "line": 339,
       "kind": "ArrowFunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5383,7 +5463,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "bindPopup",
-      "line": 288,
+      "line": 339,
       "kind": "ArrowFunctionExpression",
       "scope": "marker",
       "chapter": "04-web-react-y-api.md"
@@ -5391,7 +5471,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "addTo",
-      "line": 288,
+      "line": 339,
       "kind": "FunctionExpression",
       "scope": "marker.bindPopup",
       "chapter": "04-web-react-y-api.md"
@@ -5399,7 +5479,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "clearLayers",
-      "line": 289,
+      "line": 340,
       "kind": "FunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5407,7 +5487,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "addLayer",
-      "line": 289,
+      "line": 340,
       "kind": "FunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5415,7 +5495,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "editSector",
-      "line": 302,
+      "line": 353,
       "kind": "ArrowFunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5423,7 +5503,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "closest",
-      "line": 306,
+      "line": 357,
       "kind": "ArrowFunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5431,7 +5511,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "preventDefault",
-      "line": 306,
+      "line": 357,
       "kind": "FunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5439,7 +5519,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "approvalFixture",
-      "line": 319,
+      "line": 370,
       "kind": "FunctionDeclaration",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5447,7 +5527,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "randomUUID",
-      "line": 325,
+      "line": 376,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture",
       "chapter": "04-web-react-y-api.md"
@@ -5455,7 +5535,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "getItem",
-      "line": 326,
+      "line": 377,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture",
       "chapter": "04-web-react-y-api.md"
@@ -5463,7 +5543,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "setItem",
-      "line": 326,
+      "line": 377,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture",
       "chapter": "04-web-react-y-api.md"
@@ -5471,7 +5551,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "alert",
-      "line": 327,
+      "line": 378,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture",
       "chapter": "04-web-react-y-api.md"
@@ -5479,7 +5559,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "from",
-      "line": 328,
+      "line": 379,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture",
       "chapter": "04-web-react-y-api.md"
@@ -5487,7 +5567,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "insert",
-      "line": 329,
+      "line": 380,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture.from",
       "chapter": "04-web-react-y-api.md"
@@ -5495,7 +5575,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "upsert",
-      "line": 330,
+      "line": 381,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture.from",
       "chapter": "04-web-react-y-api.md"
@@ -5503,7 +5583,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "delete",
-      "line": 331,
+      "line": 382,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture.from",
       "chapter": "04-web-react-y-api.md"
@@ -5511,7 +5591,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "eq",
-      "line": 331,
+      "line": 382,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture.from.delete",
       "chapter": "04-web-react-y-api.md"
@@ -5519,7 +5599,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "name",
-      "line": 333,
+      "line": 384,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture",
       "chapter": "04-web-react-y-api.md"
@@ -5527,7 +5607,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "publishPacSchedule",
-      "line": 334,
+      "line": 385,
       "kind": "ArrowFunctionExpression",
       "scope": "approvalFixture",
       "chapter": "04-web-react-y-api.md"
@@ -5535,7 +5615,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "setApprovalFields",
-      "line": 340,
+      "line": 391,
       "kind": "FunctionDeclaration",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5543,7 +5623,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "alert",
-      "line": 414,
+      "line": 465,
       "kind": "ArrowFunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5551,7 +5631,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "hideActiveBroadcast",
-      "line": 415,
+      "line": 466,
       "kind": "ArrowFunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5559,7 +5639,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "from",
-      "line": 416,
+      "line": 467,
       "kind": "ArrowFunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -5567,7 +5647,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "upsert",
-      "line": 416,
+      "line": 467,
       "kind": "ArrowFunctionExpression",
       "scope": "from",
       "chapter": "04-web-react-y-api.md"
@@ -5575,7 +5655,7 @@
     {
       "file": "admin-web/tests/admin-ui.test.cjs",
       "name": "preventDefault",
-      "line": 421,
+      "line": 472,
       "kind": "FunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -6022,8 +6102,16 @@
     },
     {
       "file": "admin-web/tests/report-semantics.test.cjs",
+      "name": "render",
+      "line": 74,
+      "kind": "ArrowFunctionExpression",
+      "scope": "",
+      "chapter": "04-web-react-y-api.md"
+    },
+    {
+      "file": "admin-web/tests/report-semantics.test.cjs",
       "name": "getBlockBadgeClass",
-      "line": 58,
+      "line": 101,
       "kind": "ArrowFunctionExpression",
       "scope": "",
       "chapter": "04-web-react-y-api.md"
@@ -6581,9 +6669,49 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md"
     },
     {
+      "file": "app/src/main/java/com/example/ads/AppOpenInteractionGuard.kt",
+      "name": "canOpenAfterReturn",
+      "line": 14,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/AppOpenInteractionGuard.kt",
+      "name": "acquire",
+      "line": 18,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/AppOpenInteractionGuard.kt",
+      "name": "release",
+      "line": 24,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/AppOpenInteractionGuard.kt",
+      "name": "AppOpenInteractionProtection",
+      "line": 32,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
       "file": "app/src/main/java/com/example/ads/AppOpenLaunchGate.kt",
       "name": "AppOpenLaunchGate",
       "line": 23,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/AppOpenLaunchHost.kt",
+      "name": "AppOpenLaunchHost",
+      "line": 15,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7487,7 +7615,7 @@
     {
       "file": "app/src/main/java/com/example/MainActivity.kt",
       "name": "onStop",
-      "line": 96,
+      "line": 97,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7495,7 +7623,15 @@
     {
       "file": "app/src/main/java/com/example/MainActivity.kt",
       "name": "onCreate",
-      "line": 104,
+      "line": 105,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/MainActivity.kt",
+      "name": "onSaveInstanceState",
+      "line": 147,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7503,7 +7639,7 @@
     {
       "file": "app/src/main/java/com/example/MainActivity.kt",
       "name": "MainAppScreen",
-      "line": 147,
+      "line": 155,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8159,7 +8295,7 @@
     {
       "file": "app/src/main/java/com/example/ui/screens/DashboardScreen.kt",
       "name": "BroadcastNoticeBanner",
-      "line": 803,
+      "line": 802,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8653,6 +8789,46 @@
       "chapter": "02-android-datos-y-motor.md"
     },
     {
+      "file": "app/src/test/java/com/example/AppOpenLaunchHostTest.kt",
+      "name": "FakeGate",
+      "line": 30,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/AppOpenLaunchHostTest.kt",
+      "name": "returnOverlayPreservesMountedFormAndDraft",
+      "line": 35,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/AppOpenLaunchHostTest.kt",
+      "name": "protectedReturnIsSkippedAndNotDeferredUntilFormCloses",
+      "line": 60,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/AppOpenLaunchHostTest.kt",
+      "name": "activeAlarmBypassesInitialGateAndAlwaysBlocksReturn",
+      "line": 91,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/AppOpenLaunchHostTest.kt",
+      "name": "closingOneProtectedSurfaceCannotReleaseAnother",
+      "line": 110,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
       "file": "app/src/test/java/com/example/AppOpenLaunchPolicyTest.kt",
       "name": "step",
       "line": 8,
@@ -8695,7 +8871,15 @@
     {
       "file": "app/src/test/java/com/example/CompactDialogUiTest.kt",
       "name": "LargeText",
-      "line": 36,
+      "line": 38,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/CompactDialogUiTest.kt",
+      "name": "weeklyMatrixShowsSeventhSlotAndMissingCellsAsUnassigned",
+      "line": 48,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8703,7 +8887,7 @@
     {
       "file": "app/src/test/java/com/example/CompactDialogUiTest.kt",
       "name": "registerSectorSaveRemainsReachableWithLargeText",
-      "line": 46,
+      "line": 60,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8711,7 +8895,7 @@
     {
       "file": "app/src/test/java/com/example/CompactDialogUiTest.kt",
       "name": "updateActionsRemainReachableWithLongReleaseNotesInLandscape",
-      "line": 71,
+      "line": 85,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8719,7 +8903,7 @@
     {
       "file": "app/src/test/java/com/example/CompactDialogUiTest.kt",
       "name": "welcomeCanBeSkippedWithoutOpeningPermissionSetup",
-      "line": 91,
+      "line": 105,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8727,7 +8911,55 @@
     {
       "file": "app/src/test/java/com/example/CompactDialogUiTest.kt",
       "name": "longSectorNameKeepsChangeActionAndIrregularReportUsable",
-      "line": 106,
+      "line": 120,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/DashboardStatusUiTest.kt",
+      "name": "publishActivePacForTheWholeDay",
+      "line": 29,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/DashboardStatusUiTest.kt",
+      "name": "restoreSchedule",
+      "line": 38,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/DashboardStatusUiTest.kt",
+      "name": "showStatus",
+      "line": 40,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/DashboardStatusUiTest.kt",
+      "name": "unknownServiceIsNotReportedAsAnObservedOutageDuringPac",
+      "line": 55,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/DashboardStatusUiTest.kt",
+      "name": "normalCommunityReportRemainsDistinctFromTheActivePac",
+      "line": 62,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/DashboardStatusUiTest.kt",
+      "name": "irregularFaultKeepsItsLabelDuringAnActiveScheduledCut",
+      "line": 69,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8862,7 +9094,7 @@
     },
     {
       "file": "app/src/test/java/com/example/PacAlertsPersistenceTest.kt",
-      "name": "changingProfileReplacesOldAlarmsAndRejectsAnAlreadyQueuedOldIntent",
+      "name": "olderPersistedScheduleCannotOverrideANewerInMemorySnapshot",
       "line": 109,
       "kind": "Kotlin fun",
       "scope": "",
@@ -8870,8 +9102,16 @@
     },
     {
       "file": "app/src/test/java/com/example/PacAlertsPersistenceTest.kt",
+      "name": "changingProfileReplacesOldAlarmsAndRejectsAnAlreadyQueuedOldIntent",
+      "line": 122,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/PacAlertsPersistenceTest.kt",
       "name": "disabledSettingsCancelPreviouslyScheduledAlarmsAndUnscheduledDArmsNothing",
-      "line": 138,
+      "line": 151,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "02-android-datos-y-motor.md"
@@ -8879,7 +9119,7 @@
     {
       "file": "app/src/test/java/com/example/PacAlertsPersistenceTest.kt",
       "name": "exactAndPeriodicDeliveryShareADurableKeyButDifferentProfilesAreIndependent",
-      "line": 156,
+      "line": 169,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "02-android-datos-y-motor.md"
@@ -8887,7 +9127,7 @@
     {
       "file": "app/src/test/java/com/example/PacAlertsPersistenceTest.kt",
       "name": "planHonorsIndependentAlertSwitchesAndSchedulesFutureWhileCurrentCutIsActive",
-      "line": 166,
+      "line": 179,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "02-android-datos-y-motor.md"
