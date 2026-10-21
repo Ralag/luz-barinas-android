@@ -10,12 +10,12 @@ Las líneas corresponden al código local leído; al cambiarlo, regenera este í
 |---|---:|
 | [../OPERACION_GATEWAY_SUPABASE.md](../OPERACION_GATEWAY_SUPABASE.md) | 31 |
 | [02-android-datos-y-motor.md](02-android-datos-y-motor.md) | 139 |
-| [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md) | 240 |
+| [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md) | 255 |
 | [04-web-react-y-api.md](04-web-react-y-api.md) | 324 |
 | [05-panel-clasico.md](05-panel-clasico.md) | 280 |
 | [06-base-de-datos-configuracion-y-operacion.md](06-base-de-datos-configuracion-y-operacion.md) | 10 |
 
-Archivos examinados: **170**. Declaraciones identificadas: **1024**. Errores de análisis: **0**.
+Archivos examinados: **172**. Declaraciones identificadas: **1039**. Errores de análisis: **0**.
 
 ## admin-web/admin.html
 
@@ -1169,12 +1169,13 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | Función | Línea | Contexto |
 |---|---:|---|
 | `initialize` | 34 | Kotlin fun |
-| `reconcile` | 64 | Kotlin fun |
-| `canRequestAds` | 95 | Kotlin fun |
-| `showPrivacyOptions` | 98 | Kotlin fun |
-| `canShowOn` | 110 | Kotlin fun |
-| `acquire` | 119 | Kotlin fun |
-| `release` | 125 | Kotlin fun |
+| `reconcile` | 71 | Kotlin fun |
+| `canRequestAds` | 106 | Kotlin fun |
+| `showPrivacyOptions` | 109 | Kotlin fun |
+| `canShowOn` | 121 | Kotlin fun |
+| `canShowAutomaticAd` | 132 | Kotlin fun |
+| `acquire` | 137 | Kotlin fun |
+| `release` | 143 | Kotlin fun |
 
 ## app/src/main/java/com/example/ads/AppOpenInteractionGuard.kt
 
@@ -1209,10 +1210,20 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `evaluate` | 13 | Kotlin fun |
-| `skip` | 39 | Kotlin fun |
-| `onAdFinished` | 43 | Kotlin fun |
-| `continueOnce` | 46 | Kotlin fun |
+| `evaluate` | 19 | Kotlin fun |
+| `skip` | 54 | Kotlin fun |
+| `onAdFinished` | 58 | Kotlin fun |
+| `continueOnce` | 61 | Kotlin fun |
+
+## app/src/main/java/com/example/ads/InterstitialPlacementPolicy.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `recordNavigation` | 8 | Kotlin fun |
+| `isEligible` | 12 | Kotlin fun |
+| `onImpression` | 18 | Kotlin fun |
 
 ## app/src/main/java/com/example/ads/RewardedAdManager.kt
 
@@ -1223,11 +1234,11 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | `clear` | 29 | Kotlin fun |
 | `load` | 35 | Kotlin fun |
 | `onAdLoaded` | 59 | Kotlin fun |
-| `onAdFailedToLoad` | 68 | Kotlin fun |
-| `show` | 78 | Kotlin fun |
-| `finish` | 92 | Kotlin fun |
-| `onAdDismissedFullScreenContent` | 107 | Kotlin fun |
-| `onAdFailedToShowFullScreenContent` | 108 | Kotlin fun |
+| `onAdFailedToLoad` | 69 | Kotlin fun |
+| `show` | 80 | Kotlin fun |
+| `finish` | 94 | Kotlin fun |
+| `onAdDismissedFullScreenContent` | 109 | Kotlin fun |
+| `onAdFailedToShowFullScreenContent` | 110 | Kotlin fun |
 
 ## app/src/main/java/com/example/data/local/AppDatabase.kt
 
@@ -1600,28 +1611,32 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 
 | Función | Línea | Contexto |
 |---|---:|---|
-| `initializeAdMob` | 41 | Kotlin fun |
-| `getBannerAdUnitId` | 43 | Kotlin fun |
-| `AdaptiveBannerAd` | 47 | Kotlin fun |
-| `clear` | 97 | Kotlin fun |
-| `preload` | 99 | Kotlin fun |
-| `onAdLoaded` | 110 | Kotlin fun |
-| `onAdFailedToLoad` | 118 | Kotlin fun |
-| `showAd` | 128 | Kotlin fun |
-| `finish` | 142 | Kotlin fun |
-| `onAdShowedFullScreenContent` | 150 | Kotlin fun |
-| `onAdDismissedFullScreenContent` | 151 | Kotlin fun |
-| `onAdFailedToShowFullScreenContent` | 152 | Kotlin fun |
-| `isLaunchEligible` | 178 | Kotlin fun |
-| `hasAvailableAd` | 181 | Kotlin fun |
-| `clear` | 184 | Kotlin fun |
-| `loadAd` | 191 | Kotlin fun |
-| `onAdLoaded` | 203 | Kotlin fun |
-| `onAdFailedToLoad` | 215 | Kotlin fun |
-| `showAdIfAvailable` | 226 | Kotlin fun |
-| `finish` | 236 | Kotlin fun |
-| `onAdDismissedFullScreenContent` | 245 | Kotlin fun |
-| `onAdFailedToShowFullScreenContent` | 246 | Kotlin fun |
+| `initializeAdMob` | 42 | Kotlin fun |
+| `getBannerAdUnitId` | 44 | Kotlin fun |
+| `AdaptiveBannerAd` | 48 | Kotlin fun |
+| `onAdLoaded` | 63 | Kotlin fun |
+| `onAdFailedToLoad` | 64 | Kotlin fun |
+| `clear` | 102 | Kotlin fun |
+| `showForNavigation` | 104 | Kotlin fun |
+| `preload` | 112 | Kotlin fun |
+| `onAdLoaded` | 123 | Kotlin fun |
+| `onAdFailedToLoad` | 132 | Kotlin fun |
+| `showAd` | 143 | Kotlin fun |
+| `finish` | 158 | Kotlin fun |
+| `onAdShowedFullScreenContent` | 166 | Kotlin fun |
+| `onAdDismissedFullScreenContent` | 167 | Kotlin fun |
+| `onAdFailedToShowFullScreenContent` | 168 | Kotlin fun |
+| `isLaunchEligible` | 197 | Kotlin fun |
+| `hasAvailableAd` | 201 | Kotlin fun |
+| `clear` | 204 | Kotlin fun |
+| `loadAd` | 211 | Kotlin fun |
+| `onAdLoaded` | 223 | Kotlin fun |
+| `onAdFailedToLoad` | 236 | Kotlin fun |
+| `showAdIfAvailable` | 247 | Kotlin fun |
+| `finish` | 256 | Kotlin fun |
+| `onAdShowedFullScreenContent` | 265 | Kotlin fun |
+| `onAdDismissedFullScreenContent` | 269 | Kotlin fun |
+| `onAdFailedToShowFullScreenContent` | 270 | Kotlin fun |
 
 ## app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt
 
@@ -1916,8 +1931,11 @@ Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-seg
 | `step` | 8 | Kotlin fun |
 | `loadCallbackShowsOnlyWithinLoadingDeadline` | 13 | Kotlin fun |
 | `timeoutAndLateCallbackCannotShowOverContent` | 22 | Kotlin fun |
-| `skipAndRewardEndLoadingExactlyOnce` | 28 | Kotlin fun |
-| `consentOrLoadFailureNeverBlocksEntry` | 36 | Kotlin fun |
+| `skipAndRewardEndLoadingExactlyOnce` | 30 | Kotlin fun |
+| `consentOrLoadFailureNeverBlocksEntry` | 38 | Kotlin fun |
+| `slowConsentAndSdkDoNotConsumeTheAdLoadingWindow` | 45 | Kotlin fun |
+| `initializationHasAHardLimitAndBackgroundCannotShow` | 54 | Kotlin fun |
+| `cachedConsentCanPreloadButCannotDisplayBeforeRefreshCompletes` | 63 | Kotlin fun |
 
 ## app/src/test/java/com/example/CompactDialogUiTest.kt
 
@@ -1971,6 +1989,17 @@ Explicación: [02-android-datos-y-motor.md](02-android-datos-y-motor.md).
 | Función | Línea | Contexto |
 |---|---:|---|
 | `greeting_screenshot` | 25 | Kotlin fun |
+
+## app/src/test/java/com/example/InterstitialPlacementPolicyTest.kt
+
+Explicación: [03-android-interfaz-y-segundo-plano.md](03-android-interfaz-y-segundo-plano.md).
+
+| Función | Línea | Contexto |
+|---|---:|---|
+| `threeTransitions` | 8 | Kotlin fun |
+| `timeAndThreeDistinctTransitionsAreBothRequired` | 15 | Kotlin fun |
+| `impressionRestartsBothCounterAndThreeMinuteInterval` | 26 | Kotlin fun |
+| `anotherFullscreenAdAlsoPreventsBackToBackAds` | 37 | Kotlin fun |
 
 ## app/src/test/java/com/example/MapBridgeSecurityTest.kt
 

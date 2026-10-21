@@ -29,7 +29,7 @@ function walk(dir, accept) {
 function relative(p) { return path.relative(root, p).replaceAll('\\', '/'); }
 function chapter(file) {
   if (file.endsWith('/report-aggregation-concurrency.cjs')) return '06-base-de-datos-configuracion-y-operacion.md';
-  if (/\/(CompactDialogUiTest|MapBridgeSecurityTest|AppOpenLaunchPolicyTest|AppOpenLaunchHostTest|DashboardStatusUiTest)\.kt$/.test(file)) return '03-android-interfaz-y-segundo-plano.md';
+  if (/\/(CompactDialogUiTest|MapBridgeSecurityTest|AppOpenLaunchPolicyTest|AppOpenLaunchHostTest|DashboardStatusUiTest|InterstitialPlacementPolicyTest)\.kt$/.test(file)) return '03-android-interfaz-y-segundo-plano.md';
   if (file.startsWith('supabase/functions/')) return '../OPERACION_GATEWAY_SUPABASE.md';
   if (/^app\/src\/(test|androidTest)/.test(file) || /^app\/src\/main\/java\/com\/example\/(data|engine|utils)\//.test(file)) return '02-android-datos-y-motor.md';
   if (file.endsWith('/assets/map/map.html')) return '03-android-interfaz-y-segundo-plano.md';

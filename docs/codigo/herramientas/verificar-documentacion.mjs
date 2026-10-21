@@ -21,7 +21,7 @@ function walk(dir) {
 }
 const documentFiles = [
   ...['DOCUMENTACION_SISTEMA.md', 'DOCUMENTACION_CODIGO.md', 'ANALISIS_SISTEMA_PAC_BARINAS_2026-10-15.md'].map(n => path.join(root, n)),
-  ...['ACTIVACION_SEGURIDAD.md', 'CAMBIOS_SEGURIDAD_Y_ALERTAS.md', 'OPERACION_GATEWAY_SUPABASE.md', 'CAMBIOS_MAPA_ANUNCIOS_Y_SINCRONIZACION.md'].map(n => path.join(root, 'docs', n)).filter(fs.existsSync),
+  ...['ACTIVACION_SEGURIDAD.md', 'CAMBIOS_SEGURIDAD_Y_ALERTAS.md', 'OPERACION_GATEWAY_SUPABASE.md', 'CAMBIOS_MAPA_ANUNCIOS_Y_SINCRONIZACION.md', 'RELEASE_1.4.0.md'].map(n => path.join(root, 'docs', n)).filter(fs.existsSync),
   ...walk(docdir)
 ];
 function syncCopies() {

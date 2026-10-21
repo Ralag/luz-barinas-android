@@ -37,9 +37,7 @@ android {
   }
 
   buildTypes {
-    debug {
-      manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-3940256099942544~3347511713"
-    }
+    // UMP uses our public app ID in both variants. Debug ad units are always Google's test units.
     release {
       isCrunchPngs = true
       isMinifyEnabled = true

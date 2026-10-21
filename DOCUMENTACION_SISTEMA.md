@@ -1,6 +1,6 @@
 # PAC Barinas: documentación del sistema
 
-**Versión documental: 20 de octubre de 2026.** Esta guía describe el código de ambos repositorios con seguridad y alertas por bloque, mapa común, publicidad opcional de doce horas, pantallas compactas y sincronización PAC corregida. El [registro de cambios y verificaciones](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md) distingue código, pruebas y activación remota. Publicar código no acredita su distribución en Google Play.
+**Versión documental: 21 de octubre de 2026.** Esta guía describe el código de ambos repositorios con seguridad y alertas por bloque, mapa común, publicidad opcional de doce horas, pantallas compactas y sincronización PAC corregida. La [guía release 1.4.0](docs/RELEASE_1.4.0.md) añade frecuencia publicitaria, diagnóstico de apertura y comprobación de APK/AAB. Publicar código no acredita su distribución en Google Play.
 
 El código prepara Android **1.4.0, versionCode 8**; todavía no se ha publicado el binario. Las instalaciones anteriores conservan su mapa y anuncios hasta actualizar. Los commits c890853 en Android y 19a76ce en web corresponden al análisis inicial. Los defectos corregidos se identifican expresamente; el [registro actual](docs/CAMBIOS_MAPA_ANUNCIOS_Y_SINCRONIZACION.md) explica límites y validación, y la [guía del gateway](docs/OPERACION_GATEWAY_SUPABASE.md) detalla rutas compatibles y cuotas.
 
@@ -199,7 +199,7 @@ AppUpdater consulta la última release de GitHub y compara nombres de versión, 
 
 Gradle usa el módulo :app y wrapper 9.3.1. Release toma contraseñas exclusivamente de STORE_PASSWORD y KEY_PASSWORD; KEYSTORE_PATH y KEY_ALIAS seleccionan archivo y alias. Debug usa su firma estándar y no exige el keystore de publicación. Las contraseñas retiradas del código deben rotarse según el procedimiento de firma.
 
-Para preparar Android se necesita SDK 36, JVM compatible, dependencias y directorios de caché escribibles. Compilar debug no valida minificación/firma de release. Publicar requiere incrementar versión, generar artefacto firmado y verificar el canal; esta documentación no construyó ni publicó una versión nueva.
+Para preparar Android se necesita SDK 36, JVM compatible, dependencias y directorios de caché escribibles. Compilar debug no valida minificación/firma de release. La guía release registra generación y comprobación de los artefactos firmados; publicar en Google Play sigue siendo un paso separado y requiere un código de versión disponible en ese canal.
 
 En admin-web, npm ci instala el lockfile, npm run dev inicia Vite, npm run build genera dist/blog/sitemap y npm run preview sirve la salida. Vite local no ejecuta automáticamente las funciones Vercel. vercel.json configura build, publicación de dist, recursos con hash, rutas del blog y rewrite administrativo.
 

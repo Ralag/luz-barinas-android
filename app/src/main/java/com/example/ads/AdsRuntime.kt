@@ -47,29 +47,38 @@ object AdsRuntime {
                 } else {
                     UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity) { error ->
                         consentRequestRunning = false
+                        if (error != null) android.util.Log.i("PacAds", "privacy form failed: code=${error.errorCode}")
                         reconcile(activity.applicationContext, consent,
                             if (error != null) "No se pudo actualizar la privacidad publicitaria." else null)
                     }
                 }
             },
-            {
+            { error ->
                 consentRequestRunning = false
+                android.util.Log.i("PacAds", "privacy update failed: code=${error.errorCode}")
                 // UMP may still permit requests using an existing, valid choice.
                 reconcile(activity.applicationContext, consent,
                     "No se pudo actualizar la privacidad publicitaria. Intenta de nuevo con conexión.")
             }
         )
+        // UMP itself may authorize an existing choice after the refresh has started.
+        // Preload early, but the launch gate still waits for the current refresh/form.
+        if (consentRequestRunning && consent.canRequestAds()) {
+            reconcile(activity.applicationContext, consent, resolved = false)
+        }
     }
 
-    private fun reconcile(context: Context, consent: ConsentInformation, message: String? = null) {
+    private fun reconcile(context: Context, consent: ConsentInformation, message: String? = null,
+                          resolved: Boolean = true) {
         val allowed = consent.canRequestAds()
         mutableState.value = mutableState.value.copy(
             canRequestAds = allowed,
-            consentResolved = true,
+            consentResolved = resolved,
             privacyOptionsRequired = consent.privacyOptionsRequirementStatus ==
                 ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED,
             message = message
         )
+        android.util.Log.i("PacAds", "privacy: resolved=$resolved, requestsAllowed=$allowed")
         if (!allowed) {
             InterstitialAdManager.clear()
             AppOpenAdManager.clear()
@@ -78,6 +87,7 @@ object AdsRuntime {
         }
         if (mutableState.value.initialized) {
             AppOpenAdManager.loadAd(context.applicationContext)
+            InterstitialAdManager.preload(context.applicationContext)
             return
         }
         if (initializationStarted) return
@@ -85,6 +95,7 @@ object AdsRuntime {
         MobileAds.initialize(context.applicationContext) {
             mainHandler.post {
                 mutableState.value = mutableState.value.copy(initialized = true)
+                android.util.Log.i("PacAds", "SDK initialization completed")
                 // Cache only: the loading gate is the sole caller allowed to show app-open ads.
                 AppOpenAdManager.loadAd(context.applicationContext)
                 InterstitialAdManager.preload(context.applicationContext)
@@ -115,6 +126,13 @@ object AdsRuntime {
 internal object FullScreenAdCoordinator {
     private var showing = false
     val isShowing: Boolean get() = showing
+    var lastFinishedAtMillis: Long? = null
+        private set
+
+    fun canShowAutomaticAd(nowMillis: Long = android.os.SystemClock.elapsedRealtime()): Boolean =
+        !showing && lastFinishedAtMillis?.let {
+            nowMillis - it >= InterstitialPlacementPolicy.MIN_INTERVAL_MILLIS
+        } != false
 
     fun acquire(activity: Activity): Boolean {
         if (showing || !AdsRuntime.canShowOn(activity)) return false
@@ -122,5 +140,8 @@ internal object FullScreenAdCoordinator {
         return true
     }
 
-    fun release() { showing = false }
+    fun release() {
+        if (showing) lastFinishedAtMillis = android.os.SystemClock.elapsedRealtime()
+        showing = false
+    }
 }
