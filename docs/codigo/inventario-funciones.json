@@ -583,8 +583,8 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "0e382749ab8483c9b5b5446dc02914ef4c500f2747c45dba479517e8118566de",
-      "lines": 127
+      "sha256": "45122d0c97419e5247474b99a481c396a64176d99d09ba20916032d7617ef832",
+      "lines": 148
     },
     {
       "file": "app/src/main/java/com/example/ads/AppOpenInteractionGuard.kt",
@@ -599,8 +599,8 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "ee3ad36a6ed8481d51424d74ea74be4c5662732da2d549c7d049ae395338ba4e",
-      "lines": 76
+      "sha256": "5dd3009c8d4c6454690aade8bcc75ac24ec146ed46a7583f520711163e2c9d75",
+      "lines": 79
     },
     {
       "file": "app/src/main/java/com/example/ads/AppOpenLaunchHost.kt",
@@ -615,16 +615,24 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "f93e874761613f657dc9d6a415447a5a17a508d0325bd0cbb6ab127c537d4331",
-      "lines": 51
+      "sha256": "931e9cbcc30a9a2c9d718c7599f8706cfbc5a9393b2ba48bcefe59ae134f5a07",
+      "lines": 67
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/InterstitialPlacementPolicy.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "localOnly": false,
+      "sha256": "93d17e03253ab8d66bf6c4bc001acd20e5fd6bd4b6e088e4231f9cce5eabe23c",
+      "lines": 29
     },
     {
       "file": "app/src/main/java/com/example/ads/RewardedAdManager.kt",
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "e35c4763b40028c09d5d80a2adba9ebb09153b15db0052b7f070aa7bbf0d1bcb",
-      "lines": 127
+      "sha256": "07aaf6ce800c8d733da43038f507043fcbf06338fcf5d602829d2b7fbd07dad6",
+      "lines": 129
     },
     {
       "file": "app/src/main/java/com/example/data/local/AppDatabase.kt",
@@ -839,8 +847,8 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "f22b5e561d618e29b5b1b2049d65a40a8c1201a864b3f170773e74ff29f50c04",
-      "lines": 577
+      "sha256": "e4d588a4b545a8d208fcd13211255ccb0b453f223d9f5f35537151ace22cb981",
+      "lines": 590
     },
     {
       "file": "app/src/main/java/com/example/notification/NotificationActionReceiver.kt",
@@ -903,8 +911,8 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "728d4cace2fab0c10d9a9f95f047cfbb57c265ffd39d4b73ec4347bc67b9fd76",
-      "lines": 256
+      "sha256": "8e17762020e7d55a17e27e35af0c23f3143a71df0e203967cf56bb9ce377a56b",
+      "lines": 283
     },
     {
       "file": "app/src/main/java/com/example/ui/components/BarinasAddressDialog.kt",
@@ -1127,8 +1135,8 @@
       "chapter": "03-android-interfaz-y-segundo-plano.md",
       "language": "Kotlin",
       "localOnly": false,
-      "sha256": "7e6f9bde849f99d2b7d8907187ceb48a74a50a6a8a615c9269014f0ae8998115",
-      "lines": 42
+      "sha256": "9b75c3539a321713df593ef5f9634d81dc6908b6f6122af427087f321375e63b",
+      "lines": 69
     },
     {
       "file": "app/src/test/java/com/example/CompactDialogUiTest.kt",
@@ -1169,6 +1177,14 @@
       "localOnly": false,
       "sha256": "aa849b379a8ef6d87fcc322501e0ac8f7bb10a513a7d9aa628297c271c3c44aa",
       "lines": 36
+    },
+    {
+      "file": "app/src/test/java/com/example/InterstitialPlacementPolicyTest.kt",
+      "chapter": "03-android-interfaz-y-segundo-plano.md",
+      "language": "Kotlin",
+      "localOnly": false,
+      "sha256": "1ebda0d415de67a0085672474d85d99d79dfc8139d4dc52eba072936c9228c9d",
+      "lines": 44
     },
     {
       "file": "app/src/test/java/com/example/MapBridgeSecurityTest.kt",
@@ -6623,7 +6639,7 @@
     {
       "file": "app/src/main/java/com/example/ads/AdsRuntime.kt",
       "name": "reconcile",
-      "line": 64,
+      "line": 71,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6631,7 +6647,7 @@
     {
       "file": "app/src/main/java/com/example/ads/AdsRuntime.kt",
       "name": "canRequestAds",
-      "line": 95,
+      "line": 106,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6639,7 +6655,7 @@
     {
       "file": "app/src/main/java/com/example/ads/AdsRuntime.kt",
       "name": "showPrivacyOptions",
-      "line": 98,
+      "line": 109,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6647,7 +6663,15 @@
     {
       "file": "app/src/main/java/com/example/ads/AdsRuntime.kt",
       "name": "canShowOn",
-      "line": 110,
+      "line": 121,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/AdsRuntime.kt",
+      "name": "canShowAutomaticAd",
+      "line": 132,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6655,7 +6679,7 @@
     {
       "file": "app/src/main/java/com/example/ads/AdsRuntime.kt",
       "name": "acquire",
-      "line": 119,
+      "line": 137,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6663,7 +6687,7 @@
     {
       "file": "app/src/main/java/com/example/ads/AdsRuntime.kt",
       "name": "release",
-      "line": 125,
+      "line": 143,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6719,7 +6743,7 @@
     {
       "file": "app/src/main/java/com/example/ads/AppOpenLaunchPolicy.kt",
       "name": "evaluate",
-      "line": 13,
+      "line": 19,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6727,7 +6751,7 @@
     {
       "file": "app/src/main/java/com/example/ads/AppOpenLaunchPolicy.kt",
       "name": "skip",
-      "line": 39,
+      "line": 54,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6735,7 +6759,7 @@
     {
       "file": "app/src/main/java/com/example/ads/AppOpenLaunchPolicy.kt",
       "name": "onAdFinished",
-      "line": 43,
+      "line": 58,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6743,7 +6767,31 @@
     {
       "file": "app/src/main/java/com/example/ads/AppOpenLaunchPolicy.kt",
       "name": "continueOnce",
-      "line": 46,
+      "line": 61,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/InterstitialPlacementPolicy.kt",
+      "name": "recordNavigation",
+      "line": 8,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/InterstitialPlacementPolicy.kt",
+      "name": "isEligible",
+      "line": 12,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ads/InterstitialPlacementPolicy.kt",
+      "name": "onImpression",
+      "line": 18,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6775,7 +6823,7 @@
     {
       "file": "app/src/main/java/com/example/ads/RewardedAdManager.kt",
       "name": "onAdFailedToLoad",
-      "line": 68,
+      "line": 69,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6783,7 +6831,7 @@
     {
       "file": "app/src/main/java/com/example/ads/RewardedAdManager.kt",
       "name": "show",
-      "line": 78,
+      "line": 80,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6791,7 +6839,7 @@
     {
       "file": "app/src/main/java/com/example/ads/RewardedAdManager.kt",
       "name": "finish",
-      "line": 92,
+      "line": 94,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6799,7 +6847,7 @@
     {
       "file": "app/src/main/java/com/example/ads/RewardedAdManager.kt",
       "name": "onAdDismissedFullScreenContent",
-      "line": 107,
+      "line": 109,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -6807,7 +6855,7 @@
     {
       "file": "app/src/main/java/com/example/ads/RewardedAdManager.kt",
       "name": "onAdFailedToShowFullScreenContent",
-      "line": 108,
+      "line": 110,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7871,7 +7919,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "initializeAdMob",
-      "line": 41,
+      "line": 42,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7879,7 +7927,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "getBannerAdUnitId",
-      "line": 43,
+      "line": 44,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7887,7 +7935,23 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "AdaptiveBannerAd",
-      "line": 47,
+      "line": 48,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdLoaded",
+      "line": 63,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdFailedToLoad",
+      "line": 64,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7895,7 +7959,15 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "clear",
-      "line": 97,
+      "line": 102,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "showForNavigation",
+      "line": 104,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7903,7 +7975,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "preload",
-      "line": 99,
+      "line": 112,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7911,7 +7983,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "onAdLoaded",
-      "line": 110,
+      "line": 123,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7919,7 +7991,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "onAdFailedToLoad",
-      "line": 118,
+      "line": 132,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7927,7 +7999,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "showAd",
-      "line": 128,
+      "line": 143,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7935,7 +8007,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "finish",
-      "line": 142,
+      "line": 158,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7943,7 +8015,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "onAdShowedFullScreenContent",
-      "line": 150,
+      "line": 166,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7951,7 +8023,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "onAdDismissedFullScreenContent",
-      "line": 151,
+      "line": 167,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7959,7 +8031,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "onAdFailedToShowFullScreenContent",
-      "line": 152,
+      "line": 168,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7967,7 +8039,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "isLaunchEligible",
-      "line": 178,
+      "line": 197,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7975,7 +8047,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "hasAvailableAd",
-      "line": 181,
+      "line": 201,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7983,7 +8055,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "clear",
-      "line": 184,
+      "line": 204,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7991,7 +8063,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "loadAd",
-      "line": 191,
+      "line": 211,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -7999,7 +8071,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "onAdLoaded",
-      "line": 203,
+      "line": 223,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8007,22 +8079,6 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "onAdFailedToLoad",
-      "line": 215,
-      "kind": "Kotlin fun",
-      "scope": "",
-      "chapter": "03-android-interfaz-y-segundo-plano.md"
-    },
-    {
-      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
-      "name": "showAdIfAvailable",
-      "line": 226,
-      "kind": "Kotlin fun",
-      "scope": "",
-      "chapter": "03-android-interfaz-y-segundo-plano.md"
-    },
-    {
-      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
-      "name": "finish",
       "line": 236,
       "kind": "Kotlin fun",
       "scope": "",
@@ -8030,8 +8086,32 @@
     },
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "showAdIfAvailable",
+      "line": 247,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "finish",
+      "line": 256,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
+      "name": "onAdShowedFullScreenContent",
+      "line": 265,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "onAdDismissedFullScreenContent",
-      "line": 245,
+      "line": 269,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8039,7 +8119,7 @@
     {
       "file": "app/src/main/java/com/example/ui/components/AdComponents.kt",
       "name": "onAdFailedToShowFullScreenContent",
-      "line": 246,
+      "line": 270,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8855,7 +8935,7 @@
     {
       "file": "app/src/test/java/com/example/AppOpenLaunchPolicyTest.kt",
       "name": "skipAndRewardEndLoadingExactlyOnce",
-      "line": 28,
+      "line": 30,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -8863,7 +8943,31 @@
     {
       "file": "app/src/test/java/com/example/AppOpenLaunchPolicyTest.kt",
       "name": "consentOrLoadFailureNeverBlocksEntry",
-      "line": 36,
+      "line": 38,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/AppOpenLaunchPolicyTest.kt",
+      "name": "slowConsentAndSdkDoNotConsumeTheAdLoadingWindow",
+      "line": 45,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/AppOpenLaunchPolicyTest.kt",
+      "name": "initializationHasAHardLimitAndBackgroundCannotShow",
+      "line": 54,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/AppOpenLaunchPolicyTest.kt",
+      "name": "cachedConsentCanPreloadButCannotDisplayBeforeRefreshCompletes",
+      "line": 63,
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "03-android-interfaz-y-segundo-plano.md"
@@ -9011,6 +9115,38 @@
       "kind": "Kotlin fun",
       "scope": "",
       "chapter": "02-android-datos-y-motor.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/InterstitialPlacementPolicyTest.kt",
+      "name": "threeTransitions",
+      "line": 8,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/InterstitialPlacementPolicyTest.kt",
+      "name": "timeAndThreeDistinctTransitionsAreBothRequired",
+      "line": 15,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/InterstitialPlacementPolicyTest.kt",
+      "name": "impressionRestartsBothCounterAndThreeMinuteInterval",
+      "line": 26,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
+    },
+    {
+      "file": "app/src/test/java/com/example/InterstitialPlacementPolicyTest.kt",
+      "name": "anotherFullscreenAdAlsoPreventsBackToBackAds",
+      "line": 37,
+      "kind": "Kotlin fun",
+      "scope": "",
+      "chapter": "03-android-interfaz-y-segundo-plano.md"
     },
     {
       "file": "app/src/test/java/com/example/MapBridgeSecurityTest.kt",

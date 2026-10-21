@@ -1,6 +1,6 @@
 # Manual del código de PAC Barinas
 
-**Edición:** 20 de octubre de 2026. **Propósito:** comprender y mantener el código propio de la app, las páginas, los paneles y el servidor sin depender de una IA.
+**Edición:** 21 de octubre de 2026. **Propósito:** comprender y mantener el código propio de la app, las páginas, los paneles y el servidor sin depender de una IA.
 
 Este manual complementa la [documentación actual del sistema](DOCUMENTACION_SISTEMA.md). Incluye seguridad, mapa compartido, publicidad/recompensa de doce horas, pantallas compactas, sincronización y calendario coherente, además de los contratos pendientes. El [registro de cambios](docs/CAMBIOS_SEGURIDAD_Y_ALERTAS.md) distingue implementación, validación y activación remota.
 
@@ -17,6 +17,8 @@ Este manual complementa la [documentación actual del sistema](DOCUMENTACION_SIS
 | [07. Índice verificable de funciones](docs/codigo/07-indice-funciones.md) | Cada declaración detectada, archivo/línea y capítulo de explicación. Incluye funciones locales y callbacks con nombre. |
 
 La [guía del gateway](docs/OPERACION_GATEWAY_SUPABASE.md) explica cada función del servidor compatible y el [registro actual](docs/CAMBIOS_MAPA_ANUNCIOS_Y_SINCRONIZACION.md) separa código, pruebas y distribución.
+
+La [guía release 1.4.0](docs/RELEASE_1.4.0.md) documenta frecuencia publicitaria, diagnóstico de apertura, firma y comprobación de APK/AAB.
 
 Lee 01 primero. Después elige el capítulo correspondiente a tu tarea. El índice07 sirve para buscar una función concreta; su tabla no sustituye la explicación de los capítulos.
 
@@ -47,7 +49,7 @@ Cuando una operación solo altera memoria, está señalado. Cuando devuelve éxi
 
 Incluye el código propio de app/src, admin-web/src, api, scripts, panel clásico, mapa inline, configuración y utilidades de mantenimiento presentes. Se excluye explicar por función el interior de dependencias como AndroidX, React, Supabase y Leaflet, los archivos generados, cachés, node_modules y skills ajenos al producto. Sí se explica la forma en que el proyecto los utiliza.
 
-El inventario actualizado detecta **1024 declaraciones** en **170 archivos**, incluidas ambas copias clásicas, el gateway y las pruebas con funciones nombradas. No representan 1024 operaciones únicas de negocio. Los archivos con constantes/modelos/efectos superiores también se explican. Los scripts locales de mantenimiento fuera de Git se identifican expresamente y pueden no existir en un clon.
+El inventario actualizado detecta **1039 declaraciones** en **172 archivos**, incluidas ambas copias clásicas, el gateway y las pruebas con funciones nombradas. No representan 1039 operaciones únicas de negocio. Los archivos con constantes/modelos/efectos superiores también se explican. Los scripts locales de mantenimiento fuera de Git se identifican expresamente y pueden no existir en un clon.
 
 Los enlaces de fuentes versionadas apuntan a revisiones concretas de GitHub para funcionar desde ambos repositorios. El índice conserva las líneas exactas del código local leído; regenerarlo al modificar fuentes. Para ejecutar la verificación conjunta se presupone la disposición descrita en la documentación del sistema.
 

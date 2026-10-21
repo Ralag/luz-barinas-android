@@ -50,6 +50,8 @@ Versiones relevantes declaradas: AGP9.1.1, Kotlin2.2.10, KSP2.3.5, Compose BOM20
 | `FIREBASE_SERVICE_ACCOUNT` | Función `sendPushAlert` | JSON de credencial de servidor para Firebase Admin. Debe residir en el entorno del servidor, no en archivos del cliente. |
 | Variables de firma | Gradle | Seleccionan archivo/alias/contraseñas de firma; necesarias para continuidad de actualizaciones. |
 | IDs AdMob | Build, `.env.example` y componentes de anuncios | Identifican aplicación/unidades publicitarias; no son contraseñas de administrador. La configuración actual debe leerse completa. |
+
+La [guía release 1.4.0](../RELEASE_1.4.0.md) detalla plazos de apertura, anuncios de navegación y generación/verificación del APK y AAB. El App ID público propio se mantiene también en debug para UMP; las cuatro unidades debug siguen siendo de prueba. Para firmar se utiliza la llave existente, sin contraseñas en argumentos o repositorio; la ejecución temporal desactiva la caché de configuración y conserva mapping R8 y certificado público para comprobar continuidad.
 | `.env.example` | Plugin secrets como defaults | Contiene mezcla de IDs de producción/test aunque su comentario general diga prueba. No asumir que copiarlo convierte todo a entorno de desarrollo. |
 | Credenciales del panel | Supabase Auth | Correo/contraseña personales; getUser verifica identidad e is_admin consulta el registro privado. Sin contraseña embebida. |
 | SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY o SUPABASE_ANON_KEY | sendPushAlert servidor | Requeridas; admite alias VITE_ de URL/anon. Usar clave pública, nunca service_role/sb_secret. Sin configuración devuelve503. |

@@ -63,12 +63,14 @@ object RewardedAdManager {
                     loadedAt = SystemClock.elapsedRealtime()
                     failedAt = null
                     mutableState.value = RewardedAdState(RewardedAdStatus.READY)
+                    android.util.Log.i("PacAds", "rewarded loaded")
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     if (generation != requestGeneration) return
                     ad = null
                     failedAt = SystemClock.elapsedRealtime()
+                    android.util.Log.i("PacAds", "rewarded load failed: code=${error.code}, domain=${error.domain}")
                     mutableState.value = RewardedAdState(RewardedAdStatus.ERROR,
                         "No hay un anuncio disponible ahora. Puedes intentarlo más tarde.")
                 }

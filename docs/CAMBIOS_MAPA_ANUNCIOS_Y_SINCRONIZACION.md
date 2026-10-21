@@ -1,5 +1,7 @@
 # Mapa, publicidad y sincronización — revisión del 20 de octubre de 2026
 
+Actualización del 21 de octubre: la [preparación release 1.4.0](RELEASE_1.4.0.md) amplía la revisión publicitaria con plazos separados de inicialización/carga, intersticiales de navegación y comprobación de firma. Los resultados de abajo conservan el registro de la entrega del día 20.
+
 Esta entrega prepara Android **1.4.0 / código 8**. El cambio de código y documentación se conserva en los repositorios separados de Android y web. Publicar la web no actualiza el APK instalado ni publica una versión en Google Play.
 
 ## Cambios de comportamiento

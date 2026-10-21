@@ -281,6 +281,19 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
 
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isLargeScreen = configuration.screenWidthDp > 600
+    var tabNavigationPending by remember { mutableStateOf(false) }
+    val navigateToTab: (Int) -> Unit = { destination ->
+        if (destination in 0..2 && destination != uiState.currentTab && !tabNavigationPending) {
+            tabNavigationPending = true
+            val complete: () -> Unit = {
+                tabNavigationPending = false
+                viewModel.setTab(destination)
+            }
+            val activity = context as? android.app.Activity
+            if (activity == null || !com.example.ui.components.InterstitialAdManager.showForNavigation(
+                    activity, uiState.currentTab, destination, complete)) complete()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxSize()) {
@@ -292,21 +305,21 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                     Spacer(modifier = Modifier.height(32.dp))
                     androidx.compose.material3.NavigationRailItem(
                         selected = uiState.currentTab == 0,
-                        onClick = { viewModel.setTab(0) },
+                        onClick = { navigateToTab(0) },
                         icon = { Icon(Icons.Outlined.Bolt, contentDescription = "Hoy") },
                         label = { Text("Hoy") }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     androidx.compose.material3.NavigationRailItem(
                         selected = uiState.currentTab == 1,
-                        onClick = { viewModel.setTab(1) },
+                        onClick = { navigateToTab(1) },
                         icon = { Icon(Icons.Outlined.CalendarMonth, contentDescription = "Horarios") },
                         label = { Text("Horarios") }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     androidx.compose.material3.NavigationRailItem(
                         selected = uiState.currentTab == 2,
-                        onClick = { viewModel.setTab(2) },
+                        onClick = { navigateToTab(2) },
                         icon = { Icon(Icons.Outlined.Map, contentDescription = "Mapa") },
                         label = { Text("Mapa") }
                     )
@@ -425,7 +438,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                     // Tab 0: Hoy (Estado actual, próximo corte y reporte rápido)
                     NavigationBarItem(
                         selected = uiState.currentTab == 0,
-                        onClick = { viewModel.setTab(0) },
+                        onClick = { navigateToTab(0) },
                         icon = {
                             Icon(
                                 Icons.Outlined.Bolt,
@@ -446,7 +459,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                     // Tab 1: Horarios (Cronograma semanal y mensual oficial por bloques)
                     NavigationBarItem(
                         selected = uiState.currentTab == 1,
-                        onClick = { viewModel.setTab(1) },
+                        onClick = { navigateToTab(1) },
                         icon = {
                             Icon(
                                 Icons.Outlined.CalendarMonth,
@@ -467,7 +480,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                     // Tab 2: Mapa de Circuitos (Ahora Mapa de Calor)
                     NavigationBarItem(
                         selected = uiState.currentTab == 2,
-                        onClick = { viewModel.setTab(2) },
+                        onClick = { navigateToTab(2) },
                         icon = {
                             Icon(
                                 Icons.Outlined.Map,
@@ -516,7 +529,7 @@ fun MainAppScreen(viewModel: LuzBarinasViewModel) {
                             viewModel.reportPowerStatus(hasPower, reportType, voltage, observation)
                         },
                         onChangeAddressClicked = { showAddressDialog = true },
-                        onNavigateToSchedule = { viewModel.setTab(1) },
+                        onNavigateToSchedule = { navigateToTab(1) },
                         onOpenAlarmSettings = { isSettingsOpen = true },
                         onWatchTutorial = watchTutorial,
                         scheduleVersion = uiState.scheduleVersion

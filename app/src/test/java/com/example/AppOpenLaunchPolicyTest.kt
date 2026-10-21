@@ -21,8 +21,10 @@ class AppOpenLaunchPolicyTest {
     @Test
     fun timeoutAndLateCallbackCannotShowOverContent() {
         val policy = AppOpenLaunchPolicy(0)
-        assertEquals(AppOpenLaunchAction.CONTINUE, step(policy, 3500, ready = true))
-        assertEquals(AppOpenLaunchAction.NONE, step(policy, 3501, ready = true))
+        assertEquals(AppOpenLaunchAction.LOAD, step(policy, 100))
+        assertEquals(AppOpenLaunchAction.CONTINUE, step(policy, 5100, ready = true))
+        assertEquals(AppOpenExitReason.LOAD_TIMEOUT, policy.exitReason)
+        assertEquals(AppOpenLaunchAction.NONE, step(policy, 5101, ready = true))
     }
     @Test
     fun skipAndRewardEndLoadingExactlyOnce() {
@@ -37,5 +39,30 @@ class AppOpenLaunchPolicyTest {
         assertEquals(AppOpenLaunchAction.NONE, step(AppOpenLaunchPolicy(0), 100, resolved = false))
         assertEquals(AppOpenLaunchAction.CONTINUE, step(AppOpenLaunchPolicy(0), 100, allowed = false))
         assertEquals(AppOpenLaunchAction.CONTINUE, step(AppOpenLaunchPolicy(0), 100, failed = true))
+    }
+
+    @Test
+    fun slowConsentAndSdkDoNotConsumeTheAdLoadingWindow() {
+        val policy = AppOpenLaunchPolicy(0)
+        assertEquals(AppOpenLaunchAction.NONE, step(policy, 4500, resolved = false))
+        assertEquals(AppOpenLaunchAction.NONE, policy.evaluate(5000, false, true, true, false, false, false, true, true))
+        assertEquals(AppOpenLaunchAction.LOAD, step(policy, 6000))
+        assertEquals(AppOpenLaunchAction.SHOW, step(policy, 10_000, ready = true))
+    }
+
+    @Test
+    fun initializationHasAHardLimitAndBackgroundCannotShow() {
+        val policy = AppOpenLaunchPolicy(0)
+        assertEquals(AppOpenLaunchAction.LOAD, policy.evaluate(1000, false, true, true, true, true, false, true, false))
+        assertEquals(AppOpenLaunchAction.CONTINUE, step(policy, 12_000, resolved = false))
+        assertEquals(AppOpenExitReason.STARTUP_TIMEOUT, policy.exitReason)
+        assertEquals(AppOpenLaunchAction.NONE, step(policy, 12_001, ready = true))
+    }
+
+    @Test
+    fun cachedConsentCanPreloadButCannotDisplayBeforeRefreshCompletes() {
+        val policy = AppOpenLaunchPolicy(0)
+        assertEquals(AppOpenLaunchAction.NONE, step(policy, 100, ready = true, resolved = false))
+        assertEquals(AppOpenLaunchAction.SHOW, step(policy, 6000, ready = true))
     }
 }

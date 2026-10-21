@@ -27,6 +27,7 @@ import com.example.ads.rememberAdFreeActive
 import com.example.ads.resolveAdUnitId
 import com.example.BuildConfig
 import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
@@ -58,6 +59,12 @@ fun AdaptiveBannerAd(adUnitId: String = getBannerAdUnitId(), modifier: Modifier 
                 AdView(context).apply {
                     setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, widthDp))
                     this.adUnitId = resolvedId
+                    adListener = object : AdListener() {
+                        override fun onAdLoaded() { android.util.Log.i("PacAds", "banner loaded") }
+                        override fun onAdFailedToLoad(error: LoadAdError) {
+                            android.util.Log.i("PacAds", "banner load failed: code=${error.code}, domain=${error.domain}")
+                        }
+                    }
                     loadAd(AdRequest.Builder().build())
                 }
             }
@@ -88,13 +95,19 @@ object InterstitialAdManager {
     private var generation = 0
     private var loadedAt = 0L
     private var failedAt: Long? = null
-    private var lastShownAt: Long? = null
-    private val sessionStartedAt = SystemClock.elapsedRealtime()
-    private const val MIN_INTERVAL_MS = 5 * 60 * 1000L
+    private val placement = com.example.ads.InterstitialPlacementPolicy(SystemClock.elapsedRealtime())
     private const val MAX_AGE_MS = 60 * 60 * 1000L
     private const val RETRY_INTERVAL_MS = 30_000L
 
     fun clear() { generation++; ad = null; loading = false }
+
+    fun showForNavigation(activity: Activity, fromTab: Int, toTab: Int, onComplete: () -> Unit): Boolean {
+        if (fromTab !in 0..2 || toTab !in 0..2 || fromTab == toTab) return false
+        placement.recordNavigation(fromTab, toTab)
+        if (com.example.ads.AppOpenInteractionGuard.blocked.value) return false
+        preload(activity.applicationContext)
+        return showAd(activity, onComplete)
+    }
 
     fun preload(context: Context) {
         if (!AdsRuntime.canRequestAds(context) || loading) return
@@ -114,12 +127,14 @@ object InterstitialAdManager {
                     ad = value
                     loadedAt = SystemClock.elapsedRealtime()
                     failedAt = null
+                    android.util.Log.i("PacAds", "interstitial loaded")
                 }
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     if (generation != requestGeneration) return
                     loading = false
                     ad = null
                     failedAt = SystemClock.elapsedRealtime()
+                    android.util.Log.i("PacAds", "interstitial load failed: code=${error.code}, domain=${error.domain}")
                 }
             })
     }
@@ -127,9 +142,10 @@ object InterstitialAdManager {
     /** True means a show was requested; completion runs once after dismissal or display failure. */
     fun showAd(activity: Activity, onComplete: () -> Unit = {}): Boolean {
         if (!AdsRuntime.canRequestAds(activity)) { clear(); return false }
+        if (com.example.notification.PacAlarmPlayer.isPlayingFlow.value) return false
         val now = SystemClock.elapsedRealtime()
-        if (now - sessionStartedAt < 60_000L ||
-            lastShownAt?.let { now - it < MIN_INTERVAL_MS } == true) return false
+        if (!placement.isEligible(now, FullScreenAdCoordinator.lastFinishedAtMillis) ||
+            !FullScreenAdCoordinator.canShowAutomaticAd(now)) return false
         val ready = ad
         if (ready == null || now - loadedAt >= MAX_AGE_MS) {
             ad = null
@@ -147,9 +163,12 @@ object InterstitialAdManager {
             preload(activity.applicationContext)
         }
         ready.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdShowedFullScreenContent() { lastShownAt = SystemClock.elapsedRealtime() }
+            override fun onAdShowedFullScreenContent() { placement.onImpression(SystemClock.elapsedRealtime()) }
             override fun onAdDismissedFullScreenContent() = finish()
-            override fun onAdFailedToShowFullScreenContent(error: AdError) = finish()
+            override fun onAdFailedToShowFullScreenContent(error: AdError) {
+                android.util.Log.i("PacAds", "interstitial show failed: code=${error.code}, domain=${error.domain}")
+                finish()
+            }
         }
         return try { ready.show(activity); true } catch (_: RuntimeException) {
             completed = true
@@ -176,6 +195,7 @@ object AppOpenAdManager {
     val state = mutableState.asStateFlow()
 
     fun isLaunchEligible(): Boolean = AdsConfiguration.unitId(AdFormat.APP_OPEN) != null &&
+        FullScreenAdCoordinator.canShowAutomaticAd() &&
         lastShownAt?.let { SystemClock.elapsedRealtime() - it >= MIN_INTERVAL_MS } != false
 
     fun hasAvailableAd(): Boolean = ad != null &&
@@ -211,6 +231,7 @@ object AppOpenAdManager {
                     loadedAt = SystemClock.elapsedRealtime()
                     failedAt = null
                     mutableState.value = AppOpenAdStatus.READY
+                    android.util.Log.i("PacAds", "app_open loaded")
                 }
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     if (generation != requestGeneration) return
@@ -230,7 +251,6 @@ object AppOpenAdManager {
         if (SystemClock.elapsedRealtime() - loadedAt >= MAX_AGE_MS) { clear(); return false }
         if (!FullScreenAdCoordinator.acquire(activity)) return false
         ad = null
-        lastShownAt = SystemClock.elapsedRealtime()
         mutableState.value = AppOpenAdStatus.SHOWING
         var completed = false
         fun finish() {
@@ -242,8 +262,15 @@ object AppOpenAdManager {
             loadAd(activity.applicationContext)
         }
         ready.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdShowedFullScreenContent() {
+                lastShownAt = SystemClock.elapsedRealtime()
+                android.util.Log.i("PacAds", "app_open shown")
+            }
             override fun onAdDismissedFullScreenContent() = finish()
-            override fun onAdFailedToShowFullScreenContent(error: AdError) = finish()
+            override fun onAdFailedToShowFullScreenContent(error: AdError) {
+                android.util.Log.i("PacAds", "app_open show failed: code=${error.code}, domain=${error.domain}")
+                finish()
+            }
         }
         return try { ready.show(activity); true } catch (_: RuntimeException) {
             completed = true

@@ -53,7 +53,10 @@ fun AppOpenLaunchGate(onReady: () -> Unit, modifier: Modifier = Modifier) {
                 }
                 if (!shown && policy.onAdFinished() == AppOpenLaunchAction.CONTINUE) readyCallback()
             }
-            AppOpenLaunchAction.CONTINUE -> readyCallback()
+            AppOpenLaunchAction.CONTINUE -> {
+                android.util.Log.i("PacAds", "app_open gate exit: reason=${policy.exitReason}, sdk=${runtime.initialized}, consent=${runtime.consentResolved}")
+                readyCallback()
+            }
             AppOpenLaunchAction.NONE -> Unit
         }
     }

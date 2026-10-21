@@ -6,12 +6,13 @@
 
 Aplicación Android y plataforma web para consultar el Plan de Administración de Carga, relacionar sectores con bloques y colaborar mediante reportes del estado eléctrico.
 
-**Estado documentado:** 20 de octubre de 2026. El código Android prepara **1.4.0 / versionCode 8**, Android7.0/API24 o superior. Esta corrección de código no emite un nuevo binario comercial.
+**Estado documentado:** 21 de octubre de 2026. Android **1.4.0 / versionCode 8**, Android7.0/API24 o superior. La revisión de publicidad y preparación de APK release/AAB figura en la guía de publicación; no se publica automáticamente en Google Play.
 
 ## Documentación
 
 - [Documentación actual del sistema](DOCUMENTACION_SISTEMA.md): arquitectura, capacidades reales, datos, distribución y pendientes.
 - [Manual detallado del código](DOCUMENTACION_CODIGO.md): guía de aprendizaje y siete capítulos, con explicación por archivo/función, flujos, contratos y mantenimiento.
+- [Release 1.4.0](docs/RELEASE_1.4.0.md): anuncios de navegación/apertura, firma, APK/AAB y comprobaciones de publicación.
 - [Índice de funciones](docs/codigo/07-indice-funciones.md): nombres, archivos y líneas para encontrar cada declaración.
 - [Análisis técnico previo](ANALISIS_SISTEMA_PAC_BARINAS_2026-10-15.md): hallazgos y prioridades que motivaron la actualización documental.
 - [Mapa, anuncios y sincronización](docs/CAMBIOS_MAPA_ANUNCIOS_Y_SINCRONIZACION.md): correcciones actuales y límites de distribución.
